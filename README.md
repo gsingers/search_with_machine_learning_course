@@ -1,6 +1,15 @@
 # Welcome to Search with Machine Learning
 
-If you are reading this, you are _almost_ in the right place.  For our class, we have four weekly projects.  Each project
+Search with Machine Learning is a four week class taught by Grant Ingersoll and Daniel Tunkelang and is focused on helping students
+quickly get up to speed on search best practices by first teaching the basics of search and then extending those basics with machine learning.  
+
+Students will learn indexing, querying, aggregations and text analysis, as well as how to use machine learning for ranking, content classification and query understanding.
+
+The class is a hands-on project-driven course where students will work with real data and the [Opensearch](https://opensearch.com)/Elasticsearch ecosystem along with libraries like [FastText](https://fasttext.cc/)
+
+# Class code layout (e.g. where the projects are)
+
+For our class, we have four weekly projects.  Each project
 is a standalone Python Flask application that interacts with an OpenSearch server (and perhaps other services).  
 
 You will find these four projects in the directories below them organized in the following way:
@@ -10,7 +19,22 @@ You will find these four projects in the directories below them organized in the
 - Week 2:
     - week2 -- The unfinished template for the week's project, annotated with instructions.
 - Week 3 and 4: you get the picture
-    
+
+Our instructor annotated results for each project will be provided during the class.  Please note, these represent our way of doing the assignment and may differ from your results, as there is often more than one way of doing things in search.
+
+You will also find several supporting directories and files for [Logstash](https://opensearch.org/docs/latest/clients/logstash/), Docker and Gitpod.
+
+# Prerequisites
+
+1. For this class, you will need a Kaggle account
+1. No prior search knowledge is required, but you should be able to code in Python or Java (all examples are in Python)
+1. You will need a [Gitpod](https://gitpod.io) account.
+
+# Working in Gitpod (Officially Supported)
+
+
+
+# Working locally (Not supported, but may work for you. YMMV)     
 
 # Running an example
 
