@@ -1,0 +1,96 @@
+input {
+  file {
+    path => ["$REPLACE_ME$/*.xml"]  #Put in the path to the ungzipped/untarred product data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
+    start_position => "beginning"
+    codec => multiline {
+            pattern => "<product>"
+            negate => "true"
+            what => "previous"
+        }
+  }
+}
+  filter {
+      xml {
+        source => "message"
+        target => "xml_doc"
+        store_xml => "false"
+        xpath => [ # NOTE: this is not a complete list of fields.  If you wish to add more, put in the appropriate XPath expression.
+                  #TODO: is there a way to do this using XPath/XSL Functions so that we don't have to maintain a big list?
+            "/product/productId/text()", "productId",
+            "/product/name/text()", "name",
+            "/product/type/text()", "type",
+            "/product/startDate/text()", "startDate",
+            "/product/active/text()", "active",
+            "/product/regularPrice/text()", "regularPrice",
+            "/product/salePrice/text()", "salePrice",
+            "/product/onSale/text()", "onSale",
+            "/product/digital/text()", "digital",
+            "/product/frequentlyPurchasedWith/*/text()", "frequentlyPurchasedWith",# Note the match all here to get the subfields
+            "/product/accessories/*/text()", "accessories",# Note the match all here to get the subfields
+            "/product/relatedProducts/*/text()", "relatedProducts",# Note the match all here to get the subfields
+            "/product/crossSell/text()", "crossSell",
+            "/product/salesRankShortTerm/text()", "salesRankShortTerm",
+            "/product/salesRankMediumTerm/text()", "salesRankMediumTerm",
+            "/product/salesRankLongTerm/text()", "salesRankLongTerm",
+            "/product/bestSellingRank/text()", "bestSellingRank",
+            "/product/url/text()", "url",
+            "/product/categoryPath/*/name/text()", "categoryPath", # Note the match all here to get the subfields
+            "/product/customerReviewCount/text()", "customerReviewCount",
+            "/product/customerReviewAverage/text()", "customerReviewAverage",
+            "/product/inStoreAvailability/text()", "inStoreAvailability",
+            "/product/onlineAvailability/text()", "onlineAvailability",
+            "/product/releaseDate/text()", "releaseDate",
+            "/product/shippingCost/text()", "shippingCost",
+            "/product/shortDescription/text()", "shortDescription",
+            "/product/shortDescriptionHtml/text()", "shortDescriptionHtml",
+            "/product/class/text()", "class",
+            "/product/classId/text()", "classId",
+            "/product/subclass/text()", "subclass",
+            "/product/subclassId/text()", "subclassId",
+            "/product/department/text()", "department",
+            "/product/departmentId/text()", "departmentId",
+            "/product/bestBuyItemId/text()", "bestBuyItemId",
+            "/product/description/text()", "description",
+            "/product/manufacturer/text()", "manufacturer",
+            "/product/modelNumber/text()", "modelNumber",
+            "/product/image/text()", "image",
+            "/product/condition/text()", "condition",
+            "/product/inStorePickup/text()", "inStorePickup",
+            "/product/homeDelivery/text()", "homeDelivery",
+            "/product/quantityLimit/text()", "quantityLimit",
+            "/product/color/text()", "color",
+            "/product/depth/text()", "depth",
+            "/product/height/text()", "height",
+            "/product/weight/text()", "weight",
+            "/product/shippingWeight/text()", "shippingWeight",
+            "/product/width/text()", "width",
+            "/product/longDescription/text()", "longDescription",
+            "/product/longDescriptionHtml/text()", "longDescriptionHtml",
+            "/product/features/*/text()", "features" # Note the match all here to get the subfields
+
+        ]
+      }
+
+      mutate{
+        remove_field => ["message", "host", "path"] # clean up some stuff we don't need
+      }
+      # Drop the root event, which doesn't contain any product information
+      if ![productId] {
+        drop{}
+      }
+
+    }
+output {
+  opensearch {
+    hosts => ["https://localhost:9200"]
+    index => "bbuy_products"
+    user => "admin"
+    password => "admin"
+    document_id => "%{productId}"
+    ssl_certificate_verification => false
+  }
+
+  stdout {
+	codec => rubydebug
+  }
+}
