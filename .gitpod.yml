@@ -9,7 +9,7 @@ ports:
   - port: 5601
     onOpen: open-browser
   - port: 9200
-    onOpen: open-preview
+    onOpen: ignore
   - port: 9300
     onOpen: ignore
   - port: 9600
