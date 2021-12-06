@@ -48,4 +48,4 @@ At the command line, do the following steps to run the example.  For purposes of
 1. Run Flask: 
     1. `export FLASK_ENV=development`
     1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week1` 
-    1. `flask run`  
+    1. `flask run --port 3000` (The default port of 5000 is already in use) 
