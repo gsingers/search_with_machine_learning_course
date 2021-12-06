@@ -26,7 +26,7 @@ services:
     networks:
       - opensearch-net
   logstash-with-opensearch-products:
-    image: logstash-oss-with-opensearch-output-plugin:7.13.4
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:7.13.4
     container_name: log-products
     environment:
       discovery.seed_hosts: logstash
@@ -45,7 +45,7 @@ services:
       - opensearch-net
     command: logstash -f /usr/share/logstash/pipeline/index-bbuy.logstash
   logstash-with-opensearch-queries:
-    image: logstash-oss-with-opensearch-output-plugin:7.13.4
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:7.13.4
     container_name: log-queries
     environment:
       discovery.seed_hosts: logstash
