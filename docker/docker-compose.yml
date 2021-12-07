@@ -31,7 +31,7 @@ services:
       - "5000:5000/tcp"
       - "5000:5000/udp"
       - "5044:5044"
-      - "9602:9602"
+      - "9601:9601"
     depends_on:
       - opensearch-node1
     networks:
