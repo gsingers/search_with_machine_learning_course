@@ -31,7 +31,7 @@ services:
       - "5000:5000/tcp"
       - "5000:5000/udp"
       - "5044:5044"
-      - "9600:9600"
+      - "9602:9602"
     depends_on:
       - opensearch-node1
     networks:
@@ -47,10 +47,10 @@ services:
       - ./logstash/index-bbuy-queries.logstash:/usr/share/logstash/pipeline/index-bbuy-queries.logstash
       - /workspace/datasets:/workspace/datasets
     ports:
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-      - "5044:5044"
-      - "9600:9600"
+      - "5001:5001/tcp"
+      - "5001:5001/udp"
+      - "5045:5045"
+      - "9602:9602"
     depends_on:
       - opensearch-node1
     networks:
