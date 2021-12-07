@@ -6,6 +6,10 @@ tasks:
 ports:
   - port: 3000
     onOpen: ignore
+  - port: 5000
+    onOpen: ignore
+  - port: 5001
+    onOpen: ignore
   - port: 5601
     onOpen: open-browser
   - port: 9200
@@ -13,4 +17,8 @@ ports:
   - port: 9300
     onOpen: ignore
   - port: 9600
+    onOpen: ignore
+  - port: 9601
+    onOpen: ignore
+  - port: 9602
     onOpen: ignore
