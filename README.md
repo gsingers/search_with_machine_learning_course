@@ -26,11 +26,20 @@ You will also find several supporting directories and files for [Logstash](https
 
 # Prerequisites
 
-1. For this class, you will need a Kaggle account
+1. For this class, you will need a Kaggle account and a [Kaggle API token](https://www.kaggle.com/docs/api).
 1. No prior search knowledge is required, but you should be able to code in Python or Java (all examples are in Python)
 1. You will need a [Gitpod](https://gitpod.io) account.
 
 # Working in Gitpod (Officially Supported)
+
+The following things must be done each time you create a new Gitpod Workspace (unfortunately, we can't automate this)
+1. Launch a new Gitpod workspace based on this repository.
+1. Install (create/copy) your Kaggle API token in `~/.kaggle/kaggle.json`
+1. Run the download data script:
+
+        ./download-data.sh
+        
+1.  
 
 
 

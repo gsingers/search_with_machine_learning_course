@@ -4,11 +4,7 @@ services:
     image: opensearchproject/opensearch:latest
     container_name: opensearch-node1
     environment:
-      - cluster.name=opensearch-cluster
-      - node.name=opensearch-node1
-      - discovery.seed_hosts=opensearch-node1
-      - cluster.initial_master_nodes=opensearch-node1
-      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - discovery.type=single-node
       - http.max_content_length=1000mb
       - "OPENSEARCH_JAVA_OPTS=-Xms4G -Xmx4G"
     volumes:
@@ -16,46 +12,14 @@ services:
     ports:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
     networks:
       - opensearch-net
-  logstash-with-opensearch-products:
-    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:7.13.4
-    container_name: log-products
-    environment:
-      discovery.seed_hosts: logstash
-      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
-    volumes:
-      - ./logstash/index-bbuy.logstash:/usr/share/logstash/pipeline/index-bbuy.logstash
-      - /workspace/datasets:/workspace/datasets
-    ports:
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-      - "5044:5044"
-      - "9601:9601"
-    depends_on:
-      - opensearch-node1
-    networks:
-      - opensearch-net
-    command: logstash -f /usr/share/logstash/pipeline/index-bbuy.logstash
-  logstash-with-opensearch-queries:
-    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:7.13.4
-    container_name: log-queries
-    environment:
-      discovery.seed_hosts: logstash
-      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
-    volumes:
-      - ./logstash/index-bbuy-queries.logstash:/usr/share/logstash/pipeline/index-bbuy-queries.logstash
-      - /workspace/datasets:/workspace/datasets
-    ports:
-      - "5001:5001/tcp"
-      - "5001:5001/udp"
-      - "5045:5045"
-      - "9602:9602"
-    depends_on:
-      - opensearch-node1
-    networks:
-      - opensearch-net
-    command: logstash -f /usr/share/logstash/pipeline/index-bbuy.logstash
+  
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:latest
     container_name: opensearch-dashboards
@@ -65,8 +29,11 @@ services:
       - "5601"
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch-node1:9200"]'
+    depends_on:
+      - opensearch-node1
     networks:
       - opensearch-net
+
 
 volumes:
   opensearch-data1:

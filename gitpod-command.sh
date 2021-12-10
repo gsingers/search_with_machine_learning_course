@@ -1,5 +1,6 @@
 mkdir -p /workspace/opensearch
 mkdir -p /workspace/logstash
+mkdir -p /workspace/datasets
 sudo chown -R gitpod:gitpod /workspace/opensearch
 sudo chown -R gitpod:gitpod /workspace/opensearch-data1
 sudo  chown -R gitpod:gitpod /workspace/logstash
