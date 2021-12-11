@@ -1,6 +1,6 @@
 input {
   file {
-    path => ["/workspace/datasets/bbuy/t*.csv"]  #Put in the path to the test/train CSV query data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
+    path => ["/workspace/datasets/t*.csv"]  #Put in the path to the test/train CSV query data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
     start_position => "beginning"
     codec => multiline {
             pattern => "<product>"
