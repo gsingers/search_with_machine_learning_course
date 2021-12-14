@@ -1,4 +1,4 @@
-logstash-7*
+logstash-*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
