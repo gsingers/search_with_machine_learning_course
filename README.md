@@ -32,6 +32,8 @@ You will also find several supporting directories and files for [Logstash](https
 
 # Working in Gitpod (Officially Supported)
 
+*NOTE*: The Gitpod free tier comes with 50 hours of use per month.  We expect our work will be done in less time than that.  HOwever, you may wish to conserve time on the platform by being sure to stop your workspace when you are done with it.  Gitpod will time you out (don't worry, you're work will be saved), but that may take longer to detect.
+
 The following things must be done each time you create a new Gitpod Workspace (unfortunately, we can't automate this)
 
 1. Fork this repository.

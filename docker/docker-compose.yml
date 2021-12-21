@@ -7,16 +7,12 @@ services:
       - discovery.type=single-node
       - http.max_content_length=1000mb
       - "OPENSEARCH_JAVA_OPTS=-Xms4G -Xmx4G"
+
     volumes:
       - opensearch-data1:/usr/share/opensearch/data  #todo: figure this out so we can have persistent storage
     ports:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1" ]
-      interval: 10s
-      timeout: 10s
-      retries: 3
     networks:
       - opensearch-net
   
