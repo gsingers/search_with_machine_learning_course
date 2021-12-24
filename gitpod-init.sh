@@ -1,3 +1,4 @@
+# Move this to a custom docker image at some point
 mkdir -p /workspace/pyenv/versions
 pyenv install 3.9.7
 mv /home/gitpod/.pyenv/versions/3.9.7/ /workspace/pyenv/versions/3.9.7
