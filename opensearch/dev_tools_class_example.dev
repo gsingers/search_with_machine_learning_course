@@ -1,3 +1,4 @@
+# Index some documents
 PUT /searchml_test/_doc/doc_a
 { "title": "Fox and Hounds",
 "body": "The quick red fox jumped over the lazy brown dogs.",
@@ -17,3 +18,33 @@ PUT /searchml_test/_doc/doc_d
 { "title": "The Three Little Pigs Revisted",
 "body": "The big, bad wolf huffed and puffed and blew the house down. The end.",
 "category": "childrens" }
+
+# Retrieve a document directly:
+GET /searchml_test/_doc/doc_b
+
+# Retrieve all the documents with dog in them:
+GET _search?q=dog
+
+# Get more than one doc:
+GET _search?q=jumped
+
+# Aggregate on Category
+GET _search
+{
+  "size": 0,
+  "aggs": {
+    "CATEGORY": {
+      "terms": {
+        "field": "category.keyword"
+      }
+    }
+  }
+}
+
+# DANGER
+
+# Delete a document
+DELETE searchml_test/_doc/doc_b
+
+# Delete an Index
+DELETE searchml_test
