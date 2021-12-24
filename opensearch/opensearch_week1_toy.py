@@ -87,6 +87,10 @@ for doc in docs:
 # Verify they are in:
 print(client.cat.count(index_name, params={"v": "true"}))
 
+# Get the index mappings
+
+print(client.indices.get_mapping(index_name))
+
 
 # if you want to delete the documents, but keep the index, run the following:
 for doc in docs:
