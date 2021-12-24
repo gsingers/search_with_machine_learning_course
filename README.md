@@ -37,20 +37,25 @@ You will also find several supporting directories and files for [Logstash](https
 The following things must be done each time you create a new Gitpod Workspace (unfortunately, we can't automate this)
 
 1. Fork this repository.
-1. Launch a new Gitpod workspace based on this repository.
+1. Launch a new Gitpod workspace based on this repository.  This will automatically start OpenSearch and OpenSearch Dashboards
 1. Install (create/copy) your Kaggle API token in `~/.kaggle/kaggle.json`
 1. Run the download data script:
 
         ./download-data.sh
         
 1. You should now have a running Opensearch instance (port 9200) and a running Opensearch Dashboards instance (port 5601)
-1. Login to the dashboards and change your password to something you will remember, as these are public instances.  
+1. Login to the dashboards at http://<$GITPOD_URL>:5601/ and change your password to something you will remember, as these are public instances.
+
+        $GITPOD_URL is a placeholder for your ephemeral Gitpod host name, e.g. https://silver-grasshopper-8czadqyn.ws-us25.gitpod.io:5601/     
 
 
+# Exploring the OpenSearch Sample Dashboards and Data
 
-# Working locally (Not supported, but may work for you. YMMV)     
+1. Login to OpenSearch and point your browser at http://<$GITPOD_URL>:5601/app/opensearch_dashboards_overview#/
+1. Click the "Add sample data" link
+1. Click the "Add Data" link for any of the 3 projects listed. In the class, we chose the "Sample flight data", but any of the three are fine for exploration.
 
-# Running an example
+# Running the Weekly Project
 
 At the command line, do the following steps to run the example.  For purposes of demonstration, let's assume we are working on week 2.  Substitute accordingly for the week you are working on.
 
@@ -63,3 +68,7 @@ At the command line, do the following steps to run the example.  For purposes of
     1. `export FLASK_ENV=development`
     1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week1` 
     1. `flask run --port 3000` (The default port of 5000 is already in use) 
+    
+# Working locally (Not supported, but may work for you. YMMV)
+
+TBD -- we can re-use the Gitpod docker image for local setup.
