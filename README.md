@@ -38,7 +38,7 @@ The following things must be done each time you create a new Gitpod Workspace (u
 
 1. Fork this repository.
 1. Launch a new Gitpod workspace based on this repository.  This will automatically start OpenSearch and OpenSearch Dashboards
-1. Install (create/copy) your Kaggle API token in `~/.kaggle/kaggle.json`
+1. Install (create/copy) your Kaggle API token in `~/.kaggle/kaggle.json` (which is actually in `/workspace/kaggle/kaggle.json` so it is persisted.)
 1. Run the download data script:
 
         ./download-data.sh
@@ -60,7 +60,7 @@ The following things must be done each time you create a new Gitpod Workspace (u
 At the command line, do the following steps to run the example.  For purposes of demonstration, let's assume we are working on week 2.  Substitute accordingly for the week you are working on.
 
 1. Setup your Python Virtual Environment.  We use `pyenv` (Pyenv website)[https://github.com/pyenv/pyenv] and `pyenv-virtualenv` (Pyenv Virtualenv)[https://github.com/pyenv/pyenv-virtualenv], but you can use whatever you are most comfortable with.
-    1. `pyenv install 3.9.7` -- Install Python 3.9.7 into PyEnv
+    1. `pyenv install 3.9.7` -- Install Python 3.9.7 into PyEnv if it isn't installed already. (if you are running in Gitpod, this should already be installed.)
     1. `pyenv virtualenv 3.9.7 search_with_ml_week2` -- Create a Virtualenv using that 3.9.7 install
     1. `pyenv activate search_with_ml_week2` -- Activate that Virtualenv. 
 1. Install the Python dependencies: `pip install -r requirements_week2.txt`
