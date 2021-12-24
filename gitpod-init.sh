@@ -1,6 +1,6 @@
 mkdir -p /workspace/pyenv
 pyenv install 3.9.7
-mv /home/gitpod/.pyenv/versions/3.9.7/ /workspace/pyenv/versions/
+mv /home/gitpod/.pyenv/versions/3.9.7/ /workspace/pyenv/versions/3.9.7
 
 
 mkdir -p /workspace/kaggle

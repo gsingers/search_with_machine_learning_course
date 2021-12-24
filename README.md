@@ -37,7 +37,8 @@ You will also find several supporting directories and files for [Logstash](https
 The following things must be done each time you create a new Gitpod Workspace (unfortunately, we can't automate this)
 
 1. Fork this repository.
-1. Launch a new Gitpod workspace based on this repository.  This will automatically start OpenSearch and OpenSearch Dashboards
+1. Launch a new Gitpod workspace based on this repository.  This will automatically start OpenSearch and OpenSearch Dashboards.
+    1. Note: it can take a few minutes for OpenSearch and the dashboards to launch.
 1. Install (create/copy) your Kaggle API token in `~/.kaggle/kaggle.json` (which is actually in `/workspace/kaggle/kaggle.json` so it is persisted.)
 1. Run the download data script:
 
