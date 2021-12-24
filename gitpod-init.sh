@@ -1,4 +1,4 @@
-mkdir -p /workspace/pyenv
+mkdir -p /workspace/pyenv/versions
 pyenv install 3.9.7
 mv /home/gitpod/.pyenv/versions/3.9.7/ /workspace/pyenv/versions/3.9.7
 
