@@ -1,3 +1,6 @@
+# This file is meant to capture the commands we submitted in the Python REPL, therefore it is not "organized" and structured like a proper Python file.
+import json
+
 from opensearchpy import OpenSearch
 
 host = 'localhost'
@@ -38,7 +41,7 @@ index_body = {
 
 response = client.indices.create(index_name, body=index_body)
 print('\nCreating index:')
-print(response)
+print(json.dumps(response, indent=4))
 
 # Add our sample document to the index.
 docs = [
@@ -82,7 +85,7 @@ for doc in docs:
         refresh=True
     )
     print('\n\tResponse:')
-    print(response)
+    print(json.dumps(response, indent=4))
 
 # Verify they are in:
 print(client.cat.count(index_name, params={"v": "true"}))
@@ -91,23 +94,231 @@ print(client.cat.count(index_name, params={"v": "true"}))
 
 print(client.indices.get_mapping(index_name))
 
+# Create a new index, this time with different mappings
+index_name = 'searchml_revisited_custom_mappings'
+index_body = {
+    'settings': {
+        'index': {
+            'query': {
+                'default_field': "body"
+            }
+        }
+    },
+    "mappings": {
+        "properties": {
+            "title": {"type": "text", "analyzer": "english"},
+            "body": {"type": "text", "analyzer": "english"},
+            "in_stock": {"type": "boolean"},
+            "category": {"type": "keyword", "ignore_above": "256"},
+            "price": {"type": "float"}
+        }
+    }
+}
 
-# if you want to delete the documents, but keep the index, run the following:
+response = client.indices.create(index_name, body=index_body)
+print('\nCreating index:')
+print(json.dumps(response, indent=4))
+
 for doc in docs:
     doc_id = doc["id"]
     print("Indexing {}".format(doc_id))
-    response = client.delete(
+    response = client.index(
         index=index_name,
+        body=doc,
         id=doc_id,
+        refresh=True
     )
     print('\n\tResponse:')
     print(response)
 
+# Do some searches
+q = 'dogs'
+query = {
+    'size': 5,
+    'query': {
+        'multi_match': {
+            'query': q,
+            'fields': ['title^2', 'body']
+        }
+    }
+}
+
+response = client.search(
+    body=query,
+    index=index_name
+)
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
+
+# try a phrase query
+q = 'fox dog'
+query = {
+    'size': 5,
+    'query': {
+        'match_phrase': {
+            'body': {"query": q}
+        }
+    }
+}
+
+response = client.search(
+    body=query,
+    index=index_name
+)
+print('\nSearch results:')
+print(response)
+
+# try a phrase query with slop
+q = 'fox dog'
+query = {
+    'size': 5,
+    'query': {
+        'match_phrase': {
+            'body': {"query": q, "slop": 10}
+        }
+    }
+}
+
+response = client.search(
+    body=query,
+    index=index_name
+)
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
+
+# try a match all query with a filter and a price factor
+query = {
+    'size': 5,
+    'query': {
+        "function_score": {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"match_all": {}}
+                    ],
+                    "filter": [
+                        {"term": {"category": "childrens"}}
+                    ]
+                }
+            },
+            "field_value_factor": {
+                "field": "price",
+                "missing": 1
+            }
+        }
+    }
+}
+
+response = client.search(
+    body=query,
+    index=index_name
+)
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
+
+###################
+# Aggregations
+
+query = {
+    'size': 0,
+    'query': {
+        "match_all": {}
+    },
+    'aggs': {
+        "category": {
+            "terms": {
+                "field": "category",
+                "size": 10,
+                "missing": "N/A",
+                "min_doc_count": 0
+            }
+        }
+    }
+}
+
+response = client.search(
+    body=query,
+    index=index_name
+)
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
+
+# Terms on price
+query = {
+    'size': 0,
+    'query': {
+        "match_all": {}
+    },
+    'aggs': {
+        "price": {
+            "terms": {
+                "field": "price",
+                "size": 10,
+                "min_doc_count": 0
+            }
+        }
+    }
+}
+
+response = client.search(
+    body=query,
+    index=index_name
+)
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
+
+# Range aggregation
+query = {
+    'size': 0,
+    'query': {
+        "match_all": {}
+    },
+    'aggs': {
+        "price": {
+            "range": {
+                "field": "price",
+                "ranges": [
+                    {
+                        "to": 5
+                    },
+                    {
+                        "from": 5,
+                        "to": 20
+                    },
+                    {
+                        "from": 20,
+                    }
+                ]
+            }
+        }
+    }
+}
+
+response = client.search(
+body = query,
+index = index_name
+)
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
+
+######################################
+
+
+# if you want to delete the documents, but keep the index, run the following:
+for doc in docs:
+    doc_id = doc["id"]
+print("Indexing {}".format(doc_id))
+response = client.delete(
+index = index_name,
+id = doc_id,
+)
+print('\n\tResponse:')
+print(response)
 
 # If at any time you want to start over, run this command to delete the index and then you can start from the toop
 # Delete the index.
 response = client.indices.delete(
-    index = index_name
+index = index_name
 )
 
 print('\nDeleting index:')
