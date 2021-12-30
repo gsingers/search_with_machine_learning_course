@@ -1,0 +1,6 @@
+{
+  "template": "bbuy_queries",
+  "settings": {
+    "index.refresh_interval": "5s"
+  }
+}

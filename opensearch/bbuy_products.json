@@ -1,0 +1,6 @@
+{
+  "template": "bbuy_products",
+  "settings": {
+    "index.refresh_interval": "5s"
+  }
+}
