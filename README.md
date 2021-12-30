@@ -70,7 +70,7 @@ At the command line, do the following steps to run the example.  For purposes of
 1. Install the Python dependencies: `pip install -r requirements_week2.txt`
 1. Run Flask: 
     1. `export FLASK_ENV=development`
-    1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week1` 
+    1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week2` 
     1. `flask run --port 3000` (The default port of 5000 is already in use) 
     
 # Working locally (Not supported, but may work for you. YMMV)
