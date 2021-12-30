@@ -38,16 +38,19 @@ The following things must be done each time you create a new Gitpod Workspace (u
 
 1. Fork this repository.
 1. Launch a new Gitpod workspace based on this repository.  This will automatically start OpenSearch and OpenSearch Dashboards.
-    1. Note: it can take a few minutes for OpenSearch and the dashboards to launch.
-1. Install (create/copy) your Kaggle API token in `~/.kaggle/kaggle.json` (which is actually in `/workspace/kaggle/kaggle.json` so it is persisted.)
-1. Run the download data script:
-
-        ./download-data.sh
-        
+    1. Note: it can take a few minutes for OpenSearch and the dashboards to launch.        
 1. You should now have a running Opensearch instance (port 9200) and a running Opensearch Dashboards instance (port 5601)
 1. Login to the dashboards at http://<$GITPOD_URL>:5601/ and change your password to something you will remember, as these are public instances.
 
         $GITPOD_URL is a placeholder for your ephemeral Gitpod host name, e.g. https://silver-grasshopper-8czadqyn.ws-us25.gitpod.io:5601/     
+
+# Downloading the Best Buy Dataset
+
+1. Install (create/copy) your Kaggle API token in `~/.kaggle/kaggle.json` (which is actually in `/workspace/kaggle/kaggle.json` so it is persisted.)
+1. Run the download data script:
+
+        ./download-data.sh
+
 
 
 # Exploring the OpenSearch Sample Dashboards and Data
