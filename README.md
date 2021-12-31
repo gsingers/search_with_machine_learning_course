@@ -32,7 +32,7 @@ You will also find several supporting directories and files for [Logstash](https
 
 # Working in Gitpod (Officially Supported)
 
-*NOTE*: The Gitpod free tier comes with 50 hours of use per month.  We expect our work will be done in less time than that.  HOwever, you may wish to conserve time on the platform by being sure to stop your workspace when you are done with it.  Gitpod will time you out (don't worry, you're work will be saved), but that may take longer to detect.
+*NOTE*: The Gitpod free tier comes with 50 hours of use per month.  We expect our work will be done in less time than that.  However, you may wish to conserve time on the platform by being sure to stop your workspace when you are done with it.  Gitpod will time you out (don't worry, your work will be saved), but that may take longer to detect.
 
 The following things must be done each time you create a new Gitpod Workspace (unfortunately, we can't automate this)
 
@@ -40,14 +40,16 @@ The following things must be done each time you create a new Gitpod Workspace (u
 1. Launch a new Gitpod workspace based on this repository.  This will automatically start OpenSearch and OpenSearch Dashboards.
     1. Note: it can take a few minutes for OpenSearch and the dashboards to launch.        
 1. You should now have a running Opensearch instance (port 9200) and a running Opensearch Dashboards instance (port 5601)
-1. Login to the dashboards at http://<$GITPOD_URL>:5601/ and change your password to something you will remember, as these are public instances.
+1. Login to the dashboards at `https://5601-<$GITPOD_URL>/` with default username `admin` and password `admin`. Change your password to something you will remember, as these are public instances.
 
-        $GITPOD_URL is a placeholder for your ephemeral Gitpod host name, e.g. https://silver-grasshopper-8czadqyn.ws-us25.gitpod.io:5601/     
+        $GITPOD_URL is a placeholder for your ephemeral Gitpod host name, e.g. silver-grasshopper-8czadqyn.ws-us25.gitpod.io     
 
 # Downloading the Best Buy Dataset
 
-1. Install (create/copy) your Kaggle API token in `~/.kaggle/kaggle.json` (which is actually in `/workspace/kaggle/kaggle.json` so it is persisted.)
-1. Run the download data script:
+1. Run the install [Kaggle API token](https://www.kaggle.com/docs/api) script and follow the instructions:
+
+        ./install-kaggle-token.sh
+1. Accept the [kaggle competition rules](https://www.kaggle.com/c/acm-sf-chapter-hackathon-big/rules) then run the download data script:
 
         ./download-data.sh
 
