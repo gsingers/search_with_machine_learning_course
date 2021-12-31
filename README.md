@@ -40,7 +40,7 @@ The following things must be done each time you create a new Gitpod Workspace (u
 1. Launch a new Gitpod workspace based on this repository.  This will automatically start OpenSearch and OpenSearch Dashboards.
     1. Note: it can take a few minutes for OpenSearch and the dashboards to launch.        
 1. You should now have a running Opensearch instance (port 9200) and a running Opensearch Dashboards instance (port 5601)
-1. Login to the dashboards at `https://5601-<$GITPOD_URL>/` username `admin` and password `admin`. Change your password to something you will remember, as these are public instances.
+1. Login to the dashboards at `https://5601-<$GITPOD_URL>/` with default username `admin` and password `admin`. Change your password to something you will remember, as these are public instances.
 
         $GITPOD_URL is a placeholder for your ephemeral Gitpod host name, e.g. silver-grasshopper-8czadqyn.ws-us25.gitpod.io     
 
