@@ -13,6 +13,9 @@
     justify-content: center;
 }
 
+#query{
+    width: 400px;
+}
 
 /* See https://css-tricks.com/snippets/css/complete-guide-grid/ for details on grid */
 #all-results {
@@ -81,6 +84,17 @@
     font-weight: bold;
 }
 
+/*
+Debug
+*/
+#debug{
+    grid-row-start: 3;
+    grid-column-start: 2;
+}
+
+#debug-response{
+    display: none;
+}
 
 /*
 Headers and footers

@@ -6,7 +6,7 @@
         {% if agg.doc_count > 0 %}
           <div class="aggregation">
             <div><a
-                href="{{ url_for("search.query") }}?&query={{ query }}{{ applied_filters }}&filter.name=regularPrice&regularPrice.type=range&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}&regularPrice.displayName=Price">{{ agg.key }}: {{ agg.doc_count }}</a>
+                href="{{ url_for("search.query") }}?&query={{ query|e }}{{ applied_filters }}&filter.name=regularPrice&regularPrice.type=range&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}&regularPrice.displayName=Price">{{ agg.key }} (${{ agg.from }} TO ${{ agg.to }}): {{ agg.doc_count }}</a>
             </div>
           </div>{% endif %}
       {% endfor %}

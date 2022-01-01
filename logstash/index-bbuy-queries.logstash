@@ -1,6 +1,6 @@
 input {
   file {
-    path => ["/workspace/datasets/t*.csv"]  #Put in the path to the test/train CSV query data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
+    path => ["/workspace/datasets/train.csv"]  #Put in the path to the train CSV query data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
     start_position => "beginning"
     codec => multiline {
             pattern => "<product>"
@@ -12,7 +12,8 @@ input {
 
 filter {
   csv {
-    autodetect_column_names => "true"
+    autodetect_column_names => true
+    skip_header => true
     convert => {
       "click_time" => "date_time"
       "query_time" => "date_time"
@@ -29,11 +30,9 @@ output {
     index => "bbuy_queries"
     user => "admin"
     password => "admin"
-    document_id => "%{productId}"
     ssl_certificate_verification => false
   }
 
   stdout {
-	codec => rubydebug
   }
 }
