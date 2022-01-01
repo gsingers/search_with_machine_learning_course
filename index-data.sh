@@ -4,6 +4,6 @@ curl -k -X PUT -u admin  "https://localhost:9200/bbuy_queries" -H 'Content-Type:
 
 cd /workspace/search_with_machine_learning_course/logstash-7.13.2/
 echo "Launching Logstash indexing in the background via nohup.  See product_indexing.log and queries_indexing.log for log output"
-nohup bin/logstash --path.data ./products_data -f ./logstash/index-bbuy.logstash > product_indexing.log &
+nohup bin/logstash --path.data ./products_data -f /workspace/search_with_machine_learning_course/logstash/index-bbuy.logstash > product_indexing.log &
 
-nohup bin/logstash --path.data ./products_data -f ./logstash/index-bbuy-queries.logstash > queries_indexing.log &
+nohup bin/logstash --path.data ./products_data -f /workspace/search_with_machine_learning_course/logstash/index-bbuy-queries.logstash > queries_indexing.log &

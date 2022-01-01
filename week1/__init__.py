@@ -20,12 +20,9 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # A simple landing page
-    @app.route('/')
-    def index():
-        return render_template('index.jinja2')
-
-
-    app.add_url_rule('/', endpoint='index')
+    # Load up our Search Blueprint and map the base URL to default to search.
+    from . import search
+    app.register_blueprint(search.bp)
+    app.add_url_rule('/', view_func=search.query)
 
     return app
