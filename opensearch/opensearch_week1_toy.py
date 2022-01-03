@@ -1,5 +1,5 @@
-# This file is meant to capture the commands we submitted in the iPython REPL, therefore it is not "organized" and structured like a proper Python file.
-
+# This file is meant to capture the commands we submitted in the Python REPL, therefore it is not "organized" and structured like a proper Python file.
+import json
 
 from opensearchpy import OpenSearch
 
@@ -39,8 +39,9 @@ index_body = {
     }
 }
 
-client.indices.create(index_name, body=index_body)
-
+response = client.indices.create(index_name, body=index_body)
+print('\nCreating index:')
+print(json.dumps(response, indent=4))
 
 # Add our sample document to the index.
 docs = [
@@ -77,12 +78,14 @@ docs = [
 for doc in docs:
     doc_id = doc["id"]
     print("Indexing {}".format(doc_id))
-    client.index(
+    response = client.index(
         index=index_name,
         body=doc,
         id=doc_id,
         refresh=True
     )
+    print('\n\tResponse:')
+    print(json.dumps(response, indent=4))
 
 # Verify they are in:
 print(client.cat.count(index_name, params={"v": "true"}))
@@ -112,8 +115,9 @@ index_body = {
     }
 }
 
-client.indices.create(index_name, body=index_body)
-
+response = client.indices.create(index_name, body=index_body)
+print('\nCreating index:')
+print(json.dumps(response, indent=4))
 
 for doc in docs:
     doc_id = doc["id"]
@@ -139,10 +143,12 @@ query = {
     }
 }
 
-client.search(
+response = client.search(
     body=query,
     index=index_name
 )
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
 
 # try a phrase query
 q = 'fox dog'
@@ -155,10 +161,12 @@ query = {
     }
 }
 
-client.search(
+response = client.search(
     body=query,
     index=index_name
 )
+print('\nSearch results:')
+print(response)
 
 # try a phrase query with slop
 q = 'fox dog'
@@ -171,10 +179,12 @@ query = {
     }
 }
 
-client.search(
+response = client.search(
     body=query,
     index=index_name
 )
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
 
 # try a match all query with a filter and a price factor
 query = {
@@ -199,10 +209,12 @@ query = {
     }
 }
 
-client.search(
+response = client.search(
     body=query,
     index=index_name
 )
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
 
 ###################
 # Aggregations
@@ -224,10 +236,12 @@ query = {
     }
 }
 
-client.search(
+response = client.search(
     body=query,
     index=index_name
 )
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
 
 # Terms on price
 query = {
@@ -246,10 +260,12 @@ query = {
     }
 }
 
-client.search(
+response = client.search(
     body=query,
     index=index_name
 )
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
 
 # Range aggregation
 query = {
@@ -278,16 +294,16 @@ query = {
     }
 }
 
-client.search(
+response = client.search(
 body = query,
 index = index_name
 )
+print('\nSearch results:')
+print(json.dumps(response, indent=4))
 
 ######################################
-#####
-#####  DANGER!!!!!!!!!!!
-#####
-######################################
+
+
 # if you want to delete the documents, but keep the index, run the following:
 for doc in docs:
     doc_id = doc["id"]

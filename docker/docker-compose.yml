@@ -1,7 +1,7 @@
 version: '3'
 services:
   opensearch-node1:
-    image: opensearchproject/opensearch:latest
+    image: gsingers/opensearch-learning-to-rank:1.2.3
     container_name: opensearch-node1
     environment:
       - discovery.type=single-node

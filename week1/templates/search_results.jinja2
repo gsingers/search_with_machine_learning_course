@@ -14,7 +14,6 @@
       <div id="search-meta-container">Your query of {{ query }} returned {{ "{:,d}".format(search_response.hits.total.value) }} hits in {{ search_response.took }} ms.</div>
       <div id="aggregations-container">{% include 'aggregations.jinja2' %}</div>
       <div id="search-results-container">{% include 'display_results.jinja2' %}</div>
-      <div id="debug">{% include 'debug.jinja2' %}</div>
     </div>
   {% else %}
     <div id="all-results">
