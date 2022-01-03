@@ -5,7 +5,7 @@ from flask import (
     Blueprint, redirect, render_template, request, url_for
 )
 
-from week1_finished.opensearch import get_opensearch
+from week1.opensearch import get_opensearch
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
