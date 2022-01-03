@@ -1,5 +1,5 @@
 # This file is meant to capture the commands we submitted in the iPython REPL, therefore it is not "organized" and structured like a proper Python file.
-import json
+
 
 from opensearchpy import OpenSearch
 
@@ -39,9 +39,8 @@ index_body = {
     }
 }
 
-response = client.indices.create(index_name, body=index_body)
-print('\nCreating index:')
-print(json.dumps(response, indent=4))
+client.indices.create(index_name, body=index_body)
+
 
 # Add our sample document to the index.
 docs = [
@@ -78,14 +77,12 @@ docs = [
 for doc in docs:
     doc_id = doc["id"]
     print("Indexing {}".format(doc_id))
-    response = client.index(
+    client.index(
         index=index_name,
         body=doc,
         id=doc_id,
         refresh=True
     )
-    print('\n\tResponse:')
-    print(json.dumps(response, indent=4))
 
 # Verify they are in:
 print(client.cat.count(index_name, params={"v": "true"}))
@@ -115,9 +112,8 @@ index_body = {
     }
 }
 
-response = client.indices.create(index_name, body=index_body)
-print('\nCreating index:')
-print(json.dumps(response, indent=4))
+client.indices.create(index_name, body=index_body)
+
 
 for doc in docs:
     doc_id = doc["id"]
