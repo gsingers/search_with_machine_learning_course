@@ -23,13 +23,13 @@ PUT /searchml_test/_doc/doc_d
 GET /searchml_test/_doc/doc_b
 
 # Retrieve all the documents with dog in them:
-GET /searchml_test/_search?q=dog
+GET _search?q=dog
 
 # Get more than one doc:
-GET /searchml_test/_search?q=jumped
+GET _search?q=jumped
 
 # Aggregate on Category
-GET /searchml_test/_search
+GET _search
 {
   "size": 0,
   "aggs": {
