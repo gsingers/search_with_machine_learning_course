@@ -5,7 +5,7 @@ quickly get up to speed on search best practices by first teaching the basics of
 
 Students will learn indexing, querying, aggregations and text analysis, as well as how to use machine learning for ranking, content classification and query understanding.
 
-The class is a hands-on project-driven course where students will work with real data and the [Opensearch](https://opensearch.com)/Elasticsearch ecosystem along with libraries like [FastText](https://fasttext.cc/)
+The class is a hands-on project-driven course where students will work with real data and the [Opensearch](https://opensearch.com)/Elasticsearch ecosystem along with libraries like [FastText](https://fasttext.cc/), [XG Boost](https://xgboost.readthedocs.io/en/stable/) and [OpenSearch Learning to Rank](https://github.com/aparo/opensearch-learning-to-rank).
 
 # Class code layout (e.g. where the projects are)
 
