@@ -13,3 +13,4 @@ RUN rm logstash-oss-with-opensearch-output-plugin-7.13.2-linux-x64.tar.gz
 
 RUN wget https://github.com/facebookresearch/fastText/archive/v0.9.2.zip
 RUN unzip v0.9.2.zip
+RUN cd /home/gitpod/fastText-0.9.2 && /usr/bin/make -f /home/gitpod/fastText-0.9.2/Makefile fasttext
