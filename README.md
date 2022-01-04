@@ -57,7 +57,7 @@ The following things must be done each time you create a new Gitpod Workspace (u
 
 # Exploring the OpenSearch Sample Dashboards and Data
 
-1. Login to OpenSearch and point your browser at https://5601-<$GITPOD_URL>/app/opensearch_dashboards_overview#/
+1. Login to OpenSearch and point your browser at `https://5601-<$GITPOD_URL>/app/opensearch_dashboards_overview#/`
 1. Click the "Add sample data" link
 1. Click the "Add Data" link for any of the 3 projects listed. In the class, we chose the "Sample flight data", but any of the three are fine for exploration.
 
