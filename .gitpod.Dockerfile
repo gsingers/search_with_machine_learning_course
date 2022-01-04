@@ -11,9 +11,7 @@ RUN curl -o logstash-oss-with-opensearch-output-plugin-7.13.2-linux-x64.tar.gz h
 RUN tar -xf logstash-oss-with-opensearch-output-plugin-7.13.2-linux-x64.tar.gz
 RUN rm logstash-oss-with-opensearch-output-plugin-7.13.2-linux-x64.tar.gz
 
-RUN cd /workspace/search_with_machine_learning_course/
 RUN wget https://github.com/facebookresearch/fastText/archive/v0.9.2.zip
 RUN unzip v0.9.2.zip
 RUN cd fastText-0.9.2
 RUN make
-RUN cd /workspace/search_with_machine_learning_course/
