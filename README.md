@@ -57,7 +57,7 @@ The following things must be done each time you create a new Gitpod Workspace (u
 
 # Exploring the OpenSearch Sample Dashboards and Data
 
-1. Login to OpenSearch and point your browser at http://<$GITPOD_URL>:5601/app/opensearch_dashboards_overview#/
+1. Login to OpenSearch and point your browser at http://5601-<$GITPOD_URL>/app/opensearch_dashboards_overview#/
 1. Click the "Add sample data" link
 1. Click the "Add Data" link for any of the 3 projects listed. In the class, we chose the "Sample flight data", but any of the three are fine for exploration.
 
@@ -74,6 +74,7 @@ At the command line, do the following steps to run the example.  For purposes of
     1. `export FLASK_ENV=development`
     1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week2` 
     1. `flask run --port 3000` (The default port of 5000 is already in use) 
+    1. Open the Flask APP at `https://3000-<$GITPOD_URL>/`
     
 # Working locally (Not supported, but may work for you. YMMV)
 
