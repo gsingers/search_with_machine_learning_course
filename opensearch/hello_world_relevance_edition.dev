@@ -1,0 +1,23 @@
+# This example requires the bbuy_queries index to exist and be populated.  See index-data.sh for details.
+# Get the top 10 queries from the queries log
+GET /bbuy_queries/_search
+{
+  "size": 0,
+  "aggs": {
+    "Query": {
+
+      "terms": {
+        "size": 10,
+        "field": "query.keyword"
+      },
+      "aggs":{
+        "Docs":{
+          "terms":{
+            "size": 5,
+            "field": "sku.keyword"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,116 @@
+##############
+##  Creaate the searchml_test index using the documents in dev_tools_class_example.dev
+##
+##############
+
+
+
+# Simple explain of query:
+GET /searchml_test/_validate/query?explain=true
+{
+  "query": {
+      "term":{
+        "title": "dog"
+      }
+  }
+}
+# slightly more complex
+GET /searchml_test/_validate/query?explain=true
+{
+  "query": {
+      "query_string":{
+        "query": "dog"
+      }
+  }
+}
+
+# Bit more complex explain of query
+GET /searchml_test/_validate/query?explain=true
+{
+  "query": {
+      "bool":{
+        "must":[
+            {"query_string": {
+                "query": "dogs OR cats OR \"bad wolf\" (house or puffed)"
+            }}
+        ]
+
+      }
+  }
+}
+
+# Analyze two sentences and output detailed explanations
+GET /_analyze
+{
+  "analyzer": "english",
+  "explain": "true",
+  "text": ["Wearing all red, the Fox jumped out to a lead in the race over the Dog.", "All lead must be removed from the brown and red paint."]
+}
+
+# Pass in a custom analyzer
+GET /_analyze
+{
+  "tokenizer" : "standard",
+  "filter" : ["lowercase", "snowball"],
+  "explain": "true",
+  "text": ["Wearing all red, the Fox jumped out to a lead in the race over the Dog.", "All lead must be removed from the brown and red paint."]
+}
+
+# Explain as a query
+GET /searchml_test/_search?explain=true
+{
+  "query": {
+      "bool":{
+        "must":[
+            {"query_string": {
+                "query": "dogs OR cats OR \"bad wolf\" (house or puffed)"
+            }}
+        ]
+      }
+  }
+}
+
+# Explain a particular doc
+POST /searchml_test/_explain/doc_a
+{
+  "query": {
+      "bool":{
+        "must":[
+            {"query_string": {
+                "query": "dogs"
+            }}
+        ]
+      }
+  }
+}
+
+
+# Try out some query log aggregations
+GET /bbuy_queries/_search
+{
+  "size": 0,
+  "aggs": {
+    "queries_per_week":{
+      "date_histogram": {
+        "field": "click_time",
+        "interval": "week"
+      },
+      "aggs":{
+       "Query": {
+            "terms": {
+              "size": 10,
+              "field": "query.keyword"
+            },
+            "aggs":{
+              "Docs":{
+                "terms":{
+                  "size": 5,
+                  "field": "sku.keyword"
+                }
+              }
+            }
+        }
+      }
+    }
+  }
+}
