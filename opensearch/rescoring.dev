@@ -1,0 +1,158 @@
+##############
+##  Creaate the searchml_test index using the documents
+##
+##############
+##Create our index
+PUT /searchml_test
+{
+  "settings": {
+        "index": {
+            "query": {
+                "default_field": "body"
+            }
+        }
+    },
+    "mappings": {
+        "properties": {
+            "title": {"type": "text", "analyzer": "english"},
+            "body": {"type": "text", "analyzer": "english"},
+            "in_stock": {"type": "boolean"},
+            "category": {"type": "keyword", "ignore_above": "256"},
+            "price": {"type": "float"}
+        }
+    }
+}
+
+## Index some documents
+PUT /searchml_test/_doc/doc_a
+{
+  "id": "doc_a",
+  "title": "Fox and Hounds",
+  "body": "The quick red fox jumped over the lazy brown dogs.",
+  "price": "5.99",
+  "in_stock": "true",
+  "category": "childrens"}
+
+PUT /searchml_test/_doc/doc_b
+{
+    "id": "doc_b",
+    "title": "Fox wins championship",
+    "body": "Wearing all red, the Fox jumped out to a lead in the race over the Dog.",
+    "price": "15.13",
+    "in_stock": "true",
+    "category": "sports"}
+
+PUT /searchml_test/_doc/doc_c
+{
+    "id": "doc_c",
+    "title": "Lead Paint Removal",
+    "body": "All lead must be removed from the brown and red paint.",
+    "price": "150.21",
+    "in_stock": "false",
+    "category": "instructional"}
+
+PUT /searchml_test/_doc/doc_d
+{
+        "id": "doc_d",
+        "title": "The Three Little Pigs Revisted",
+        "price": "3.51",
+        "in_stock": "true",
+        "body": "The big, bad wolf huffed and puffed and blew the house down. The end.",
+        "category": "childrens"}
+
+###########
+# Examples begin here
+
+# Rescoring: first run the baseline
+GET searchml_test/_search
+{
+  "query": {
+      "bool": {
+          "must": [
+              {"match_all": {}}
+          ],
+          "filter": [
+              {"term": {"category": "childrens"}}
+          ]
+      }
+  }
+}
+
+# Rework week 1 function score as a rescore
+POST searchml_test/_search
+{
+  "query": {
+      "bool": {
+          "must": [
+              {"match_all": {}}
+          ],
+          "filter": [
+              {"term": {"category": "childrens"}}
+          ]
+      }
+  },
+  "rescore": {
+    "query": {
+      "rescore_query":{
+        "function_score":{
+          "field_value_factor": {
+            "field": "price",
+            "missing": 1
+          }
+        }
+
+      },
+      "query_weight": 1.0,
+      "rescore_query_weight": 2.0
+    },
+    "window_size": 1
+  }
+}
+
+# Double cascade!
+# Baseline:
+POST searchml_test/_search
+{
+  "query": {
+      "match_all": {}
+  }
+}
+
+# Rework week 1 function score as a rescore
+POST searchml_test/_search
+{
+  "query": {
+      "match_all": {}
+  },
+  "rescore": [
+    {
+      "query": {
+        "rescore_query":{
+          "match_phrase":{
+            "body":{
+              "query": "Fox jumped"
+            }
+          }
+        },
+        "query_weight": 1.0,
+        "rescore_query_weight": 2.0
+      },
+      "window_size": 2
+    },
+    {
+      "query": {
+        "rescore_query":{
+          "function_score":{
+            "field_value_factor": {
+              "field": "price",
+              "missing": 1
+            }
+          }
+        },
+        "query_weight": 1.0,
+        "rescore_query_weight": 4.0
+      },
+      "window_size": 1
+    }
+  ]
+}
