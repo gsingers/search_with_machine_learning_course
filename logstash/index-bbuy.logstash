@@ -38,7 +38,7 @@ input {
             "/product/categoryPath/*/name/text()", "categoryPath", # Note the match all here to get the subfields
             "/product/categoryPath/*/id/text()", "categoryPathIds", # Note the match all here to get the subfields
             "/product/categoryPath/category[last()]/id/text()", "categoryLeaf",
-            "count(/product/categoryPath/*/name)", "categoryPathCount"
+            "count(/product/categoryPath/*/name)", "categoryPathCount",
             "/product/customerReviewCount/text()", "customerReviewCount",
             "/product/customerReviewAverage/text()", "customerReviewAverage",
             "/product/inStoreAvailability/text()", "inStoreAvailability",
