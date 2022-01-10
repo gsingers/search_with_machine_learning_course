@@ -4,6 +4,8 @@ RUN pyenv install 3.9.7
 RUN pip install kaggle
 RUN pip install nltk
 RUN pip install fasttext
+RUN pip install xgboost
+RUN pip install requests
 
 RUN pyenv virtualenv 3.9.7 search_with_ml_opensearch
 
