@@ -1,0 +1,25 @@
+{% extends 'base.jinja2' %}
+
+{% block header %}
+  <h1>{% block title %}Search Results for {{query}} {% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <div id="did-you-mean">DYM goes here</div>
+  {% if display_filters%}
+    <div id="applied-filters">{% include 'display_filters.jinja2' %}</div>
+  {% endif %}
+  {% if search_response and search_response.hits%}
+    <div id="all-results">
+      <div id="search-meta-container">Your query of {{ query }} returned {{ "{:,d}".format(search_response.hits.total.value) }} hits in {{ search_response.took }} ms.</div>
+      <div id="aggregations-container">{% include 'aggregations.jinja2' %}</div>
+      <div id="search-results-container">{% include 'display_results.jinja2' %}</div>
+      <div id="debug">{% include 'debug.jinja2' %}</div>
+    </div>
+  {% else %}
+    <div id="all-results">
+      <div id="aggregations-container">No response results to aggregate!</div>
+      <div id="search-results-container">If you are seeing this, you haven't returned a valid search response object yet. Be sure to implement opensearch.py and search.py appropriately.</div>
+    </div>
+  {% endif %}
+{% endblock %}

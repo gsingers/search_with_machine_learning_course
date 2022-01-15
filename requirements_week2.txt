@@ -1,2 +1,6 @@
 flask
 opensearch-py
+requests
+ipython
+urljoin
+xgboost

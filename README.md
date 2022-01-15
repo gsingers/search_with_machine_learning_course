@@ -49,7 +49,7 @@ The following things must be done each time you create a new Gitpod Workspace (u
 1. Run the install [Kaggle API token](https://www.kaggle.com/docs/api) script and follow the instructions:
 
         ./install-kaggle-token.sh
-1. Accept the [kaggle competition rules](https://www.kaggle.com/c/acm-sf-chapter-hackathon-big/rules) then run the download data script:
+1. Accept all of the [kaggle competition rules](https://www.kaggle.com/c/acm-sf-chapter-hackathon-big/rules) then run the download data script:
 
         ./download-data.sh
 

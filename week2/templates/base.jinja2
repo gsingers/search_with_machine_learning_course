@@ -1,0 +1,25 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} - Search with Machine Learning</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav>
+  <h1><a href="{{ url_for("query") }}">Search with Machine Learning</a></h1>
+  <ul>
+  </ul>
+</nav>
+<section class="content">
+  <header id="main-header" class="header">
+    <div id="header-content">{% block header %}{% endblock %}</div>
+    {%include 'search_box.jinja2' %}
+  </header>
+  <body>{% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}</body>
+</section>
+<section class="footer">
+  {% block footer %}
+    <div id="main-footer" class="footer">
+      <div>Copyright Daniel Tunkelang and Grant Ingersoll. 2021</div>
+    </div>
+  {% endblock %}
+</section>
