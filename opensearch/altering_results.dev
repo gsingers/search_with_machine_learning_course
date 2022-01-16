@@ -1,64 +1,20 @@
 # If you deleted your index (searchml_test), see the bottom of this file to recreate it.
-# Rescoring: first run the baseline
-GET searchml_test/_search
+
+# Pin or boost results
+POST searchml_test/_search
 {
   "query": {
-      "bool": {
-          "must": [
-              {"match_all": {}}
-          ],
-          "filter": [
-              {"term": {"category": "childrens"}}
-          ]
+      "bool":{
+        "should": [
+          {
+            "constant_score": {
+              "filter": {"term":{"id.keyword": "doc_d"}},
+              "boost": 10000
+            }
+          },
+          {"match_all": {}}
+        ]
       }
-  }
-}
-
-# Rework week 1 function score as a rescore
-POST searchml_test/_search
-{
-  "query": {
-      "bool": {
-          "must": [
-              {"match_all": {}}
-          ],
-          "filter": [
-              {"term": {"category": "childrens"}}
-          ]
-      }
-  },
-  "rescore": {
-    "query": {
-      "rescore_query":{
-        "function_score":{
-          "field_value_factor": {
-            "field": "price",
-            "missing": 1
-          }
-        }
-
-      },
-      "query_weight": 1.0,
-      "rescore_query_weight": 2.0
-    },
-    "window_size": 1
-  }
-}
-
-# Double cascade!
-# Baseline:
-POST searchml_test/_search
-{
-  "query": {
-      "match_all": {}
-  }
-}
-
-# Rework week 1 function score as a rescore
-POST searchml_test/_search
-{
-  "query": {
-      "match_all": {}
   },
   "rescore": [
     {
@@ -92,6 +48,105 @@ POST searchml_test/_search
     }
   ]
 }
+
+
+# Script score on price for doc a
+POST searchml_test/_search
+{
+  "query": {
+      "match_all": {}
+  },
+  "rescore": [
+    {
+      "query": {
+        "rescore_query":{
+          "function_score":{
+            "script_score": {
+              "script":{
+                "source": """
+                if (doc['id.keyword'].value == "doc_a"){
+                  return doc.price.value;
+                }
+                return 1;
+                """
+              }
+            }
+          }
+        },
+        "query_weight": 1.0,
+        "rescore_query_weight": 1.0
+      },
+      "window_size": 10
+    }
+  ]
+}
+
+
+# Boost low cost items:
+POST searchml_test/_search
+{
+  "query": {
+      "match_all": {}
+  },
+  "rescore": [
+    {
+      "query": {
+        "rescore_query":{
+          "function_score":{
+            "functions":[
+              {
+                  "exp": {
+                    "price":{
+                      "origin": "0",
+                    "scale": "4",
+                      "decay": "0.3"
+                    }
+                }
+              }
+              ]
+          }
+        },
+        "query_weight": 1.0,
+        "rescore_query_weight": 1.0
+      },
+      "window_size": 10
+    }
+  ]
+}
+
+# Boost high cost items:
+POST searchml_test/_search
+{
+  "query": {
+      "match_all": {}
+  },
+  "rescore": [
+    {
+      "query": {
+        "rescore_query":{
+          "function_score":{
+            "functions":[
+              {
+                  "exp": {
+                    "price":{
+                      "origin": "150",
+                    "scale": "40",
+                      "decay": "0.3"
+                    }
+                }
+              }
+              ]
+          }
+        },
+        "query_weight": 1.0,
+        "rescore_query_weight": 1.0
+      },
+      "window_size": 10
+    }
+  ]
+}
+
+
 
 ##############
 ##  Creaate the searchml_test index using the documents.  You only need to re-run this if you deleted searchml_test or want to start fresh

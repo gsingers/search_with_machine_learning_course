@@ -1,0 +1,17 @@
+#########
+#
+# Basic LTR operations
+#
+#########
+# Create the LTR metadata store
+PUT _ltr
+#Delete the LTR metadata store
+DELETE _ltr
+# Get the attributes of the LTR metadata store
+GET _ltr
+
+# If you want to manage LTR metadata stores for multiple applications, you can create multiple LTR stores:
+PUT _ltr/searchml
+PUT _ltr/bbuy
+
+
