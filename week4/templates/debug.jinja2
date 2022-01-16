@@ -1,0 +1,15 @@
+<script>
+function toggleDebug() {
+  var x = document.getElementById("debug-response");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+
+</script>
+<button onclick="toggleDebug()">View Raw Response</button>
+<div id="debug-response">
+  <pre>{{ search_response|tojson(indent=4) }}</pre>
+</div>
