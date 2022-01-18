@@ -2,7 +2,7 @@ import os
 import xml.etree.ElementTree as ET
 import csv
 
-directory = r'/workspace/datasets/bbuy/'
+directory = r'/workspace/datasets/'
 categoriesFilename = directory + 'product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 
 tree = ET.parse(categoriesFilename)
