@@ -9,7 +9,10 @@ def create_app(test_config=None):
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_envvar('LTR_APPLICATION_SETTINGS', silent=True)
+        #ALL_CLICKS_LOC = os.environ.get("ALL_CLICKS_LOC", app.config['ALL_CLICKS_LOC'])
+        #app.config["ALL_CLICKS_LOC"] = ALL_CLICKS_LOC
+        #print(app.config)
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)

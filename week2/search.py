@@ -5,7 +5,9 @@ from flask import (
     Blueprint, redirect, render_template, request, url_for
 )
 
-from week1_finished.opensearch import get_opensearch
+from week2.opensearch import get_opensearch
+
+import week2.utilities.query_utils as qu
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
@@ -66,6 +68,13 @@ def query():
     filters = None
     sort = "_score"
     sortDir = "desc"
+    
+    useLTR = False
+    hand_tuned = False
+    # TODO: Make these parameters
+    ltr_store_name = "week2"
+    ltr_model_name = "ltr_model"
+    explain = False
     if request.method == 'POST':  # a query has been submitted
         user_query = request.form['query']
         if not user_query:
@@ -76,116 +85,58 @@ def query():
         sortDir = request.form["sortDir"]
         if not sortDir:
             sortDir = "desc"
-        query_obj = create_query(user_query, [], sort, sortDir)
+        explain_val = request.form.get("explain", "false")
+        if explain_val == "true":
+            explain = True
+        useLTR_val = request.form.get("useLTR", "false")
+        if useLTR_val == "true":
+            useLTR = True
+            query_obj = qu.create_rescore_ltr_query(user_query, ltr_model_name, ltr_store_name, size=100, rescore_size=50)
+
+            print("LTR q: %s" % query_obj)
+        else:
+            hand_tuned_val = request.form.get("hand_tuned", "false")
+            if hand_tuned_val == "true":
+                hand_tuned  = True
+                query_obj = qu.create_query(user_query, [], sort, sortDir, size=100)  # We moved create_query to a utility class so we could use it elsewhere.
+                print("Hand tuned q: %s" % query_obj)
+            else:
+                query_obj = qu.create_simple_baseline(user_query, [], sort, sortDir, size=100)  # We moved create_query to a utility class so we could use it elsewhere.
+                print("Plain ol q: %s" % query_obj)
     elif request.method == 'GET':  # Handle the case where there is no query or just loading the page
         user_query = request.args.get("query", "*")
         filters_input = request.args.getlist("filter.name")
         sort = request.args.get("sort", sort)
         sortDir = request.args.get("sortDir", sortDir)
+        explain_val = request.args.get("explain", "false")
+        if explain_val == "true":
+            explain = True
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
-
-        query_obj = create_query(user_query, filters, sort, sortDir)
+        useLTR_val = request.args.get("useLTR", "false")
+        if useLTR_val == "true":
+            useLTR = True
+            query_obj = qu.create_rescore_ltr_query(user_query, ltr_model_name, ltr_store_name, size=100, rescore_size=50)
+        else:
+            hand_tuned_val = request.args.get("hand_tuned", "false")
+            if hand_tuned_val == "true":
+                hand_tuned  = True
+                query_obj = qu.create_query(user_query, filters, sort, sortDir, size=100)
+            else:
+                query_obj = qu.create_simple_baseline(user_query, filters, sort, sortDir, size=100)
     else:
-        query_obj = create_query("*", [], sort, sortDir)
+        query_obj = qu.create_query("*", [], sort, sortDir, size=100)
 
-    print("query obj: {}".format(query_obj))
-    response = opensearch.search(body=query_obj, index="bbuy_products")
+    #print("query obj: {}".format(query_obj))
+    response = opensearch.search(body=query_obj, index="bbuy_products", explain=explain)
     # Postprocess results here if you so desire
 
     #print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
-                               sort=sort, sortDir=sortDir)
+                               sort=sort, sortDir=sortDir, useLTR=useLTR, explain=explain, hand_tuned=hand_tuned)
     else:
         redirect(url_for("index"))
 
 
-def create_query(user_query, filters, sort="_score", sortDir="desc"):
-    print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    query_obj = {
-        'size': 10,
-        "highlight": {
-            "fields": {
-                "name": {},
-                "shortDescription": {},
-                "longDescription": {}
-            }
-        },
-        "sort":[
-            {sort: {"order": sortDir}}
-        ],
-        "query": {
-            "function_score": {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {
-                              "query_string": {
-                                    "query": user_query,
-                                    "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department"]
-                               }
-                            }
-                        ],
-                        "filter": filters  #
-                    }
-                },
-                "score_mode": "avg",
-                "boost_mode": "multiply",
-                "functions": [
-                  {"field_value_factor": {
-                  "field": "salesRankMediumTerm",
-                  "modifier": "reciprocal",
-                  "missing": 100000000
-                    }
-                  },
-                  {"field_value_factor": {
-                  "field": "salesRankShortTerm",
-                  "modifier": "reciprocal",
-                  "missing": 100000000
-                    }
-                  },
-                  {"field_value_factor": {
-                  "field": "salesRankLongTerm",
-                  "modifier": "reciprocal",
-                  "missing": 100000000
-                    }
-                  }
-                ]
-              }
-        },
-        "aggs": {
-            "department": {
-                "terms": {
-                    "field": "department.keyword",
-                    "min_doc_count": 1
-                }
-            },
-            "missing_images": {
-                "missing": {
-                    "field": "image"
-                }
-            },
-            "regularPrice": {
-                "range": {
-                    "field": "regularPrice",
-                    "ranges": [
-                        {"key": "$", "to": 100},
-                        {"key": "$$", "from": 100, "to": 200},
-                        {"key": "$$$", "from": 200, "to": 300},
-                        {"key": "$$$$", "from": 300, "to": 400},
-                        {"key": "$$$$$", "from": 400, "to": 500},
-                        {"key": "$$$$$$", "from": 500},
-                    ]
-                },
-                "aggs": {
-                    "price_stats": {
-                        "stats": {"field": "regularPrice"}
-                    }
-                }
-            }
-
-        }
-    }
-    return query_obj

@@ -199,7 +199,7 @@ resp = requests.post(featureset_path, headers=headers, data=json.dumps(ltr_featu
 
 
 # Create a place to store our judgments
-class Judgment():
+class Judgment:
 
     def __init__(self, query, doc_id, display_name, grade=0, features=[], query_str=None):
         self.query = query
@@ -236,7 +236,7 @@ for query in queries:
     print("################\nExecuting search: qid: {}; query: {}\n##########".format(query, queries[query]))
     response = client.search(body=query_obj, index=index_name)
     hits = response['hits']['hits']
-    if response and len(hits) > 0:
+    if len(hits) > 0:
         print(
             "For each hit answer the question: 'Is this hit relevant(1) or not relevant(0) to the query: {}?':".format(
                 queries[query]))
@@ -286,6 +286,7 @@ for (idx, item) in enumerate(judgments.items()):
                             "sltr": {
                                 "_name": "logged_featureset",
                                 "featureset": featureset_name,
+                                "store": ltr_store_name,
                                 "params": {
                                     "keywords": queries[judgment.query]
                                 }
@@ -386,8 +387,8 @@ query_obj["rescore"] = {
                     "keywords": queries[1]
                 },
                 "model": model_name,
-                "store": ltr_store_name,
                 # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
+                "store": ltr_store_name,
                 "active_features": [title_query_feature_name, body_query_feature_name, price_func_feature_name]
             }
         },
