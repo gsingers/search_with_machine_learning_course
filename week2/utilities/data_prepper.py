@@ -187,58 +187,27 @@ class DataPrepper:
         log_query = lu.create_feature_log_query(key, query_doc_ids, self.featureset_name,
                                                 self.ltr_store_name,
                                                 size=len(query_doc_ids), terms_field=terms_field)
-        if log_query is not None:
-            try:
-                response = self.opensearch.search(body=log_query, index=self.index_name)
-            except RequestError as re:
-                print("Error logging features", re, log_query)
-            else:
-                # Get the features that have been logged.  They aren't in the same order as our first round, so we need to line them up
-                if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
-                    hits = response['hits']['hits']
-                    # extract the feautres based on the features passed into the Prepper
-                    feature_results = {}  # key is the name of the feature from self.feature_names, value is an array of values
-                    # for feature in self.feature_names: #initialize storage
-                    feature_results["doc_id"] = []  # capture the doc id so we can join later
-                    feature_results["query_id"] = []  # ^^^
-                    feature_results["sku"] = []  # ^^^
-                    for (idx, hit) in enumerate(hits):
-                        features = hit['fields']['_ltrlog'][0]['log_entry']
-                        feature_results["doc_id"].append(int(hit['_id']))
-                        feature_results["sku"].append(int(hit['_source']['sku'][0]))
-                        # super redundant, but it will make it easier to join later
-                        feature_results["query_id"].append(int(query_id))
-                        print("IMPLEMENT ME")
-                        # IMPLEMENT: for each feature in `features` logged by SLTR, add it to a parallel array of feature_results
-                        # such that there is an entry in feature_results for that feature and the value is an array of all the feature values
-                        # e.g.  `feature_results[feat_name] = [.....]
-                        # for feat_idx, feature in enumerate(features):
-                    frame = pd.DataFrame(feature_results)
-                    # Make sure we type things appropriately
-                    return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
-                else:  # Save any queries we couldn't match so that we can debug them later
-                    no_results[key] = query_doc_ids
-        else:
-            # REMOVE_START -- REMOVE FROM HERE DOWN TO THE 'REMOVE_END' MARKER AND REPLACE WITH A PROPER HANDLING OF NO LOG QUERY
-            print("!!!Hey, have you implemented create_feature_log_query?  If so, you really shouldn't be here!!!!. REMOVE THIS BLOCK")
-            feature_results = {}
-            feature_results["doc_id"] = []  # capture the doc id so we can join later
-            feature_results["query_id"] = []  # ^^^
-            feature_results["sku"] = []
-            feature_results["fake_feature_1"] = []
-            feature_results["fake_feature_2"] = []
-            rng = np.random.default_rng(12345)
-            for doc_id in query_doc_ids:
-                feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-                feature_results["query_id"].append(query_id)
-                feature_results["sku"].append(doc_id)  # ^^^
-                feature_results["fake_feature_1"].append(rng.random())
-                feature_results["fake_feature_2"].append(rng.random())
-            print("REMOVE ^^^^ up to the other print statement once you've implemented proper query logging")
-            frame = pd.DataFrame(feature_results)
-            return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
-            # REMOVE_END -- REMOVE FROM HERE UP TO THE 'REMOVE_START' COMMENT ABOVE
-        return None
+        # IMPLEMENT_START --
+        print("IMPLEMENT !!!")
+        # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
+        # Your structure should look like the data frame below
+        feature_results = {}
+        feature_results["doc_id"] = []  # capture the doc id so we can join later
+        feature_results["query_id"] = []  # ^^^
+        feature_results["sku"] = []
+        feature_results["fake_feature_1"] = []
+        feature_results["fake_feature_2"] = []
+        rng = np.random.default_rng(12345)
+        for doc_id in query_doc_ids:
+            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
+            feature_results["query_id"].append(query_id)
+            feature_results["sku"].append(doc_id)  # ^^^
+            feature_results["fake_feature_1"].append(rng.random())
+            feature_results["fake_feature_2"].append(rng.random())
+        print("REMOVE ^^^^ up to the other print statement once you've implemented proper query logging")
+        frame = pd.DataFrame(feature_results)
+        return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
+        # IMPLEMENT_END
 
     # Can try out normalizing data, but for XGb, you really don't have to since it is just finding splits
     def normalize_data(self, ranks_features_df, feature_set, normalize_type_map):
