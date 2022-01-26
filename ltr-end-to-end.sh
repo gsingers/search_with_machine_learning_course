@@ -1,10 +1,10 @@
 usage()
 {
-  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course/src/main/python/search_ml] [-c {ctr, heuristic, binary}] [ -w week2 ] [ -a /path/to/bbuy/products/logstash/conf ] [ -e /path/to/bbuy/queries/logstash/conf ] [ -l /path/to/logstash/home ] [-r num rows to split train/test on, default 1000] [-y]"
+  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course] [-c {ctr, heuristic, binary}] [ -w week2 ] [ -a /path/to/bbuy/products/train.csv ]  [-r num rows to split train/test on, default 1000] [-y] [-o output dir]"
   exit 2
 }
 
-SOURCE_DIR="/workspace/search_with_machine_learning_course/src/main/python/search_ml"
+SOURCE_DIR="/workspace/search_with_machine_learning_course"
 WEEK="week2"
 OUTPUT_DIR="/workspace/ltr_output"
 ALL_CLICKS_FILE="/workspace/datasets/bbuy/train.csv"
