@@ -59,6 +59,7 @@ def evaluate_test_set(test_data, all_clicks_df, opensearch, xgb_model_name, ltr_
     # Caveat emmptor: precision is hard to define here, we're inferring a prior click as meaning the result is relevant.
     # This is self-serving, but really this whole thing is just trying to learn clicks
     print("Baseline p@%s is %.3f" % (precision, __calculate_precision(baseline_results, precision)))
+    print("Hand tuned p@%s is %.3f" % (precision, __calculate_precision(hand_tuned_results, precision)))
     print("LTR p@%s is %.3f" % (precision,__calculate_precision(ltr_results, precision)))
     return (results, no_results)
 
