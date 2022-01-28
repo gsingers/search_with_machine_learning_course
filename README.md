@@ -65,16 +65,14 @@ The following things must be done each time you create a new Gitpod Workspace (u
 
 At the command line, do the following steps to run the example.  For purposes of demonstration, let's assume we are working on week 2.  Substitute accordingly for the week you are working on.
 
-1. Setup your Python Virtual Environment.  We use `pyenv` (Pyenv website)[https://github.com/pyenv/pyenv] and `pyenv-virtualenv` (Pyenv Virtualenv)[https://github.com/pyenv/pyenv-virtualenv], but you can use whatever you are most comfortable with.
-    1. `pyenv install 3.9.7` -- Install Python 3.9.7 into PyEnv if it isn't installed already. (if you are running in Gitpod, this should already be installed.)
-    1. `pyenv virtualenv 3.9.7 search_with_ml_week2` -- Create a Virtualenv using that 3.9.7 install
-    1. `pyenv activate search_with_ml_week2` -- Activate that Virtualenv. 
-1. Install the Python dependencies: `pip install -r requirements_week2.txt`
+1. Activate your Python Virtual Environment.  We use `pyenv` (Pyenv website)[https://github.com/pyenv/pyenv] and `pyenv-virtualenv` (Pyenv Virtualenv)[https://github.com/pyenv/pyenv-virtualenv], but you can use whatever you are most comfortable with.
+    1. `pyenv activate search_with_ml_week2` -- Activate that Virtualenv. Substitute in whatever week you are working on. 
 1. Run Flask: 
     1. `export FLASK_ENV=development`
     1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week2` 
     1. `flask run --port 3000` (The default port of 5000 is already in use) 
     1. Open the Flask APP at `https://3000-<$GITPOD_URL>/`
+1. Or run `ipython`
     
 # Working locally (Not supported, but may work for you. YMMV)
 
