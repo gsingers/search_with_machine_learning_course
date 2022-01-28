@@ -66,7 +66,7 @@ The following things must be done each time you create a new Gitpod Workspace (u
 At the command line, do the following steps to run the example.  For purposes of demonstration, let's assume we are working on week 2.  Substitute accordingly for the week you are working on.
 
 1. Activate your Python Virtual Environment.  We use `pyenv` (Pyenv website)[https://github.com/pyenv/pyenv] and `pyenv-virtualenv` (Pyenv Virtualenv)[https://github.com/pyenv/pyenv-virtualenv], but you can use whatever you are most comfortable with.
-    1. `pyenv activate search_with_ml_week2` -- Activate that Virtualenv. Substitute in whatever week you are working on. 
+    1. `pyenv activate search_with_ml_week2` -- Activate that Virtualenv. Substitute in whatever week you are working on, e.g. `search_with_ml_week1`. 
 1. Run Flask: 
     1. `export FLASK_ENV=development`
     1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week2` 

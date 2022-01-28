@@ -29,7 +29,7 @@ shift $((OPTIND -1))
 
 echo "Creating index settings and mappings"
 echo " Product file: $PRODUCTS_JSON_FILE"
-echo "\ Query file: $QUERIES_JSON_FILE"
+echo " Query file: $QUERIES_JSON_FILE"
 curl -k -X PUT -u admin  "https://localhost:9200/bbuy_products" -H 'Content-Type: application/json' -d "@$PRODUCTS_JSON_FILE"
 echo ""
 curl -k -X PUT -u admin  "https://localhost:9200/bbuy_queries" -H 'Content-Type: application/json' -d "@$QUERIES_JSON_FILE"

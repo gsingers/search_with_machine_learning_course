@@ -83,8 +83,11 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
     }
     if user_query == "*":
         #replace the bool
-        query_obj["query"]["function_score"]["query"].pop("bool")
-        query_obj["query"]["function_score"]["query"] = {"match_all": {}}
+        try:
+            query_obj["query"]["function_score"]["query"].pop("bool")
+            query_obj["query"]["function_score"]["query"] = {"match_all": {}}
+        except:
+            pass
     if highlight:
         query_obj["highlight"] = {
             "fields": {
