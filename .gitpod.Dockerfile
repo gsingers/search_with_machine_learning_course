@@ -17,6 +17,12 @@ RUN pip install numexpr
 RUN pip install bottleneck
 
 RUN pyenv virtualenv 3.9.7 search_with_ml_opensearch
+RUN pyenv virtualenv 3.9.7 search_with_ml_week1
+RUN pyenv virtualenv 3.9.7 search_with_ml_week2
+RUN pyenv virtualenv 3.9.7 search_with_ml_week3
+RUN pyenv virtualenv 3.9.7 search_with_ml_week4
+
+
 
 RUN curl -o logstash-oss-with-opensearch-output-plugin-7.13.2-linux-x64.tar.gz https://artifacts.opensearch.org/logstash/logstash-oss-with-opensearch-output-plugin-7.13.2-linux-x64.tar.gz
 RUN tar -xf logstash-oss-with-opensearch-output-plugin-7.13.2-linux-x64.tar.gz
