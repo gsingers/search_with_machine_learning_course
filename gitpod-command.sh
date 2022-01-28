@@ -1,5 +1,6 @@
 ln -s /workspace/kaggle /home/gitpod/.kaggle
-
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
 mkdir -p /workspace/opensearch
 mkdir -p /workspace/logstash
 mkdir -p /workspace/datasets
