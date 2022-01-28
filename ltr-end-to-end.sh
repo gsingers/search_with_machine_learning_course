@@ -1,6 +1,6 @@
 usage()
 {
-  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course] [-c {ctr, heuristic, binary}] [ -w week2 ] [ -a /path/to/bbuy/products/train.csv ]  [-r num rows to split train/test on, default 1000] [-y] [-o output dir]"
+  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course] [-c {ctr, heuristic, binary}] [ -w week2 ] [ -d ] [ -a /path/to/bbuy/products/train.csv ]  [-r num rows to split train/test on, default 1000] [-y] [-o output dir]"
   exit 2
 }
 
@@ -11,11 +11,13 @@ ALL_CLICKS_FILE="/workspace/datasets/train.csv"
 NUM_ROWS=1000
 CLICK_MODEL="heuristic"
 SYNTHESIZE=""
+DOWNSAMPLE=""
 while getopts ':s:c:w:o:a:r:yh' c
 do
   case $c in
     a) ALL_CLICKS_FILE=$OPTARG ;;
     c) CLICK_MODEL=$OPTARG ;;
+    d) DOWNSAMPLE="--downsample" ;;
     o) OUTPUT_DIR=$OPTARG ;;
     r) NUM_ROWS=$OPTARG ;;
     s) SOURCE_DIR=$OPTARG ;;
@@ -45,7 +47,7 @@ python $WEEK/utilities/build_ltr.py -f $WEEK/conf/ltr_featureset.json --upload_f
 if [ $? -ne 0 ] ; then
   exit 2
 fi
-# Create our impressios impressions (positive/negative) data set, e.g. all sessions (with LTR features added in already)
+# Create our impressions (positive/negative) data set, e.g. all sessions (with LTR features added in already)
 echo "Creating impressions data set"
 #python $WEEK/utilities/build_ltr.py --generate_impressions "$OUTPUT_DIR" -g --impressions_file "$OUTPUT_DIR/impressions.csv" --query_ids "$OUTPUT_DIR/query_id_map.json" --all_clicks "$ALL_CLICKS_FILE"
 python $WEEK/utilities/build_ltr.py --generate_impressions  --output_dir "$OUTPUT_DIR" --all_clicks "$ALL_CLICKS_FILE" $SYNTHESIZE
@@ -59,12 +61,10 @@ if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Create the actual training set from the impressions set
-python $WEEK/utilities/build_ltr.py --ltr_terms_field sku --output_dir "$OUTPUT_DIR" --create_xgb_training -f $WEEK/conf/ltr_featureset.json --click_model $CLICK_MODEL
+python $WEEK/utilities/build_ltr.py --ltr_terms_field sku --output_dir "$OUTPUT_DIR" --create_xgb_training -f $WEEK/conf/ltr_featureset.json --click_model $CLICK_MODEL $DOWNSAMPLE
 if [ $? -ne 0 ] ; then
   exit 2
 fi
-#exit
-#python $WEEK/utilities/build_ltr.py --ltr_terms_field _id --create_training --train_file "$OUTPUT_DIR/train.csv" --query_ids "$OUTPUT_DIR/query_id_map.json" -f $WEEK/conf/ltr_featureset.json --xgb_feat_map "$OUTPUT_DIR/xgb_feat_map.txt" --xgb_train_output "$OUTPUT_DIR/training.xgb"
 # Given a training set in SVMRank format, train an XGB model
 python $WEEK/utilities/build_ltr.py  --output_dir "$OUTPUT_DIR" -x "$OUTPUT_DIR/training.xgb" --xgb_conf $WEEK/conf/xgb-conf.json
 if [ $? -ne 0 ] ; then

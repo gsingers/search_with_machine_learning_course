@@ -15,12 +15,17 @@ RUN pip install graphviz
 RUN pip install pandas
 RUN pip install numexpr
 RUN pip install bottleneck
+RUN pip install flask
 
 RUN pyenv virtualenv 3.9.7 search_with_ml_opensearch
 RUN pyenv virtualenv 3.9.7 search_with_ml_week1
+#RUN bash -c "export PATH="/home/gitpod/.pyenv/bin:$PATH" && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init -)" && pyenv activate search_with_ml_week1 && pip install -r requirements_week1.txt"
 RUN pyenv virtualenv 3.9.7 search_with_ml_week2
+#RUN bash -c "export PATH="/home/gitpod/.pyenv/bin:$PATH" && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init -)" && pyenv activate search_with_ml_week2 && pip install -r requirements_week2.txt"
 RUN pyenv virtualenv 3.9.7 search_with_ml_week3
+#RUN bash -c "export PATH="/home/gitpod/.pyenv/bin:$PATH" && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init -)" && pyenv activate search_with_ml_week3 && pip install -r requirements_week3.txt"
 RUN pyenv virtualenv 3.9.7 search_with_ml_week4
+#RUN bash -c "export PATH="/home/gitpod/.pyenv/bin:$PATH" && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init -)" && pyenv activate search_with_ml_week4 && pip install -r requirements_week4.txt"
 
 
 
