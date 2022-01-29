@@ -12,7 +12,7 @@ NUM_ROWS=1000
 CLICK_MODEL="heuristic"
 SYNTHESIZE=""
 DOWNSAMPLE=""
-while getopts ':s:c:w:o:a:r:yh' c
+while getopts ':s:c:w:o:a:r:ydh' c
 do
   case $c in
     a) ALL_CLICKS_FILE=$OPTARG ;;

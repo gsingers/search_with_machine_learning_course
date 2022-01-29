@@ -23,8 +23,9 @@ def apply_click_model(data_frame, click_model_type="binary", downsample=True):
         if downsample:
             data_frame = down_sample_buckets(data_frame)
     elif click_model_type == "ctr":
-        print("IMPLEMENT ME")
-        data_frame["grade"] = rng.random()
+        data_frame["grade"] = (data_frame["clicks"]/data_frame["num_impressions"]).fillna(0)
+        if downsample:
+            data_frame = down_sample_continuous(data_frame)
     elif click_model_type == "heuristic":
         print("IMPLEMENT ME")
         data_frame["grade"] = (data_frame["clicks"]/data_frame["num_impressions"]).fillna(0).apply(lambda x: step(x))

@@ -271,7 +271,7 @@ if __name__ == "__main__":
                 train_features_df = pd.merge(train_df, features_df, how="left", on=["query_id", "sku"])
                 train_features_df["doc_id"] = train_features_df["sku"]
 
-                cm.apply_click_model(train_features_df, args.click_model, downsample=args.downsample)
+                train_features_df = cm.apply_click_model(train_features_df, args.click_model, downsample=args.downsample)
                 # Now write out in XGB/SVM Rank format
                 print("NAN counts: %s" % train_features_df.isna().any().count())
                 train_features_df = train_features_df.fillna(0)
