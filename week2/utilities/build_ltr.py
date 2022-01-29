@@ -182,6 +182,8 @@ if __name__ == "__main__":
         try:
             print("Loading all clicks from %s" % args.all_clicks)
             all_clicks_df = pd.read_csv(args.all_clicks)
+            # remove sale/promotional queries like: `LaborDay_HomeAppliances_20110902`
+            all_clicks_df = all_clicks_df[all_clicks_df["query"].str.match("\w+_\w+_[\w+|\d+]") == False]
         except:
             print("Error loading all clicks data")
             exit(2)
