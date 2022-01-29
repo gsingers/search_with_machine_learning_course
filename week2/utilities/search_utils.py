@@ -24,7 +24,7 @@ def evaluate_test_set(test_data, all_clicks_df, opensearch, xgb_model_name, ltr_
     print("Running test queries")
     for key in query_gb.groups.keys():
         all_clicks_for_query = query_all_gb.get_group(key) # this is the set of docs in our sample that have clicks
-        all_skus_for_query = all_clicks_for_query.sku
+        all_skus_for_query = all_clicks_for_query.sku.drop_duplicates()
         #print(key)
         # Score the baseline
         #print("\tRunning baseline:")

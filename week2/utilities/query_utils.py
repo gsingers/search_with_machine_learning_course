@@ -54,7 +54,6 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
                             "query": user_query,
                             "type": "phrase",
                             "slop": "6",
-                            "boost": 10.0,
                             "minimum_should_match": "2<75%",
                             "fields": ["name^10", "name.hyphens", "shortDescription",
                                        "longDescription", "department", "sku", "manufacturer", "features", "categoryPath"]
@@ -84,8 +83,8 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
     if user_query == "*":
         #replace the bool
         try:
-            query_obj["query"]["function_score"]["query"].pop("bool")
-            query_obj["query"]["function_score"]["query"] = {"match_all": {}}
+            query_obj["query"].pop("bool")
+            query_obj["query"] = {"match_all": {}}
         except:
             pass
     if highlight:
@@ -100,38 +99,7 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
         query_obj["_source"] = source
 
     if include_aggs:
-        query_obj["aggs"] = {
-            "department": {
-                "terms": {
-                    "field": "department.keyword",
-                    "min_doc_count": 1
-                }
-            },
-            "missing_images": {
-                "missing": {
-                    "field": "image"
-                }
-            },
-            "regularPrice": {
-                "range": {
-                    "field": "regularPrice",
-                    "ranges": [
-                        {"key": "$", "to": 100},
-                        {"key": "$$", "from": 100, "to": 200},
-                        {"key": "$$$", "from": 200, "to": 300},
-                        {"key": "$$$$", "from": 300, "to": 400},
-                        {"key": "$$$$$", "from": 400, "to": 500},
-                        {"key": "$$$$$$", "from": 500},
-                    ]
-                },
-                "aggs": {
-                    "price_stats": {
-                        "stats": {"field": "regularPrice"}
-                    }
-                }
-            }
-
-        }
+        add_aggs(query_obj)
     return query_obj
 
 # Hardcoded query here.  Better to use search templates or other query config.
@@ -172,7 +140,6 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
                                     "query": user_query,
                                     "type": "phrase",
                                     "slop": "6",
-                                    "boost": 10.0,
                                     "minimum_should_match": "2<75%",
                                     "fields": ["name^10", "name.hyphens", "shortDescription",
                                                "longDescription", "department", "sku", "manufacturer", "features", "categoryPath"]
@@ -265,36 +232,40 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
         query_obj["_source"] = source
 
     if include_aggs:
-        query_obj["aggs"] = {
-            "department": {
-                "terms": {
-                    "field": "department.keyword",
-                    "min_doc_count": 1
-                }
+        add_aggs(query_obj)
+    return query_obj
+
+
+def add_aggs(query_obj):
+    query_obj["aggs"] = {
+        "department": {
+            "terms": {
+                "field": "department.keyword",
+                "min_doc_count": 1
+            }
+        },
+        "missing_images": {
+            "missing": {
+                "field": "image"
+            }
+        },
+        "regularPrice": {
+            "range": {
+                "field": "regularPrice",
+                "ranges": [
+                    {"key": "$", "to": 100},
+                    {"key": "$$", "from": 100, "to": 200},
+                    {"key": "$$$", "from": 200, "to": 300},
+                    {"key": "$$$$", "from": 300, "to": 400},
+                    {"key": "$$$$$", "from": 400, "to": 500},
+                    {"key": "$$$$$$", "from": 500},
+                ]
             },
-            "missing_images": {
-                "missing": {
-                    "field": "image"
-                }
-            },
-            "regularPrice": {
-                "range": {
-                    "field": "regularPrice",
-                    "ranges": [
-                        {"key": "$", "to": 100},
-                        {"key": "$$", "from": 100, "to": 200},
-                        {"key": "$$$", "from": 200, "to": 300},
-                        {"key": "$$$$", "from": 300, "to": 400},
-                        {"key": "$$$$$", "from": 400, "to": 500},
-                        {"key": "$$$$$$", "from": 500},
-                    ]
-                },
-                "aggs": {
-                    "price_stats": {
-                        "stats": {"field": "regularPrice"}
-                    }
+            "aggs": {
+                "price_stats": {
+                    "stats": {"field": "regularPrice"}
                 }
             }
-
         }
-    return query_obj
+
+    }
