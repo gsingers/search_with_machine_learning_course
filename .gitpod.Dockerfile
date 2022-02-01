@@ -12,6 +12,7 @@ RUN pip install urljoin
 RUN pip install matplotlib
 RUN pip install graphviz
 RUN pip install bottleneck
+RUN pip install pandas
 
 RUN pyenv virtualenv 3.9.7 search_with_ml_opensearch
 RUN pyenv virtualenv 3.9.7 search_with_ml_week1
