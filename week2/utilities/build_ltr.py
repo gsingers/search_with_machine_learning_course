@@ -121,6 +121,8 @@ if __name__ == "__main__":
     util_group.add_argument("--lookup_explain", action="store_true",
                             help="With --lookup_query, run explains for each query/sku pair")
     util_group.add_argument("--lookup_product", help="Given a SKU, return the product")
+    util_group.add_argument("--verify_products", action="store_true", help="Looks through all SKUs in --all_clicks and reports the ones that aren't in the index. Argument is where to output the items to under --output")
+    util_group.add_argument("--verify_file", default="validity.csv", help="The filename to store --verify_products output to under the --output_dir.  If set with --all_clicks and the file exists, then this file will be used to filter bad SKUs from all_clicks")
 
     args = parser.parse_args()
     output_file = "output.txt"
@@ -183,9 +185,20 @@ if __name__ == "__main__":
             print("Loading all clicks from %s" % args.all_clicks)
             all_clicks_df = pd.read_csv(args.all_clicks)
             # remove sale/promotional queries like: `LaborDay_HomeAppliances_20110902`
-            all_clicks_df = all_clicks_df[all_clicks_df["query"].str.match("\w+_\w+_[\w+|\d+]") == False]
-        except:
+            print("All click pre filtering: %s" % len(all_clicks_df))
+            all_clicks_df = all_clicks_df[all_clicks_df["query"].str.match("\w+_(\w+_)?[\w+|\d+]") == False]
+            print("All click post filtering promos: %s" % len(all_clicks_df))
+            verify_file_path = "%s/%s" % (output_dir, args.verify_file)
+            print("Verify info: flag: %s, path: %s, exists: %s" % (args.verify_file, verify_file_path, os.path.exists(verify_file_path)))
+            if args.verify_file and os.path.exists(verify_file_path):
+                verify_file = pd.read_csv(verify_file_path)
+                good = verify_file[verify_file["status"] == 1]
+                all_clicks_df = pd.merge(all_clicks_df, good, on="sku", how="right")
+            print("All click post filtering: %s" % len(all_clicks_df))
+
+        except Exception as e:
             print("Error loading all clicks data")
+            print(e)
             exit(2)
 
     # uplaod the LTR featureset
@@ -321,3 +334,21 @@ if __name__ == "__main__":
         doc = su.lookup_product(sku, opensearch, index_name)
         print("Retrieved doc:\n %s" % json.dumps(doc, indent=4))
         # opensearch.get(index_name, sku)
+
+    if args.verify_products:
+        skus = all_clicks_df['sku'].drop_duplicates()
+        print("Verifying %s skus.  This may take a while" % len(skus))
+        sku_tracker = []
+        valid_tracker = []
+        status = {"sku": sku_tracker, "status": valid_tracker}
+        for item in skus.iteritems():
+            doc = su.lookup_product(item[1], opensearch, index_name)
+            sku_tracker.append(item[1])
+            if doc is None:
+                valid_tracker.append(0)
+            else:
+                valid_tracker.append(1)
+        df = pd.DataFrame(status)
+        output_file = "%s/%s" % (output_dir, args.verify_file)
+        print("Writing results to %s" % output_file)
+        df.to_csv(output_file, index=False)

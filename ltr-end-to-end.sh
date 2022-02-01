@@ -81,4 +81,4 @@ if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Run our test queries through
-python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --all_clicks "$ALL_CLICKS_FILE"
+python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --all_clicks "$ALL_CLICKS_FILE" --output_dir "$OUTPUT_DIR"

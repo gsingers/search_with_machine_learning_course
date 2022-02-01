@@ -11,9 +11,9 @@ def create_stats_query(aggs, extended=True):
     return agg_obj
 
 
-def create_rescore_ltr_query(user_query, ltr_model_name, ltr_store_name, active_features=None, filters=None, size=200, rescore_size=100, include_aggs=True, highlight=True, source=None):
-    # Create the base query
-    query_obj = create_query(user_query, filters, size=size, include_aggs=include_aggs, highlight=highlight, source=source)
+def create_rescore_ltr_query(user_query, ltr_model_name, ltr_store_name, active_features=None, filters=None, size=500, rescore_size=500, include_aggs=True, highlight=True, source=None):
+    # Create the base query, use a much bigger window
+    query_obj = create_simple_baseline(user_query, filters, size=size, include_aggs=include_aggs, highlight=highlight, source=source)
     #add on the rescore
     query_obj["rescore"] = {
         "window_size": rescore_size,
@@ -28,7 +28,7 @@ def create_rescore_ltr_query(user_query, ltr_model_name, ltr_store_name, active_
                     "store": ltr_store_name,
                 }
             },
-            "rescore_query_weight": "2"  # Magic number, but let's say LTR matches are 2x baseline matches
+            "rescore_query_weight": "10"  # Magic number, but let's say LTR matches are 10x baseline matches
         }
     }
     if active_features is not None and len(active_features) > 0:
@@ -49,6 +49,24 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
 
                 ],
                 "should":[ #
+                    {
+                      "match": {
+                            "name": {
+                                "query": user_query,
+                                "fuzziness": "1",
+                                "boost": 0.01
+                            }
+                       }
+                    },
+                    {
+                      "match_phrase": { # near exact phrase match
+                            "name.hyphens": {
+                                "query": user_query,
+                                "slop": 1,
+                                "boost": 50
+                            }
+                       }
+                    },
                     {
                       "multi_match": {
                             "query": user_query,

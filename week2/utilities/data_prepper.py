@@ -87,7 +87,7 @@ class DataPrepper:
         total_query_count = all_clicks_df.count()
         for key in query_gb.groups.keys():
             query_id, query_counter = self.__get_query_id(key, query_ids_map, query_counter)
-            print("Q[%s]: %s" % (query_id, key))
+            #print("Q[%s]: %s" % (query_id, key))
             query_times_seen = all_clicks_df[all_clicks_df["query"] == key]["query"].count()
             query_obj = qu.create_query(key, filters=None, size=retrieval_size, include_aggs=False, highlight=False,
                                         source=["name", "sku"])  # TODO: handle categories
@@ -124,7 +124,7 @@ class DataPrepper:
                             product_names.append("SKU: %s -- No Name" % sku)
                         # print("Name: {}\n\nDesc: {}\n".format(hit['_source']['name'], hit['_source']['shortDescription']))
 
-                    print("\tQ[%s]: %s clicked" % (query_id, total_clicked_docs_per_query))
+                    #print("\tQ[%s]: %s clicked" % (query_id, total_clicked_docs_per_query))
                 else:
                     if response and (response['hits']['hits'] == None or len(response['hits']['hits']) == 0):
                         print("No results for query: %s" % key)
