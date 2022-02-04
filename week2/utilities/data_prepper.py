@@ -202,7 +202,7 @@ class DataPrepper:
             group = query_gb.get_group(key)
             doc_ids = group.doc_id.values
 
-            if isinstance(doc_ids, numpy.ndarray):
+            if isinstance(doc_ids, np.ndarray):
                 doc_ids = doc_ids.tolist()
             click_prior_query = qu.create_prior_queries_from_group(group)
             ltr_feats_df = self.__log_ltr_query_features(group[:1]["query_id"], key, doc_ids, click_prior_query, no_results,
