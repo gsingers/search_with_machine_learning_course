@@ -250,7 +250,6 @@ class DataPrepper:
             feature_results["sku"].append(doc_id)  # ^^^
             feature_results["fake_feature_1"].append(rng.random())
             feature_results["fake_feature_2"].append(rng.random())
-        print("REMOVE ^^^^ up to the other print statement once you've implemented proper query logging")
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
