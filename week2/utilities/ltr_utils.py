@@ -49,7 +49,7 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
     query_obj["query"]["function_score"]["query"]["bool"]["should"].append(sltr)
     return query_obj, len(query_obj["query"]["function_score"]["query"]["bool"]["should"])
 
-def create_feature_log_query(query, doc_ids, featureset_name, ltr_store_name, size=200, terms_field="_id"):
+def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     print("IMPLEMENT ME: create_feature_log_query")
     return None
 
