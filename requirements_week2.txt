@@ -8,7 +8,6 @@ pandas
 numpy
 numba
 numexpr
-bottleneck
 sklearn
 graphviz
 matplotlib
