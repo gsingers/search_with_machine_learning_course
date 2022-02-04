@@ -14,7 +14,7 @@ RUN pip install matplotlib
 RUN pip install graphviz
 RUN pip install pandas
 RUN pip install numexpr
-RUN pip install bottleneck
+#RUN pip install bottleneck
 RUN pip install flask
 
 RUN pyenv virtualenv 3.9.7 search_with_ml_opensearch
