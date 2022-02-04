@@ -234,7 +234,7 @@ class DataPrepper:
                                                 self.ltr_store_name,
                                                 size=len(query_doc_ids), terms_field=terms_field)
         # IMPLEMENT_START --
-        print("IMPLEMENT !!!")
+        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
         feature_results = {}
@@ -303,5 +303,5 @@ class DataPrepper:
 
     # Determine the number of clicks for this sku given a query (represented by the click group)
     def __num_clicks(self, all_skus_for_query, test_sku):
-        print("IMPLEMENT NUM_CLICKS")
+        print("IMPLEMENT ME: __num_clicks(): Return how many clicks the given sku received in the set of skus passed ")
         return 0
