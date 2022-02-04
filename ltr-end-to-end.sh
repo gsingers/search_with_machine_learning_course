@@ -1,6 +1,6 @@
 usage()
 {
-  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course] [-c {ctr, heuristic, binary}] [ -w week2 ] [ -d ] [ -a /path/to/bbuy/products/train.csv ]  [-r num rows to split train/test on, default 1000] [-y] [-o output dir]"
+  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course] [-c {ctr, heuristic, binary}] [ -w week2 ] [ -d ] [ -a /path/to/bbuy/products/train.csv ]  [-t num rows for the test split, default 100000] [-e num test queries to run. Default 200] [-r num rows for the training split, default 1000000] [-y] [-o output dir]"
   exit 2
 }
 
@@ -8,18 +8,22 @@ SOURCE_DIR="/workspace/search_with_machine_learning_course"
 WEEK="week2"
 OUTPUT_DIR="/workspace/ltr_output"
 ALL_CLICKS_FILE="/workspace/datasets/train.csv"
-NUM_ROWS=1000
+SPLIT_TRAIN_ROWS=1000000
+SPLIT_TEST_ROWS=1000000
+NUM_TEST_QUERIES=200 # the number of test queries to run
 CLICK_MODEL="heuristic"
 SYNTHESIZE=""
 DOWNSAMPLE=""
-while getopts ':s:c:w:o:a:r:ydh' c
+while getopts ':s:c:e:w:o:a:r:t:ydh' c
 do
   case $c in
     a) ALL_CLICKS_FILE=$OPTARG ;;
     c) CLICK_MODEL=$OPTARG ;;
     d) DOWNSAMPLE="--downsample" ;;
+    e) NUM_TEST_QUERIES=$OPTARG ;;
     o) OUTPUT_DIR=$OPTARG ;;
-    r) NUM_ROWS=$OPTARG ;;
+    r) SPLIT_TRAIN_ROWS=$OPTARG ;;
+    t) SPLIT_TEST_ROWS=$OPTARG ;;
     s) SOURCE_DIR=$OPTARG ;;
     w) WEEK=$OPTARG ;;
     y) SYNTHESIZE="--synthesize" ;;
@@ -47,16 +51,16 @@ python $WEEK/utilities/build_ltr.py -f $WEEK/conf/ltr_featureset.json --upload_f
 if [ $? -ne 0 ] ; then
   exit 2
 fi
-# Create our impressions (positive/negative) data set, e.g. all sessions (with LTR features added in already)
-echo "Creating impressions data set"
-#python $WEEK/utilities/build_ltr.py --generate_impressions "$OUTPUT_DIR" -g --impressions_file "$OUTPUT_DIR/impressions.csv" --query_ids "$OUTPUT_DIR/query_id_map.json" --all_clicks "$ALL_CLICKS_FILE"
-python $WEEK/utilities/build_ltr.py --generate_impressions  --output_dir "$OUTPUT_DIR" --all_clicks "$ALL_CLICKS_FILE" $SYNTHESIZE
+echo "Creating training and test data sets from impressions by splitting on dates"
+# Split the impressions into training and test
+python $WEEK/utilities/build_ltr.py --output_dir "$OUTPUT_DIR" --split_input "$ALL_CLICKS_FILE"  --split_train_rows $SPLIT_TRAIN_ROWS --split_test_rows $SPLIT_TEST_ROWS
 if [ $? -ne 0 ] ; then
   exit 2
 fi
-echo "Creating training and test data sets from impressions"
-# Split the impressions into training and test
-python $WEEK/utilities/build_ltr.py --output_dir "$OUTPUT_DIR" --split_input "$OUTPUT_DIR/impressions.csv"  --split_rows $NUM_ROWS
+
+# Create our impressions (positive/negative) data set, e.g. all sessions (with LTR features added in already)
+echo "Creating impressions data set" # outputs to $OUTPUT_DIR/impressions.csv by default
+python $WEEK/utilities/build_ltr.py --generate_impressions  --output_dir "$OUTPUT_DIR" --train_file "$OUTPUT_DIR/train.csv" $SYNTHESIZE
 if [ $? -ne 0 ] ; then
   exit 2
 fi
@@ -81,4 +85,9 @@ if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Run our test queries through
-python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --all_clicks "$ALL_CLICKS_FILE" --output_dir "$OUTPUT_DIR"
+python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --train_file "$OUTPUT_DIR/train.csv" --output_dir "$OUTPUT_DIR" --xgb_test_num_queries $NUM_TEST_QUERIES
+if [ $? -ne 0 ] ; then
+  exit 2
+fi
+# Analyze the results
+python $WEEK/utilities/build_ltr.py --analyze --output_dir "$OUTPUT_DIR" 

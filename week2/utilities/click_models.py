@@ -27,8 +27,8 @@ def apply_click_model(data_frame, click_model_type="binary", downsample=True):
         if downsample:
             data_frame = down_sample_continuous(data_frame)
     elif click_model_type == "heuristic":
-        print("IMPLEMENT ME")
         data_frame["grade"] = (data_frame["clicks"]/data_frame["num_impressions"]).fillna(0).apply(lambda x: step(x))
+        print("IMPLEMENT ME: downsampling")
     return data_frame
 
 # https://stackoverflow.com/questions/55119651/downsampling-for-more-than-2-classes
@@ -44,5 +44,10 @@ def down_sample_continuous(data_frame):
     x = np.sort(data_frame['grade'])
     f_x = np.gradient(x)*np.exp(-x**2/2)
     sample_probs = f_x/np.sum(f_x)
-    return data_frame.sort_values('grade').sample(frac=0.8,weights=sample_probs,replace=False)
+    try: # if we have too many zeros, we can get value errors, so first try w/o replacement, then with
+        sample = data_frame.sort_values('grade').sample(frac=0.8, weights=sample_probs, replace=False)
+    except Exception as e:
+        print("Unable to downsample, keeping original:\n%s" % e)
+        sample = data_frame #data_frame.sort_values('grade').sample(frac=0.8, weights=sample_probs, replace=True)
+    return sample
 

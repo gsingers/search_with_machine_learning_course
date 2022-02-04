@@ -2,10 +2,55 @@ import json
 
 import requests
 
-#  Modified from https://github.com/o19s/elasticsearch-ltr-demo/blob/master/train/judgments.py
+
+def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name,
+                             active_features=None, rescore_size=500, main_query_weight=1, rescore_query_weight=2):
+    # Create the base query, use a much bigger window
+    #add on the rescore
+    print("IMPLEMENT ME: create_rescore_ltr_query")
+    return query_obj
+
+# take an existing query and add in an SLTR so we can use it for explains to see how much SLTR contributes
+def create_sltr_simple_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name, active_features=None):
+    # Create the base query, use a much bigger window
+    #add on the rescore
+    sltr = {
+        "sltr": {
+            "params": {
+                "keywords": user_query,
+                "click_prior_query": click_prior_query
+            },
+            "model": ltr_model_name,
+            # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
+            "store": ltr_store_name,
+        }
+    }
+    if active_features is not None and len(active_features) > 0:
+        sltr["active_features"] =  active_features
+    query_obj["query"]["bool"]["should"].append(sltr)
+    return query_obj, len(query_obj["query"]["bool"]["should"])
+
+def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name, active_features=None):
+    # Create the base query, use a much bigger window
+    #add on the rescore
+    sltr = {
+        "sltr": {
+            "params": {
+                "keywords": user_query,
+                "click_prior_query": click_prior_query
+            },
+            "model": ltr_model_name,
+            # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
+            "store": ltr_store_name,
+        }
+    }
+    if active_features is not None and len(active_features) > 0:
+        sltr["active_features"] =  active_features
+    query_obj["query"]["function_score"]["query"]["bool"]["should"].append(sltr)
+    return query_obj, len(query_obj["query"]["function_score"]["query"]["bool"]["should"])
 
 def create_feature_log_query(query, doc_ids, featureset_name, ltr_store_name, size=200, terms_field="_id"):
-    print("IMPLEMENT create_feature_log_query")
+    print("IMPLEMENT ME: create_feature_log_query")
     return None
 
 
@@ -44,11 +89,8 @@ def write_training_file(train_data, output_file, feat_map):
             # if there is a norm version, take that
             #
             features = get_features(item, exclusions, col_names)
-
-            #print(features)
             xgb_format = to_xgb_format(item.query_id, item.doc_id, item.rank, item.query,
                                            item.product_name, item.grade, features)
-            #print(xgb_format)
             output.write(bytes(xgb_format + "\n", 'utf-8'))
     # We need to write out the feature map, probably more needed here
     if feat_map:
@@ -61,7 +103,7 @@ def write_training_file(train_data, output_file, feat_map):
                 #https://docs.rs/xgboost/0.1.4/xgboost/struct.FeatureMap.html are the only docs I can find on the format
                 if feat != "onSale":
                     feat_map_file.write('{}\t{}\tq\n'.format(idx+1,feat))#idx+2 b/c we are one-based for this
-                else: #Kludgy way of handling onSale being boolean
+                else: #Kludgy way of handling onSale being at some point.  For now, write it out as 'q'
                     # Bug in LTR prevents 'indicator'/boolean features, so model as q for now by
                     # encoding onSale as a percentage discount
                     feat_map_file.write('{}\t{}\tq\n'.format(idx+1,feat)) #make the q an i

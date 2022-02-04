@@ -1,4 +1,4 @@
-FROM gitpod/workspace-full
+FROM gitpod/workspace-full:legacy-dazzle-v1
 
 RUN sudo apt-get install -y graphviz
 RUN pyenv install 3.9.7

@@ -1,3 +1,4 @@
+import math
 # some helpful tools for dealing with queries
 def create_stats_query(aggs, extended=True):
     print("Creating stats query from %s" % aggs)
@@ -10,33 +11,38 @@ def create_stats_query(aggs, extended=True):
         agg_map[agg] = {stats_type: {"field": agg}}
     return agg_obj
 
+# expects clicks and impressions to be in the row
+def create_prior_queries_from_group(click_group): # total impressions isn't currently used, but it mayb worthwhile at some point
+    click_prior_query = ""
+    # Create a string that looks like:  "query": "1065813^100 OR 8371111^89", where the left side is the doc id and the right side is the weight.  In our case, the number of clicks a document received in the training set
+    if click_group is not None:
+        for item in click_group.itertuples():
+            try:
+                click_prior_query += "%s^%.3f  " % (item.doc_id, item.clicks/item.num_impressions)
 
-def create_rescore_ltr_query(user_query, ltr_model_name, ltr_store_name, active_features=None, filters=None, size=500, rescore_size=500, include_aggs=True, highlight=True, source=None):
-    # Create the base query, use a much bigger window
-    query_obj = create_simple_baseline(user_query, filters, size=size, include_aggs=include_aggs, highlight=highlight, source=source)
-    #add on the rescore
-    query_obj["rescore"] = {
-        "window_size": rescore_size,
-        "query": {
-            "rescore_query": {
-                "sltr": {
-                    "params": {
-                        "keywords": user_query
-                    },
-                    "model": ltr_model_name,
-                    # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
-                    "store": ltr_store_name,
-                }
-            },
-            "rescore_query_weight": "10"  # Magic number, but let's say LTR matches are 10x baseline matches
-        }
-    }
-    if active_features is not None and len(active_features) > 0:
-        query_obj["rescore"]["query"]["rescore_query"]["sltr"]["active_features"] =  active_features
-    return query_obj
+            except KeyError as ke:
+                pass # nothing to do in this case, it just means we can't find priors for this doc
+    return click_prior_query
 
-# a bit of hack to accentuate the baseline that LTR is learning the features
-def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", size=10, include_aggs=True, highlight=True, source=None):
+
+# expects clicks from the raw click logs, so value_counts() are being passed in
+def create_prior_queries(doc_ids, doc_id_weights, query_times_seen): # total impressions isn't currently used, but it mayb worthwhile at some point
+    click_prior_query = ""
+    # Create a string that looks like:  "query": "1065813^100 OR 8371111^89", where the left side is the doc id and the right side is the weight.  In our case, the number of clicks a document received in the training set
+    click_prior_map = "" # looks like: '1065813':100, '8371111':809
+    if doc_ids is not None and doc_id_weights is not None:
+        for idx, doc in enumerate(doc_ids):
+            try:
+                wgt = doc_id_weights[doc]  # This should be the number of clicks or whatever
+                click_prior_query += "%s^%.3f  " % (doc, wgt/query_times_seen)
+            except KeyError as ke:
+                pass # nothing to do in this case, it just means we can't find priors for this doc
+    return click_prior_query
+
+
+
+def create_simple_baseline(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, include_aggs=True, highlight=True, source=None):
+
     query_obj = {
         'size': size,
         "sort":[
@@ -54,6 +60,7 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
                             "name": {
                                 "query": user_query,
                                 "fuzziness": "1",
+                                "prefix_length": 2, # short words are often acronyms or usually not misspelled, so don't edit
                                 "boost": 0.01
                             }
                        }
@@ -73,8 +80,8 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
                             "type": "phrase",
                             "slop": "6",
                             "minimum_should_match": "2<75%",
-                            "fields": ["name^10", "name.hyphens", "shortDescription",
-                                       "longDescription", "department", "sku", "manufacturer", "features", "categoryPath"]
+                            "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
+                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath"]
                        }
                     },
                     {
@@ -87,7 +94,7 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
                       "match": {
                             "name.hyphens": {
                                 "query": user_query,
-                                "operator": "AND",
+                                "operator": "OR",
                                 "minimum_should_match": "2<75%"
                             }
                        }
@@ -98,7 +105,15 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
 
         }
     }
-    if user_query == "*":
+    if click_prior_query != "":
+        query_obj["query"]["bool"]["should"].append({
+                        "query_string":{  # This may feel like cheating, but it's really not, esp. in ecommerce where you have all this prior data,  You just can't let the test clicks leak in, which is why we split on date
+                            "query": click_prior_query,
+                            "fields": ["_id"]
+                        }
+                    })
+        #print(query_obj)
+    if user_query == "*" or user_query == "#":
         #replace the bool
         try:
             query_obj["query"].pop("bool")
@@ -121,7 +136,8 @@ def create_simple_baseline(user_query, filters,sort="_score", sortDir="desc", si
     return query_obj
 
 # Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, include_aggs=True, highlight=True, source=None):
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, include_aggs=True, highlight=True, source=None):
+
     query_obj = {
         'size': size,
         "sort":[
@@ -140,6 +156,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
                                     "name": {
                                         "query": user_query,
                                         "fuzziness": "1",
+                                        "prefix_length": 2, # short words are often acronyms or usually not misspelled, so don't edit
                                         "boost": 0.01
                                     }
                                }
@@ -159,8 +176,8 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
                                     "type": "phrase",
                                     "slop": "6",
                                     "minimum_should_match": "2<75%",
-                                    "fields": ["name^10", "name.hyphens", "shortDescription",
-                                               "longDescription", "department", "sku", "manufacturer", "features", "categoryPath"]
+                                    "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
+                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath"]
                                }
                             },
                             {
@@ -173,7 +190,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
                               "match": {
                                     "name.hyphens": {
                                         "query": user_query,
-                                        "operator": "AND",
+                                        "operator": "OR",
                                         "minimum_should_match": "2<75%"
                                     }
                                }
@@ -182,8 +199,8 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
                         "filter": filters  #
                     }
                 },
-                "boost_mode": "multiply",
-                "score_mode": "sum",
+                "boost_mode": "multiply", # how _score and functions are combined
+                "score_mode": "sum", # how functions are combined
                 "functions": [
                     {
                         "filter": {
@@ -234,10 +251,21 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
             }
         }
     }
-    if user_query == "*":
+    if click_prior_query != "":
+        query_obj["query"]["function_score"]["query"]["bool"]["should"].append({
+                        "query_string":{  # This may feel like cheating, but it's really not, esp. in ecommerce where you have all this prior data,  You just can't let the test clicks leak in, which is why we split on date
+                            "query": click_prior_query,
+                            "fields": ["_id"]
+                        }
+                    })
+        #print(query_obj)
+    if user_query == "*" or user_query == "#":
         #replace the bool
-        query_obj["query"]["function_score"]["query"].pop("bool")
-        query_obj["query"]["function_score"]["query"] = {"match_all": {}}
+        try:
+            query_obj["query"].pop("bool")
+            query_obj["query"] = {"match_all": {}}
+        except:
+            pass
     if highlight:
         query_obj["highlight"] = {
             "fields": {
