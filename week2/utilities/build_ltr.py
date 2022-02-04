@@ -194,8 +194,7 @@ if __name__ == "__main__":
         try:
             print("Loading all clicks from %s" % args.all_clicks)
             all_clicks_df = pd.read_csv(args.all_clicks, parse_dates=['click_time', 'query_time'])
-            all_clicks_df = data_prepper.filter_junk_clicks(all_clicks_df, args.verify_file, output_dir,
-                                                            args.verify_file)
+            all_clicks_df = data_prepper.filter_junk_clicks(all_clicks_df, args.verify_file, output_dir)
             # all_clicks_df = all_clicks_df.astype({'click_time': 'datetime64', 'query_time':'datetime64'})
         except Exception as e:
             print("Error loading all clicks data")
