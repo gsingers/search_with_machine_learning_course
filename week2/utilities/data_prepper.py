@@ -241,15 +241,15 @@ class DataPrepper:
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
-        feature_results["fake_feature_1"] = []
-        feature_results["fake_feature_2"] = []
+        feature_results["salePrice"] = []
+        feature_results["name_match"] = []
         rng = np.random.default_rng(12345)
         for doc_id in query_doc_ids:
             feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
             feature_results["sku"].append(doc_id)  # ^^^
-            feature_results["fake_feature_1"].append(rng.random())
-            feature_results["fake_feature_2"].append(rng.random())
+            feature_results["salePrice"].append(rng.random())
+            feature_results["name_match"].append(rng.random())
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
