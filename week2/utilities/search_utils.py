@@ -240,6 +240,8 @@ def compare_explains(join, type, opensearch, index, ltr_model_name, ltr_store_na
             pass #just means we can't find this query in the priors, which is OK
 
         query_obj, num_shoulds = get_explain_query_for_type(item.query, type, click_prior_query, ltr_model_name, ltr_store_name)
+        if click_prior_query is None or click_prior_query == '':
+            num_shoulds += 1 # if click prior is empty, then num shoulds will always be one less than a query with a valid click prior, which will throw off our parallel arrays
         #print("Explain query %s" % query_obj)
         response = opensearch.explain(index, item.sku, body=query_obj)
         # get the top level scores by description
