@@ -93,8 +93,4 @@ output {
     document_id => "%{sku}"
     ssl_certificate_verification => false
   }
-
-  stdout {
-	codec => rubydebug
-  }
 }
