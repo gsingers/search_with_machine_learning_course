@@ -81,8 +81,7 @@ class DataPrepper:
         pairs['rank'] = pairs.groupby('query')['clicks'].rank('dense', ascending=False)
         pairs['num_impressions'] = pairs.groupby('query')['clicks'].transform('sum')
         # cut off the extreme end of the long tail due to low confidence in the evidence
-        print(
-            "IMPLEMENT ME: cut off the extreme end of the long tail due to low confidence in the evidence by min clicks and min impressions")
+        pairs = pairs[(pairs['num_impressions'] >= min_impressions) & (pairs['clicks'] >= min_clicks)]
 
         pairs['doc_id'] = pairs['sku']  # not technically the doc id, but since we aren't doing a search...
         pairs['product_name'] = "fake"
@@ -183,8 +182,8 @@ class DataPrepper:
             "product_name": product_names
         })
         # remove low click/impressions,
-        print(
-            "IMPLEMENT ME: cut off the extreme end of the long tail due to low confidence in the evidence by min clicks and min impressions")
+        #remove low click/impressions
+        impressions_df = impressions_df[(impressions_df['num_impressions'] >= min_impressions) & (impressions_df['clicks'] >= min_clicks)]
 
         return impressions_df, query_ids_map
 
