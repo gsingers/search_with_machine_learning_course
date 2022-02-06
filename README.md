@@ -66,10 +66,11 @@ The following things must be done each time you create a new Gitpod Workspace (u
 At the command line, do the following steps to run the example.  For purposes of demonstration, let's assume we are working on week 2.  Substitute accordingly for the week you are working on.
 
 1. Activate your Python Virtual Environment.  We use `pyenv` (Pyenv website)[https://github.com/pyenv/pyenv] and `pyenv-virtualenv` (Pyenv Virtualenv)[https://github.com/pyenv/pyenv-virtualenv], but you can use whatever you are most comfortable with.
-    1. `pyenv activate search_with_ml_week2` -- Activate that Virtualenv. Substitute in whatever week you are working on. 
+    1. `pyenv activate search_with_ml_week2` -- Activate that Virtualenv. Substitute in whatever week you are working on, e.g. `search_with_ml_week1`. 
 1. Run Flask: 
     1. `export FLASK_ENV=development`
-    1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week2` 
+    1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week2`
+    1. For week2, you may also choose to set `export PRIOR_CLICKS_LOC=/workspace/ltr_output/train.csv` after running the LTR end-to-end script. 
     1. `flask run --port 3000` (The default port of 5000 is already in use) 
     1. Open the Flask APP at `https://3000-<$GITPOD_URL>/`
 1. Or run `ipython`

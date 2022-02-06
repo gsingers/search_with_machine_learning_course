@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 from flask import render_template
+import pandas as pd
 
 def create_app(test_config=None):
     # create and configure the app
@@ -9,7 +10,15 @@ def create_app(test_config=None):
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_envvar('LTR_APPLICATION_SETTINGS', silent=True)
+        PRIOR_CLICKS_LOC = os.environ.get("PRIOR_CLICKS_LOC")
+        print("PRIOR CLICKS: %s" % PRIOR_CLICKS_LOC)
+        if PRIOR_CLICKS_LOC:
+            priors = pd.read_csv(PRIOR_CLICKS_LOC)
+            priors_gb = priors.groupby("query")
+            app.config["priors_df"] = priors
+            app.config["priors_gb"] = priors_gb
+        #print(app.config)
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)

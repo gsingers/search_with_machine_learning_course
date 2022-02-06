@@ -4,3 +4,10 @@ requests
 ipython
 urljoin
 xgboost
+pandas
+numpy
+numba
+numexpr
+sklearn
+graphviz
+matplotlib

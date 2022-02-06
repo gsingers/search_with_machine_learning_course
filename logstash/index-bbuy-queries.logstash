@@ -2,11 +2,6 @@ input {
   file {
     path => ["/workspace/datasets/train.csv"]  #Put in the path to the train CSV query data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
     start_position => "beginning"
-    codec => multiline {
-            pattern => "<product>"
-            negate => "true"
-            what => "previous"
-        }
   }
 }
 
@@ -31,8 +26,5 @@ output {
     user => "admin"
     password => "admin"
     ssl_certificate_verification => false
-  }
-
-  stdout {
   }
 }

@@ -90,11 +90,7 @@ output {
     index => "bbuy_products"
     user => "admin"
     password => "admin"
-    document_id => "%{productId}"
+    document_id => "%{sku}"
     ssl_certificate_verification => false
-  }
-
-  stdout {
-	codec => rubydebug
   }
 }

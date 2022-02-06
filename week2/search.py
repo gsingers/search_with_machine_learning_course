@@ -2,10 +2,13 @@
 # The main search hooks for the Search Flask application.
 #
 from flask import (
-    Blueprint, redirect, render_template, request, url_for
+    Blueprint, redirect, render_template, request, url_for, current_app
 )
 
-from week1_finished.opensearch import get_opensearch
+from week2.opensearch import get_opensearch
+
+import week2.utilities.query_utils as qu
+import week2.utilities.ltr_utils as lu
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
@@ -66,6 +69,11 @@ def query():
     filters = None
     sort = "_score"
     sortDir = "desc"
+    model = "simple"
+    # TODO: Make these parameters
+    ltr_store_name = "week2"
+    ltr_model_name = "ltr_model"
+    explain = False
     if request.method == 'POST':  # a query has been submitted
         user_query = request.form['query']
         if not user_query:
@@ -76,116 +84,84 @@ def query():
         sortDir = request.form["sortDir"]
         if not sortDir:
             sortDir = "desc"
-        query_obj = create_query(user_query, [], sort, sortDir)
+        explain_val = request.form.get("explain", "false")
+        if explain_val == "true":
+            explain = True
+        model = request.form.get("model", "simple")
+        click_prior = get_click_prior(user_query)
+
+        if model == "simple_LTR":
+            query_obj = qu.create_simple_baseline(user_query, click_prior, [], sort, sortDir, size=500)  # We moved create_query to a utility class so we could use it elsewhere.
+            query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name,
+                                                    rescore_size=500, main_query_weight=0)
+            print("Simple LTR q: %s" % query_obj)
+        elif model == "ht_LTR":
+            query_obj = qu.create_query(user_query, click_prior, [], sort, sortDir, size=500)  # We moved create_query to a utility class so we could use it elsewhere.
+            query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name,
+                                                    rescore_size=500, main_query_weight=0)
+            print("LTR q: %s" % query_obj)
+        elif model == "hand_tuned":
+            query_obj = qu.create_query(user_query, click_prior, [], sort, sortDir, size=100)  # We moved create_query to a utility class so we could use it elsewhere.
+            print("Hand tuned q: %s" % query_obj)
+        else:
+            query_obj = qu.create_simple_baseline(user_query, click_prior, [], sort, sortDir, size=100)  # We moved create_query to a utility class so we could use it elsewhere.
+            print("Plain ol q: %s" % query_obj)
     elif request.method == 'GET':  # Handle the case where there is no query or just loading the page
         user_query = request.args.get("query", "*")
         filters_input = request.args.getlist("filter.name")
         sort = request.args.get("sort", sort)
         sortDir = request.args.get("sortDir", sortDir)
+        explain_val = request.args.get("explain", "false")
+        click_prior = get_click_prior(user_query)
+        if explain_val == "true":
+            explain = True
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
-
-        query_obj = create_query(user_query, filters, sort, sortDir)
+        model = request.args.get("model", "simiple")
+        if model == "simple_LTR":
+            query_obj = qu.create_simple_baseline(user_query, click_prior, filters, sort, sortDir, size=500)
+            query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name, rescore_size=500)
+        elif model == "ht_LTR":
+            query_obj = qu.create_query(user_query, click_prior, filters, sort, sortDir, size=100)
+            query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name, rescore_size=100)
+        elif model == "hand_tuned":
+            query_obj = qu.create_query(user_query, click_prior, filters, sort, sortDir, size=100)
+        else:
+            query_obj = qu.create_simple_baseline(user_query, click_prior, filters, sort, sortDir, size=100)
     else:
-        query_obj = create_query("*", [], sort, sortDir)
+        query_obj = qu.create_query("*", "", [], sort, sortDir, size=100)
 
-    print("query obj: {}".format(query_obj))
-    response = opensearch.search(body=query_obj, index="bbuy_products")
+    #print("query obj: {}".format(query_obj))
+    response = opensearch.search(body=query_obj, index="bbuy_products", explain=explain)
     # Postprocess results here if you so desire
 
     #print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
-                               sort=sort, sortDir=sortDir)
+                               sort=sort, sortDir=sortDir, model=model, explain=explain)
     else:
         redirect(url_for("index"))
 
 
-def create_query(user_query, filters, sort="_score", sortDir="desc"):
-    print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    query_obj = {
-        'size': 10,
-        "highlight": {
-            "fields": {
-                "name": {},
-                "shortDescription": {},
-                "longDescription": {}
-            }
-        },
-        "sort":[
-            {sort: {"order": sortDir}}
-        ],
-        "query": {
-            "function_score": {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {
-                              "query_string": {
-                                    "query": user_query,
-                                    "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department"]
-                               }
-                            }
-                        ],
-                        "filter": filters  #
-                    }
-                },
-                "score_mode": "avg",
-                "boost_mode": "multiply",
-                "functions": [
-                  {"field_value_factor": {
-                  "field": "salesRankMediumTerm",
-                  "modifier": "reciprocal",
-                  "missing": 100000000
-                    }
-                  },
-                  {"field_value_factor": {
-                  "field": "salesRankShortTerm",
-                  "modifier": "reciprocal",
-                  "missing": 100000000
-                    }
-                  },
-                  {"field_value_factor": {
-                  "field": "salesRankLongTerm",
-                  "modifier": "reciprocal",
-                  "missing": 100000000
-                    }
-                  }
-                ]
-              }
-        },
-        "aggs": {
-            "department": {
-                "terms": {
-                    "field": "department.keyword",
-                    "min_doc_count": 1
-                }
-            },
-            "missing_images": {
-                "missing": {
-                    "field": "image"
-                }
-            },
-            "regularPrice": {
-                "range": {
-                    "field": "regularPrice",
-                    "ranges": [
-                        {"key": "$", "to": 100},
-                        {"key": "$$", "from": 100, "to": 200},
-                        {"key": "$$$", "from": 200, "to": 300},
-                        {"key": "$$$$", "from": 300, "to": 400},
-                        {"key": "$$$$$", "from": 400, "to": 500},
-                        {"key": "$$$$$$", "from": 500},
-                    ]
-                },
-                "aggs": {
-                    "price_stats": {
-                        "stats": {"field": "regularPrice"}
-                    }
-                }
-            }
+def get_click_prior(user_query):
+    click_prior = ""
+    if current_app.config["priors_gb"]:
+        try:
+            prior_doc_ids = None
+            prior_doc_id_weights = None
+            query_times_seen = 0  # careful here
+            prior_clicks_for_query = None
+            prior_clicks_for_query = current_app.config["priors_gb"].get_group(user_query)
+            if prior_clicks_for_query is not None and len(prior_clicks_for_query) > 0:
+                prior_doc_ids = prior_clicks_for_query.sku.drop_duplicates()
+                prior_doc_id_weights = prior_clicks_for_query.sku.value_counts()  # histogram gives us the click counts for all the doc_ids
+                query_times_seen = prior_clicks_for_query.sku.count()
+                click_prior = qu.create_prior_queries(prior_doc_ids, prior_doc_id_weights, query_times_seen)
+        except KeyError as ke:
+            pass
+            # nothing to do here, we just haven't seen this query before in our training set
+    print("prior: %s" % click_prior)
+    return click_prior
 
-        }
-    }
-    return query_obj
+
