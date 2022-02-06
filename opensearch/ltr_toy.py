@@ -9,11 +9,12 @@ from opensearchpy import OpenSearch
 import matplotlib.pyplot as plt
 from xgboost import XGBClassifier
 from xgboost import plot_tree
+
+#######################
 #
 # Setup work
 #
-
-
+#######################
 host = 'localhost'
 port = 9200
 base_url = "https://{}:{}/".format(host, port)
@@ -112,7 +113,7 @@ index_body = {
     }
 }
 
-client.indices.delete(index_name)
+client.indices.delete(index_name, ignore_unavailable=True)
 client.indices.create(index_name, body=index_body)
 # Index our documents
 print("Indexing our documents")
@@ -129,6 +130,12 @@ for doc in docs:
 # Verify they are in:
 print("We indexed:\n{}".format(client.cat.count(index_name, params={"v": "true"})))
 
+#######################
+#
+# Step 1: Setup LTR storage
+#
+#######################
+
 # Turn on the LTR store and name it the same as our index
 ltr_store_name = index_name
 ltr_store_path = "_ltr/" + ltr_store_name
@@ -143,6 +150,11 @@ print("\tDeleted old store response status: %s" % resp.status_code)
 resp = requests.put(ltr_model_path, auth=auth, verify=False)
 print("\tCreate the new store response status: %s" % resp.status_code)
 
+#######################
+#
+# Step 2: Setup LTR Featureset
+#
+#######################
 featureset_name = "ltr_toy"
 headers = {"Content-Type": 'application/json'}
 featureset_path = urljoin(ltr_model_path + "/", "_featureset/{}".format(featureset_name))
@@ -197,7 +209,11 @@ ltr_feature_set = {"featureset": {
 }}
 resp = requests.post(featureset_path, headers=headers, data=json.dumps(ltr_feature_set), auth=auth, verify=False)
 
-
+#######################
+#
+# Step 3: Collect Judgments
+#
+#######################
 # Create a place to store our judgments
 class Judgment:
 
@@ -261,6 +277,12 @@ for query in queries:
                     break
             if input == "exit" or input == "e":
                 break  # break out of hits, this is ugly, but OK for what we are doing here
+
+#######################
+#
+# Step 4: Create Training Data (AKA Feature Logging)
+#
+#######################
 # Coming out of this loop, we should have an array of judgments
 train_file = tempfile.NamedTemporaryFile(delete=False)
 # Log our features by sending our query and it's judged documents to OpenSearch
@@ -325,6 +347,11 @@ for (idx, item) in enumerate(judgments.items()):
 
 train_file.close()
 
+#######################
+#
+# Step 5: Train and Test with XGBoost
+#
+#######################
 # Modified from https://github.com/o19s/elasticsearch-learning-to-rank/blob/main/demo/xgboost-demo/xgb.py
 # Read the LibSVM labels/features
 
@@ -358,12 +385,22 @@ os_model = {
         }
     }
 }
+#######################
+#
+# Step 6: Deploy your Model
+#
+#######################
 # Upload the model to OpenSearch
 model_path = urljoin(featureset_path + "/", "_createmodel")
 print("Uploading our model to %s" % model_path)
 response = requests.post(model_path, data=json.dumps(os_model), headers=headers, auth=auth, verify=False)
 print("\tResponse: %s" % response)
 
+#######################
+#
+# Step 7: Search with LTR
+#
+#######################
 # issue a search!
 print("Search with baseline")
 query_obj = {
