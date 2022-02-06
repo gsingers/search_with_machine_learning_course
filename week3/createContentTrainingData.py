@@ -12,8 +12,8 @@ directory = r'/workspace/datasets/product_data/products/'
 parser = argparse.ArgumentParser(description='Process some integers.')
 general = parser.add_argument_group("general")
 general.add_argument("--output", default="/workspace/datasets/fasttext/output.fasttext", help="the file to output to")
-general.add_argument("--min_product_names", default=5, type=int, help="the file to output to")
-general.add_argument("--max_product_names", default=50, type=int, help="the file to output to")
+general.add_argument("--min_product_names", default=5, type=int, help="The minimum number of products per category.")
+general.add_argument("--max_product_names", default=50, type=int, help="The maximum number of products per category.")
 args = parser.parse_args()
 output_file = args.output
 path = Path(output_file)

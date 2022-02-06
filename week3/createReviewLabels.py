@@ -11,8 +11,6 @@ def transform_training_data(title, comment):
 parser = argparse.ArgumentParser(description='Process some integers.')
 general = parser.add_argument_group("general")
 general.add_argument("--output", default="/workspace/datasets/fasttext/output.fasttext", help="the file to output to")
-general.add_argument("--min_product_names", default=5, type=int, help="the file to output to")
-general.add_argument("--max_product_names", default=50, type=int, help="the file to output to")
 
 args = parser.parse_args()
 output_file = args.output
