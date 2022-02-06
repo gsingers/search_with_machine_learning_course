@@ -1,2 +1,4 @@
 flask
 opensearch-py
+fasttext
+nltk
