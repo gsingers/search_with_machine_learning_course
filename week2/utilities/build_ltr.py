@@ -25,7 +25,7 @@ if __name__ == "__main__":
     host = 'localhost'
     port = 9200
     auth = ('admin', 'admin')  # For testing only. Don't store credentials in code.
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser = argparse.ArgumentParser(description='Build LTR.')
     # TODO: setup argparse requirements/dependencies to better enforce arguments that require other arguments
     general = parser.add_argument_group("general")
     general.add_argument("-i", '--index', default="bbuy_products",
