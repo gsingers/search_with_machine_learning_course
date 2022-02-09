@@ -11,6 +11,7 @@ def transform_name(product_name):
 directory = r'/workspace/datasets/product_data/products/'
 parser = argparse.ArgumentParser(description='Process some integers.')
 general = parser.add_argument_group("general")
+general.add_argument("--input", default=directory,  help="The directory containing product data")
 general.add_argument("--output", default="/workspace/datasets/fasttext/output.fasttext", help="the file to output to")
 general.add_argument("--min_product_names", default=5, type=int, help="The minimum number of products per category.")
 general.add_argument("--max_product_names", default=50, type=int, help="The maximum number of products per category.")
@@ -21,6 +22,8 @@ output_dir = path.parent
 if os.path.isdir(output_dir) == False:
         os.mkdir(output_dir)
 
+if args.input:
+    directory = args.input
 # IMPLEMENT:  Track the number of items in each category and only output if above the min and below the max
 min_product_names = args.min_product_names
 max_product_names = args.max_product_names
