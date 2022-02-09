@@ -93,19 +93,25 @@ input {
       # This is messed up, but I can't seem to figure out how to extract the substructure from annotations.  I've tried [annotations][name_cat_prediction]
       # Doing the stringf approach of %{[annotations][name_cat_prediction]) doesn't quite work since it creates strings and flattens our structures
       # So, we convert the annotations to a string, which can then be parsed as json.  Shrugs.
-      mutate{
-         add_field => {
-          "json" => "%{annotations}"
+      if [annotations] {
+          mutate{
+           add_field => {
+            "json" => "%{annotations}"
+          }
+        }
+
+        json{
+          source => "json"
+
+        }
+
+        mutate {
+          remove_field => ["annotations", "json"]
         }
       }
 
-      json{
-        source => "json"
-
-      }
-
       mutate{
-        remove_field => ["message", "host", "path", "headers", "annotations", "json"]
+        remove_field => ["message", "host", "path", "headers"]
       }
 
 

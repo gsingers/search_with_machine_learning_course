@@ -42,6 +42,7 @@ def create_app(test_config=None):
             app.config["syns_model"] = fasttext.load_model(SYNS_MODEL_LOC)
         else:
             print("No category model found.  Have you run fasttext?")
+        app.config["index_name"] = os.environ.get("INDEX_NAME", "bbuy_products")
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)

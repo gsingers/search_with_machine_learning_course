@@ -2,10 +2,10 @@
 # The main search hooks for the Search Flask application.
 #
 from flask import (
-    Blueprint, redirect, render_template, request, url_for
+    Blueprint, redirect, render_template, request, url_for, current_app
 )
 
-from week3.opensearch import get_opensearch
+from week3_finished.opensearch import get_opensearch
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
@@ -90,7 +90,7 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = opensearch.search(body=query_obj, index="bbuy_products")
+    response = opensearch.search(body=query_obj, index=current_app.config["index_name"])
     # Postprocess results here if you so desire
 
     #print(response)
