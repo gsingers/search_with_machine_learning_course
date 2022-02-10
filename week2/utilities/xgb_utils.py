@@ -24,6 +24,7 @@ def plots(xgb_model, xgb_model_name, xgb_feat_map, xgb_plot):
         print("Unable to plot our models")
 
 
+# xgb_train_data is a string path to our training file
 def train(xgb_train_data, num_rounds=5, xgb_conf=None ):
     xgb_params = {'objective': 'reg:logistic'}
     bst = None
