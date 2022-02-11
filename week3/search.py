@@ -146,7 +146,7 @@ def query():
 
 def get_click_prior(user_query):
     click_prior = ""
-    if current_app.config["priors_gb"]:
+    if current_app.config.get("priors_gb"):
         try:
             prior_doc_ids = None
             prior_doc_id_weights = None
