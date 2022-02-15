@@ -1,5 +1,30 @@
 {
   "settings": {
-    "index.refresh_interval": "5s"
+    "index.refresh_interval": "5s",
+    "index": {
+      "query": {
+        "default_field": "name"
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "productId": {
+        "type": "double"
+      },
+      "sku": {
+        "type": "int"
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
   }
 }
