@@ -1,5 +1,8 @@
 input {
   file {
+    # Tiny indexing
+    #path => ["/workspace/datasets/product_data/products/products_0001_2570_to_430420.xml"]
+    # TODO: to reenable full indexing
     path => ["/workspace/datasets/product_data/products/*.xml"]  #Put in the path to the ungzipped/untarred product data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
     start_position => "beginning"
     codec => multiline {

@@ -24,10 +24,17 @@ GET bbuy_products/_search
   "query": {
     "boosting": {
       "positive": {
-        #FILL IN
+         "bool":{
+            "must":[{
+              "query_string": {
+                  "query": "\"ipad 2\"",
+                  "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+            }}]
+         }
+      }
       },
       "negative": {
-        #FILL IN
+        "match": {}
       },
       "negative_boost": 0.2
     }
@@ -50,12 +57,32 @@ GET bbuy_products/_search
                     "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department"]
             }
         },
-        "boost_mode": "multiply"
-        "score_mode": "#SETME",
+        "boost_mode": "replace",
+        "score_mode": "avg",
         "functions": [
+          {
+            "field_value_factor": {
+              "field": "salesRankLongTerm",
+              "missing": 100000000,
+              "modifier": "reciprocal"
+            }
+          },
+          {
+            "field_value_factor": {
+              "field": "salesRankMediumTerm",
+              "missing": 100000000,
+              "modifier": "reciprocal"
+            }
+          },
+          {
+            "field_value_factor": {
+              "field": "salesRankShortTerm",
+              "missing": 100000000,
+              "modifier": "reciprocal"
+            }
+          }
         ]
       }
-
   },
   "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm", "salesRankLongTerm", "regularPrice"]
 }
