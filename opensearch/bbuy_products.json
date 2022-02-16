@@ -1,5 +1,70 @@
 {
   "settings": {
     "index.refresh_interval": "5s"
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "image": {
+        "type": "keyword"
+      },
+      "inStoreAvailability": {
+        "type": "boolean"
+      },
+      "inStorePickup": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+          },
+          "english": {
+            "type": "text",
+            "analyzer": "english"
+           }
+        }
+      },
+      "description": {
+        "type": "text",
+        "fields": {
+            "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+            },
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+             }
+          }
+      },
+      "shortDescription": {
+        "type": "text",
+        "fields": {
+            "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+            },
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+             }
+          }
+      },
+      "longDescription": {
+        "type": "text",
+        "analyzer": "english"
+      },
+      "regularPrice": {
+        "type": "float"
+      },
+      "salePrice": {
+        "type": "float"
+      }
+    }
   }
 }
