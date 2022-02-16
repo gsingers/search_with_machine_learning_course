@@ -1,5 +1,122 @@
 {
   "settings": {
-    "index.refresh_interval": "5s"
+    "index.refresh_interval": "5s",
+    "index": {
+      "query": {
+        "default_field": "name"
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp" : {
+        "type" : "date"
+      },
+      "@version" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+      "productId": {
+        "type": "double"
+      },
+      "sku": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "shortDescription": {
+        "type": "text", 
+        "analyzer": "english", 
+        "fields": {
+          "keyword": {
+            "type": "keyword", 
+            "ignore_above": 256
+          }
+        }
+      },
+      "longDescription": {
+        "type": "text", 
+        "analyzer": "english", 
+        "fields": {
+          "keyword": {
+            "type": "keyword", 
+            "ignore_above": 256
+          }
+        }
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "startDate": {
+        "type": "date"
+      },
+      "active": {
+        "type": "boolean"
+      },
+      "regularPrice": {
+        "type": "integer_range"
+      },
+      "salePrice": {
+        "type": "integer_range"
+      },
+      "onSale": {
+        "type": "boolean"
+      },
+      "digital": {
+        "type": "boolean"
+      },
+      "activeUpdateDate": {
+        "type": "date"
+      },
+      "advertisedPriceRestriction": {
+        "type": "date"
+      },
+      "image" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+      "bestBuyItemId" : {
+        "type" : "double"
+      },
+      "accessories" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+      "bestSellingRank" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+      "homeDelivery": {
+        "type": "boolean"
+      }
+    }
   }
 }
