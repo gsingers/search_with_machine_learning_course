@@ -161,7 +161,7 @@ def query():
 
     print("query obj: {}".format(query_obj))
     response = opensearch.search(
-        body=query_obj, 
+        body=query_obj,
         index="bbuy_products"
     )
     # Postprocess results here if you so desire
@@ -232,6 +232,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                 ]
             }
         })
+
 
     query_obj = {
         'size': 10,
