@@ -22,7 +22,7 @@
           {% if hit.highlight and hit.highlight.shortDescription %}
             {{ hit.highlight.shortDescription }}
           {% else %}
-            {{ hit._source.shortDescription[0] }}
+            {{ hit._source.shortDescription }}
           {% endif %}
         {% endif %}
       </div>
