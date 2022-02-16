@@ -73,11 +73,10 @@ def query():
     else:
         query_obj = create_query("*", [], sort, sortDir)
 
-    print("query obj: {}".format(query_obj))
+    #print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index="bbuy_products", doc_type="_doc")
     # Postprocess results here if you so desire
-
-    print(response)
+    #print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
@@ -88,6 +87,7 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+    
     query_obj = {
         'size': 10,
         "query": {
@@ -100,10 +100,32 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                         }
                     }
                 ]
-            }
+            },
         },
         "aggs": {
-            #TODO: FILL ME IN
+            "regularPrice": {
+                "range": {
+                "field": "regularPrice",
+                "ranges": [
+                    {
+                    "from": 0,
+                    "to": 100
+                    },
+                    {
+                    "from": 101,
+                    "to": 250
+                    },
+                    {
+                    "from": 251
+                    }
+                ]
+                }
+            },
+            "missing_images": {
+                "missing": {
+                "field": "image"
+                }
+            }
         }
     }
     return query_obj
