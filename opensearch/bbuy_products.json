@@ -1,5 +1,58 @@
+
 {
   "settings": {
-    "index.refresh_interval": "5s"
+    "index": {
+      "refresh_interval": "5s",
+      "number_of_shards": 2,
+      "number_of_replicas": 1
+    }
+  },
+  "mappings": {
+    "properties": {
+      "color": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "standard",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "title": {"type": "text", "analyzer": "english"},
+      "body": {"type": "text", "analyzer": "english"},
+      "shortDescription": {
+        "type": "text",
+        "analyzer": "standard",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "longDescription": {
+        "type": "text",
+        "analyzer": "standard",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
+  },
+  "aliases": {
+    "sample-alias1": {}
   }
 }
