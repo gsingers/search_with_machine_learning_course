@@ -29,9 +29,33 @@ def process_filters(filters_input):
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            from_value = request.args.get(filter + ".from", None)
+            to_value = request.args.get(filter + ".to", None)
+            key = request.args.get(filter + ".key", None)
+            ret_obj = {}
+
+            if from_value:
+                ret_obj["gte"] = from_value
+            if to_value:
+                ret_obj["lt"] = to_value
+
+            filter_obj = {"range": {filter: ret_obj}}  
+            filters.append(filter_obj)
+            if from_value is None:
+                from_value = "*"
+            if to_value is None:
+                to_value = "*"
+            display_filters.append("{}: {} TO {}".format(display_name, from_value, to_value))  
+            applied_filters += "&{}.from={}&{}.to={}".format(filter, from_value, filter, to_value)
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            term_field_name = request.args.get(filter + ".fieldName", filter)
+            key = request.args.get(filter + ".key", None)
+            filter_obj = {"term": {term_field_name: key}}
+
+            filters.append(filter_obj)
+            display_filters.append("{}: {}".format(display_name, key))
+            applied_filters += "&{}.fieldName={}&{}.key={}".format(filter, term_field_name, filter, key)
+
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -76,25 +100,74 @@ def query():
     print("query obj: {}".format(query_obj))
     response = None   # TODO: Replace me with an appropriate call to OpenSearch
     # Postprocess results here if you so desire
+    try:
+        response = opensearch.search(body=query_obj, index="bbuy_products")
+    except Exception as e:
+        print(error)
+        error = e
 
-    #print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
                                sort=sort, sortDir=sortDir)
     else:
-        redirect(url_for("index"))
+        redirect(url_for("query"))
 
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
     query_obj = {
         'size': 10,
+        "sort": [
+            {sort: {"order": sortDir}}
+        ],
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+            "bool":{
+                "should": [
+                    {
+                        "multi_match": {
+                            'query': user_query,
+                            'type' : 'phrase',
+                            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"],
+                            "slop" : 3
+                        }
+                    }
+                ],
+                "minimum_should_match":1,
+                "filter": filters
+
+            }
+            # Replace me with a query that both searches and filters
+            
         },
         "aggs": {
             #TODO: FILL ME IN
+            "department":{
+                "terms":{
+                    "field": "department.keyword"
+                }
+            },
+            "regularPrice":{
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        {"key": "<100", "to": 100},
+                        {"key": ">100 and < 200", "from": 100, "to": 200},
+                        {"key": "> 200 and < 300", "from": 200, "to": 300},
+                        {"key": "> 300 and < 400", "from": 300, "to": 400},
+                        {"key": "> 400 and < 500", "from": 400, "to": 500},
+                        {"key": "> 500", "from": 500},
+                    ] 
+                }                
+            },
+            "missing_images":{
+                "missing":{
+                    "field": "image.keyword"
+                }
+            }
+
         }
     }
+    if user_query == "*":
+        query_obj["query"]["bool"]["should"] = [{"match_all": {}}]
     return query_obj
