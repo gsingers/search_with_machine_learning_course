@@ -163,5 +163,3 @@ def get_click_prior(user_query):
             # nothing to do here, we just haven't seen this query before in our training set
     print("prior: %s" % click_prior)
     return click_prior
-
-

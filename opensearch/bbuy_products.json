@@ -26,22 +26,10 @@
         "type" : "boolean"
       },
       "bestBuyItemId" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "bestSellingRank" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "long"
       },
       "categoryLeaf" : {
         "type" : "text",
@@ -131,13 +119,7 @@
         }
       },
       "departmentId" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "long"
       },
       "depth" : {
         "type" : "text",
@@ -256,9 +238,7 @@
         "type" : "integer"
       },
       "regularPrice" : {
-        "type" : "scaled_float",
-        "fielddata": true,
-        "scaling_factory": 100
+        "type" : "float"
       },
       "relatedProducts" : {
         "type" : "text",
@@ -273,8 +253,7 @@
         "type" : "date"
       },
       "salePrice" : {
-        "type" : "scaled_float",
-        "scaling_factory": 100
+        "type" : "float"
       },
       "salesRankLongTerm" : {
         "type" : "long"
@@ -286,22 +265,10 @@
         "type" : "long"
       },
       "shippingCost" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "float"
       },
       "shippingWeight" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "float"
       },
       "shortDescription" : {
         "type" : "text",

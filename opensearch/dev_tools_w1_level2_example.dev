@@ -29,19 +29,29 @@ GET bbuy_products/_search
               "query_string": {
                   "query": "\"ipad 2\"",
                   "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
-            }}]
+            }}],
+            "should":[{
+              "query_string": {
+                "fields": ["categoryPath"],
+                "query": "Computers &amp; Tablets"
+              }
+            }]
          }
-      }
       },
       "negative": {
-        "match": {}
+        "bool": {
+          "must": [{
+            "query_string": {
+              "fields": ["categoryPath", "longDescription"],
+              "query": "accessories sleeve adapter case controller musicial recording"
+            }
+          }]
+        }
       },
       "negative_boost": 0.2
     }
-  },
-  "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm", "salesRankLongTerm", "regularPrice", "categoryPath"]
+  }
 }
-
 # Get the actual document
 GET bbuy_products/_doc/1218321299000
 
