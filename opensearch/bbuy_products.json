@@ -24,6 +24,9 @@
       "productId": {
         "type": "long"
       },
+      "departmentId": {
+        "type": "long"
+      },
       "sku": {
         "type": "long"
       },
@@ -93,9 +96,6 @@
           }
         }
       },
-      "bestBuyItemId": {
-        "type": "double"
-      },
       "accessories": {
         "type": "text",
         "fields": {
@@ -118,6 +118,27 @@
         "type": "boolean"
       },
       "department": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "inStoreAvailability": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "manufacturer": {
         "type": "text",
         "fields": {
           "keyword": {
