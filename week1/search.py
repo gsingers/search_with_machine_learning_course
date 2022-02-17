@@ -16,7 +16,7 @@ bp = Blueprint('search', __name__, url_prefix='/search')
 # applied_filters -- return a String that is appropriate for inclusion in a URL as part of a query string.  This is basically the same as the input query string
 def process_filters(filters_input):
     # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
-    filters = []
+    filters = dict()
     display_filters = []  # Also create the text we will use to display the filters that are applied
     applied_filters = ""
     for filter in filters_input:
@@ -29,6 +29,15 @@ def process_filters(filters_input):
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
+            # Price range
+            filters["range"] = {
+                "range": {
+                    "regularPrice": {
+                        "gt": request.args.get("regularPrice.from"),
+                        "lt": request.args.get("regularPrice.to")
+                    }
+                }
+            }
             pass
         elif type == "terms":
             pass #TODO: IMPLEMENT
@@ -76,7 +85,7 @@ def query():
     #print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index="bbuy_products", doc_type="_doc")
     # Postprocess results here if you so desire
-    #print(response)
+    print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
@@ -87,19 +96,22 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    
-    query_obj = {
-        'size': 10,
-        "query": {
-            "bool": {
-                "must": [
-                    {
+    mustQuery = []
+    mustQuery.append({
                         "multi_match": {
-                            "fields": ["description", "name"],
+                            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"],
                             "query": user_query
                         }
-                    }
-                ]
+                    })
+
+    if filters and filters["range"]:
+        mustQuery.append(filters["range"])
+
+    query_obj = {
+        'size': 100,
+        "query": {
+            "bool": {
+                "must": mustQuery
             },
         },
         "aggs": {
@@ -128,4 +140,6 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
             }
         }
     }
+    
+    print(query_obj)
     return query_obj
