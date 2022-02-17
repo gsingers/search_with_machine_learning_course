@@ -25,6 +25,19 @@
     grid-column-gap: 15px;
 }
 
+#pagination {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.pagination_button{
+    margin-left:10px;
+    margin-right:10px;
+    padding:10px;
+    border:1px solid black;
+}
+
 .search-results {
 
 }

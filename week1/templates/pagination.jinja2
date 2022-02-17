@@ -1,0 +1,8 @@
+{% if pageNo > 0 %}
+<a class="pagination_button"
+href="{{ url_for("search.query") }}?&query={{ query|e }}{{ applied_filters }}&pageNo={{ pageNo-1 }}&sort={{ sort }}&sortDir={{ sortDir }}">Prev</a>
+{% endif %}
+{% if search_response.hits.total.value > (pageNo+1) * pageSize %}
+<a class="pagination_button"
+href="{{ url_for("search.query") }}?&query={{ query|e }}{{ applied_filters }}&pageNo={{ pageNo+1 }}&sort={{ sort }}&sortDir={{ sortDir }}">Next</a>
+{% endif %}

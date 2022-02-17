@@ -31,30 +31,38 @@ def process_filters(filters_input):
         if type == "range":
             from_value = request.args.get(filter + ".from", None)
             to_value = request.args.get(filter + ".to", None)
-            key = request.args.get(filter + ".key", None)
             ret_obj = {}
 
-            if from_value:
+            if from_value and from_value != "*":
                 ret_obj["gte"] = from_value
-            if to_value:
+            if to_value and to_value != "*":
                 ret_obj["lt"] = to_value
 
             filter_obj = {"range": {filter: ret_obj}}  
             filters.append(filter_obj)
-            if from_value is None:
+            if from_value is None or len(from_value) == 0:
                 from_value = "*"
-            if to_value is None:
+            if to_value is None or len(to_value) == 0:
                 to_value = "*"
-            display_filters.append("{}: {} TO {}".format(display_name, from_value, to_value))  
-            applied_filters += "&{}.from={}&{}.to={}".format(filter, from_value, filter, to_value)
+            dsf = "{}: {} TO {}".format(display_name, from_value, to_value)    
+            print(f"Display Filter: {dsf}" )    
+
+            display_filters.append(dsf)  
+            apf = "&{}.from={}&{}.to={}".format(filter, from_value, filter, to_value)
+            print(f"Applied Filter: {apf}")
+
+            applied_filters += apf
         elif type == "terms":
-            term_field_name = request.args.get(filter + ".fieldName", filter)
             key = request.args.get(filter + ".key", None)
+            term_field_name = request.args.get(filter + ".esFieldName", filter)
             filter_obj = {"term": {term_field_name: key}}
+            print(filter_obj)
 
             filters.append(filter_obj)
-            display_filters.append("{}: {}".format(display_name, key))
-            applied_filters += "&{}.fieldName={}&{}.key={}".format(filter, term_field_name, filter, key)
+            dsf = "{}: {}".format(display_name, key)
+            display_filters.append(dsf)
+            apf = "&{}.esFieldName={}&{}.key={}".format(filter, term_field_name, filter, key)
+            applied_filters +=  apf
 
     print("Filters: {}".format(filters))
 
@@ -74,6 +82,8 @@ def query():
     filters = None
     sort = "_score"
     sortDir = "desc"
+    pageNo = 0
+    pageSize = 10
     if request.method == 'POST':  # a query has been submitted
         user_query = request.form['query']
         if not user_query:
@@ -84,18 +94,20 @@ def query():
         sortDir = request.form["sortDir"]
         if not sortDir:
             sortDir = "desc"
-        query_obj = create_query(user_query, [], sort, sortDir)
+        query_obj = create_query(user_query, [], sort, sortDir, pageNo, pageSize)
     elif request.method == 'GET':  # Handle the case where there is no query or just loading the page
         user_query = request.args.get("query", "*")
         filters_input = request.args.getlist("filter.name")
         sort = request.args.get("sort", sort)
         sortDir = request.args.get("sortDir", sortDir)
+        pageSize = int(request.args.get("pageSize", pageSize))
+        pageNo = int(request.args.get("pageNo", pageNo))
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
 
-        query_obj = create_query(user_query, filters, sort, sortDir)
+        query_obj = create_query(user_query, filters, sort, sortDir, pageNo, pageSize)
     else:
-        query_obj = create_query("*", [], sort, sortDir)
+        query_obj = create_query("*", [], sort, sortDir, pageNo, pageSize)
 
     print("query obj: {}".format(query_obj))
     response = None   # TODO: Replace me with an appropriate call to OpenSearch
@@ -109,34 +121,82 @@ def query():
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
-                               sort=sort, sortDir=sortDir)
+                               sort=sort, sortDir=sortDir, pageSize=pageSize, pageNo=pageNo)
     else:
         redirect(url_for("query"))
 
 
-def create_query(user_query, filters, sort="_score", sortDir="desc"):
+def create_query(user_query, filters, sort="_score", sortDir="desc", pageNo=0, pageSize=10):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    query_obj = {
-        'size': 10,
+    query_obj = {       
         "sort": [
             {sort: {"order": sortDir}}
         ],
+        "from": pageSize * pageNo,
+        "size": pageSize,
         "query": {
-            "bool":{
-                "should": [
+            "function_score":{
+                "functions": [
                     {
-                        "multi_match": {
-                            'query': user_query,
-                            'type' : 'phrase',
-                            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"],
-                            "slop" : 3
-                        }
+                            "field_value_factor": {
+                            "field": "salesRankShortTerm",
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                            }
+                    },
+                    {
+                            "field_value_factor": {
+                            "field": "salesRankMediumTerm", 
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                            }
+                    },
+                    {
+                            "field_value_factor": {
+                            "field": "salesRankLongTerm", 
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                            }
+                    }                      
+                ],    
+                "boost_mode": "multiply",
+                "score_mode": "avg",            
+                "query":{
+                    "bool":{
+                        "should": [
+                            {
+                                "multi_match": {
+                                    'boost' : 50,
+                                    'query': user_query,
+                                    'type':'phrase',
+                                    'slop' : 5,
+                                    "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+                                }
+                            },
+                            {
+                                "match": {
+                                    "name":{
+                                        'query': user_query,
+                                        'boost': 10,
+                                        'minimum_should_match': '75%'
+                                    }
+                                }
+                            },                            
+                            { # work little bit like auto complete
+                                "match_phrase_prefix":{
+                                    "name":{
+                                        "query": user_query,
+                                        "boost":1
+                                    }
+                                }
+                            }
+                        ],
+                        "minimum_should_match":1,
+                        "filter": filters
                     }
-                ],
-                "minimum_should_match":1,
-                "filter": filters
-
+                }
             }
+
             # Replace me with a query that both searches and filters
             
         },
@@ -151,12 +211,12 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                 "range": {
                     "field": "regularPrice",
                     "ranges": [
-                        {"key": "<100", "to": 100},
-                        {"key": ">100 and < 200", "from": 100, "to": 200},
-                        {"key": "> 200 and < 300", "from": 200, "to": 300},
-                        {"key": "> 300 and < 400", "from": 300, "to": 400},
-                        {"key": "> 400 and < 500", "from": 400, "to": 500},
-                        {"key": "> 500", "from": 500},
+                        {"key": "$", "to": 100},
+                        {"key": "$$", "from": 100, "to": 200},
+                        {"key": "$$$", "from": 200, "to": 300},
+                        {"key": "$$$$", "from": 300, "to": 400},
+                        {"key": "$$$$$", "from": 400, "to": 500},
+                        {"key": "$$$$$$", "from": 500},
                     ] 
                 }                
             },
@@ -169,5 +229,5 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         }
     }
     if user_query == "*":
-        query_obj["query"]["bool"]["should"] = [{"match_all": {}}]
+        query_obj["query"]["function_score"]["query"]["bool"]["should"] = [{"match_all": {}}]
     return query_obj

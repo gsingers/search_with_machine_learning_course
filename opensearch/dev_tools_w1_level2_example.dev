@@ -24,10 +24,41 @@ GET bbuy_products/_search
   "query": {
     "boosting": {
       "positive": {
-        #FILL IN
+        "bool":{
+            "must":[
+              {
+                "multi_match": {
+                  "query": "\"ipad 2\"",
+                  "slop": 3,
+                  "type": "phrase",
+                  "fields": [
+                    "name^100",
+                    "shortDescription^50",
+                    "longDescription^10"
+                  ]
+                }
+              }
+            ]
+    
+          }
       },
       "negative": {
-        #FILL IN
+        "bool":{
+            "must":[
+              {
+                "multi_match": {
+                  "query": "compatible fits mount case protector sleeves",
+                  "fields": [
+                    "name^100",
+                    "shortDescription^50",
+                    "longDescription^10"
+                  ]
+                }
+              }
+            ]
+    
+          }
+
       },
       "negative_boost": 0.2
     }
@@ -50,10 +81,31 @@ GET bbuy_products/_search
                     "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department"]
             }
         },
-        "boost_mode": "multiply"
-        "score_mode": "#SETME",
-        "functions": [
-        ]
+        "boost_mode": "multiply",
+        "score_mode": "avg",
+                "functions": [
+                    {
+                            "field_value_factor": {
+                            "field": "salesRankShortTerm",
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                            }
+                    },
+                    {
+                            "field_value_factor": {
+                            "field": "salesRankMediumTerm", 
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                            }
+                    },
+                    {
+                            "field_value_factor": {
+                            "field": "salesRankLongTerm", 
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                            }
+                    }                      
+                ]
       }
 
   },
