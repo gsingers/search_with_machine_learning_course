@@ -1,3 +1,4 @@
 flask
 opensearch-py
 ipython
+pandas # extra dependency for eda

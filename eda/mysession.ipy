@@ -1,0 +1,57 @@
+# coding: utf-8
+import pandas as pd
+
+file_name_data_queries = "/workspace/datasets/train.csv"
+print(file_name_data_queries)
+
+df = pd.read_csv(file_name_data_queries)
+
+# columns
+print(list(df))
+
+# Size /shape
+df.shape
+
+df.head()
+
+# Analyze the `sku` field
+
+# Check if sku values are all digits
+df.dtypes
+
+df["sku"].min()
+df["sku"].max()
+df["sku"].quantile(0.9)
+df["sku"].quantile(0.99)
+2 ^ 63
+2 ** 63
+2**63 - 1
+max_long = (2**63 - 1)
+max_sku = df["sku"].max()
+max_long - max_sku
+max_integer = (2**31 - 1)
+max_integer - max_sku
+max_integer
+df["sku"].max()
+! cat /workspace/datasets/train.csv | grep 9999169100050029
+
+# df.sort_values("sku", ascending=False)
+# df.head(50)
+# df.sort_values("sku", ascending=False).head(50)
+# df.sort_values("sku", ascending=False).head(100)
+
+# df.sort_values("sku", ascending=False).head(100)[["sku", "category", "query"]]
+
+df[["sku", "category", "query"]].sort_values("sku", ascending=False).head(50)
+max_sku
+max_unsigned_long = (2**64) - 1
+max_unsigned_long
+max_long
+max_unsigned_long - max_sku
+max_integer
+
+# Conclusion:
+# don't use integer, it can't handle large skus
+# Use unsigned_long (or long).
+
+# %save -r mysession 1-999999
