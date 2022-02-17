@@ -2,7 +2,7 @@
   "settings": {
     "index.refresh_interval": "30s",
     "number_of_shards": "1",
-    "number_of_replicas": "1",
+    "number_of_replicas": "0",
     "analysis": {
       "filter": {
         "english_stop": {
@@ -43,25 +43,13 @@
         }
       },
       "active" : {
-        "type" : "boolean",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "boolean"
       },
       "bestBuyItemId" : {
         "type" : "keyword"
       },
       "bestSellingRank" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "integer"
       },
       "categoryLeaf" : {
         "type" : "keyword"
