@@ -22,10 +22,10 @@
         }
       },
       "productId": {
-        "type": "double"
+        "type": "long"
       },
       "sku": {
-        "type": "integer"
+        "type": "long"
       },
       "name": {
         "type": "text",
