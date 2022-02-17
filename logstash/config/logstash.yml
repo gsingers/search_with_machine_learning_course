@@ -1,0 +1,4 @@
+path.logs: /workspace/logs
+log.level: info
+pipeline.separate_logs: true
+pipeline.ordered: false

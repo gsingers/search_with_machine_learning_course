@@ -1,0 +1,6 @@
+- pipeline.id: product_indexing
+  path.config: "/workspace/search_with_machine_learning_course/logstash/index-bbuy.logstash"
+  pipeline.workers: 1
+- pipeline.id: queries_indexing
+  path.config: "/workspace/search_with_machine_learning_course/logstash/index-bbuy-queries.logstash"
+  pipeline.workers: 1
