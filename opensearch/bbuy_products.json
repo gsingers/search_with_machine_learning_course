@@ -19,7 +19,7 @@
         }
       },
       "analyzer": {
-        "my_english_analyzer": {
+        "default": {
           "tokenizer":  "standard",
           "filter": [
             "english_possessive_stemmer",
