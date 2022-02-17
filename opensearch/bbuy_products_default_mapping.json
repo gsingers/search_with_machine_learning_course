@@ -1,5 +1,10 @@
 {
-
+  "index.refresh_interval": "5s",
+  "index": {
+    "query": {
+      "default_field": "name"
+    }
+  },
     "mappings" : {
       "properties" : {
         "@timestamp" : {

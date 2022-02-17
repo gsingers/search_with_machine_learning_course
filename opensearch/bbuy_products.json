@@ -9,15 +9,15 @@
   },
   "mappings": {
     "properties": {
-      "@timestamp" : {
-        "type" : "date"
+      "@timestamp": {
+        "type": "date"
       },
-      "@version" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
+      "@version": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
           }
         }
       },
@@ -38,21 +38,21 @@
         }
       },
       "shortDescription": {
-        "type": "text", 
-        "analyzer": "english", 
+        "type": "text",
+        "analyzer": "english",
         "fields": {
           "keyword": {
-            "type": "keyword", 
+            "type": "keyword",
             "ignore_above": 256
           }
         }
       },
       "longDescription": {
-        "type": "text", 
-        "analyzer": "english", 
+        "type": "text",
+        "analyzer": "english",
         "fields": {
           "keyword": {
-            "type": "keyword", 
+            "type": "keyword",
             "ignore_above": 256
           }
         }
@@ -84,38 +84,47 @@
       "advertisedPriceRestriction": {
         "type": "date"
       },
-      "image" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
+      "image": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
           }
         }
       },
-      "bestBuyItemId" : {
-        "type" : "double"
+      "bestBuyItemId": {
+        "type": "double"
       },
-      "accessories" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
+      "accessories": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
           }
         }
       },
-      "bestSellingRank" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
+      "bestSellingRank": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
           }
         }
       },
       "homeDelivery": {
         "type": "boolean"
+      },
+      "department": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
       }
     }
   }

@@ -1,33 +1,22 @@
 {
   "settings": {
-    "index.refresh_interval": "5s",
-    "index": {
-      "query": {
-        "default_field": "name"
-      }
-    }
+    "index.refresh_interval": "5s"
   },
   "mappings": {
     "properties": {
-      "@timestamp" : {
-        "type" : "date"
+      "@timestamp": {
+        "type": "date"
       },
-      "@version" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
+      "@version": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
           }
         }
       },
-      "productId": {
-        "type": "double"
-      },
-      "sku": {
-        "type": "integer"
-      },
-      "name": {
+      "user": {
         "type": "text",
         "analyzer": "english",
         "fields": {
@@ -37,85 +26,24 @@
           }
         }
       },
-      "shortDescription": {
-        "type": "text", 
-        "analyzer": "english", 
+      "sku": {
+        "type": "integer"
+      },
+      "query": {
+        "type": "text",
+        "analyzer": "english",
         "fields": {
           "keyword": {
-            "type": "keyword", 
+            "type": "keyword",
             "ignore_above": 256
           }
         }
       },
-      "longDescription": {
-        "type": "text", 
-        "analyzer": "english", 
-        "fields": {
-          "keyword": {
-            "type": "keyword", 
-            "ignore_above": 256
-          }
-        }
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "startDate": {
+      "click_time": {
         "type": "date"
       },
-      "active": {
-        "type": "boolean"
-      },
-      "regularPrice": {
-        "type": "integer_range"
-      },
-      "salePrice": {
-        "type": "integer_range"
-      },
-      "onSale": {
-        "type": "boolean"
-      },
-      "digital": {
-        "type": "boolean"
-      },
-      "activeUpdateDate": {
+      "query_time": {
         "type": "date"
-      },
-      "advertisedPriceRestriction": {
-        "type": "date"
-      },
-      "image" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
-      },
-      "bestBuyItemId" : {
-        "type" : "double"
-      },
-      "accessories" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
-      },
-      "bestSellingRank" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
-      },
-      "homeDelivery": {
-        "type": "boolean"
       }
     }
   }
