@@ -9,6 +9,9 @@ from week1.opensearch import get_opensearch
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
+PRODUCT_INDEX = 'bbuy_products'
+
+
 
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
@@ -17,7 +20,8 @@ bp = Blueprint('search', __name__, url_prefix='/search')
 def process_filters(filters_input):
     # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
     filters = []
-    display_filters = []  # Also create the text we will use to display the filters that are applied
+    # Also create the text we will use to display the filters that are applied
+    display_filters = []
     applied_filters = ""
     for filter in filters_input:
         type = request.args.get(filter + ".type")
@@ -26,12 +30,12 @@ def process_filters(filters_input):
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
         applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
                                                                                  display_name)
-        #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
+        # TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
             pass
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            pass  # TODO: IMPLEMENT
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -40,8 +44,8 @@ def process_filters(filters_input):
 # Our main query route.  Accepts POST (via the Search box) and GETs via the clicks on aggregations/facets
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
-    opensearch = get_opensearch() # Load up our OpenSearch client from the opensearch.py file.
-    # Put in your code to query opensearch.  Set error as appropriate.
+    opensearch = get_opensearch()
+    # Set error as appropriate.
     error = None
     user_query = None
     query_obj = None
@@ -73,11 +77,13 @@ def query():
     else:
         query_obj = create_query("*", [], sort, sortDir)
 
-    print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
-    # Postprocess results here if you so desire
-
-    #print(response)
+    response = opensearch.search(
+            body=query_obj,
+            index=PRODUCT_INDEX
+        )
+    
+    print(response)
+    
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
@@ -89,16 +95,72 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
 
-
-
-    
     query_obj = {
-        'size': 10,
+        "size": 10,
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+            "bool": {
+                "filter": [
+                    {
+                        "term": {
+                            "active": True
+                        }
+                    }
+                ],
+                "must": [
+                    {
+                        "multi_match": {
+                            "query": user_query,
+                            "fields": [
+                                "name^10.0",
+                                "manufacturer^2.0",
+                                "color",
+                                "class^5.0",
+                                "categoryPath^7"
+                            ],
+                            "type": "cross_fields",
+                            "operator": "AND",
+                            "slop": 0,
+                            "minimum_should_match": "3<80%",
+                            "tie_breaker": 0.1,
+                            "boost": 1.0
+                        }
+                    }
+                ]
+            }
         },
+        "_source": {
+            "includes": [
+                "productId",
+                "name",
+                "shortDescription",
+                "longDescription",
+                "department",
+                "salesRankShortTerm",
+                "salesRankMediumTerm",
+                "salesRankLongTerm",
+                "regularPrice",
+                "categoryPath"
+            ]
+        },
+        "sort": [
+            {
+                "_score": {
+                    "order": "desc"
+                }
+            },
+            {
+                "salesRankMediumTerm": {
+                    "order": "desc"
+                }
+            }
+        ],
         "aggs": {
-            #TODO: FILL ME IN
+            "class_agg": {
+                "terms": {
+                    "field": "class.keyword", "size": 100
+                }
+            }
         }
     }
+
     return query_obj
