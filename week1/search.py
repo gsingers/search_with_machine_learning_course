@@ -42,7 +42,8 @@ def process_filters(filters_input):
 @bp.route("/query", methods=["GET", "POST"])
 def query():
     # Load up our OpenSearch client from the opensearch.py file.
-    opensearch = get_opensearch()
+    opensearch_client = get_opensearch()
+
     # Put in your code to query opensearch.  Set error as appropriate.
     error = None
     user_query = None
@@ -77,7 +78,13 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print(f"query obj: {query_obj}")
-    response = None  # TODO: Replace me with an appropriate call to OpenSearch
+
+    # DONE: TODO: Replace me with an appropriate call to OpenSearch
+    # response = None
+
+    index_name_products = "bbuy_products"
+    response = opensearch_client.search(body=query_obj, index=index_name_products)
+
     # Postprocess results here if you so desire
 
     # print(response)
@@ -96,25 +103,34 @@ def query():
 
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
-    # print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    # query_obj = {
-    #     'size': 10,
-    #     "query": {
-    #         "match_all": {} # Replace me with a query that both searches and filters
-    #     },
-    #     "aggs": {
-    #         #TODO: FILL ME IN
-    #     }
-    # }
-    # return query_obj
-
-    user_query = "vacuum"
 
     print(f"Query: {user_query} Filters: {filters} Sort: {sort}")
+
+    ########################################################
+
+    # query_obj = {
+    #     "size": 10,
+    #     "query": {
+    #         "match_all": {}  # Replace me with a query that both searches and filters
+    #     },
+    #     "aggs": {
+    #         # TODO: FILL ME IN
+    #     },
+    # }
+
+    ########################################################
+
+    # Example query:
+    # query_obj = {"size": 10, "query": {"match_all": {}}}
+
     query_obj = {
         "size": 10,
         "query": {
-            "match_all": {}  # Replace me with a query that both searches and filters
+            # "match_all": {}  # Replace me with a query that both searches and filters
+            "multi_match": {
+                "query": user_query,
+                "fields": ["name^2", "longDescription", "relatedProducts"],
+            }
         },
         "aggs": {
             # TODO: FILL ME IN
