@@ -22,7 +22,6 @@ PORT = 9200
 def get_opensearch():
     if "opensearch" not in g:
         # Implement a client connection to OpenSearch so that the rest of the application can communicate with OpenSearch
-        # g.opensearch = None
 
         auth = (
             os.environ.get("OPENSEARCH_USERNAME", "<add_fallback>"),
@@ -41,5 +40,5 @@ def get_opensearch():
         )
 
         g.opensearch = client
-q
+
     return g.opensearch
