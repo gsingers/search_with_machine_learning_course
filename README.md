@@ -96,4 +96,15 @@ Note: these have only been tested on a Mac running OS 12.2.1.  YMMV.  Much of wh
     1. `docker-compose up`
 1. Note: most of the scripts and projects assume the data is in `/workspace/datasets`, but have overrides to specify your own directories. You will need to download and plan accordingly.  
 1. Do your work per the Weekly Project     
-    
+
+
+# Additional notes
+
++ OpenSearch credentials
+    + Create a local file called `.env` in the root of the project directory.
+        + This file is listed in `.gitignore` to be ignored by git.
+        + In this file, add the following two lines, replacing the OpenSearch credentials as needed:
+            ```
+            OPENSEARCH_USERNAME=<your_username>
+            OPENSEARCH_PW=<your_pw>
+            ```
