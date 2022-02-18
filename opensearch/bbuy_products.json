@@ -1,6 +1,24 @@
 {
   "settings": {
-    "index.refresh_interval": "5s"
+    "index.refresh_interval": "5s",
+    "analysis": {
+      "analyzer": {
+        "word_bigram": {
+          "tokenizer": "word_bigram_tokenizer",
+          "filter": ["lowercase"]
+        }
+      },
+      "tokenizer": {
+        "word_bigram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 2,
+          "tokenize_on_chars": [
+            "whitespace"
+          ]
+        }
+      }
+    }
   },
   "mappings": {
     "properties": {
@@ -26,6 +44,10 @@
           "english": {
             "type": "text",
             "analyzer": "english"
+           },
+           "word_bigram": {
+             "type": "text",
+             "analyzer": "word_bigram"
            }
         }
       },
