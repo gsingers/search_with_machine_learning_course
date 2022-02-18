@@ -1,6 +1,7 @@
 #
 # The main search hooks for the Search Flask application.
 #
+from operator import index
 from flask import (
     Blueprint, redirect, render_template, request, url_for
 )
@@ -9,6 +10,8 @@ from week1.opensearch import get_opensearch
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
+PRODUCTS_INDEX = "bbuy_products"
+QUERIES_INDEX = "bbuy_queries"
 
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
@@ -40,8 +43,7 @@ def process_filters(filters_input):
 # Our main query route.  Accepts POST (via the Search box) and GETs via the clicks on aggregations/facets
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
-    opensearch = get_opensearch() # Load up our OpenSearch client from the opensearch.py file.
-    # Put in your code to query opensearch.  Set error as appropriate.
+    opensearch = get_opensearch()
     error = None
     user_query = None
     query_obj = None
@@ -74,12 +76,11 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(body=query_obj, index=PRODUCTS_INDEX)
+    search_response = process_response(response)
     # Postprocess results here if you so desire
-
-    #print(response)
     if error is None:
-        return render_template("search_results.jinja2", query=user_query, search_response=response,
+        return render_template("search_results.jinja2", query=user_query, search_response=search_response,
                                display_filters=display_filters, applied_filters=applied_filters,
                                sort=sort, sortDir=sortDir)
     else:
@@ -88,13 +89,30 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+    query = ""
+    if (user_query == "*"):
+        query = {
+            "match_all": {}
+        }
+    else:
+        query = {
+
+        }
+
     query_obj = {
         'size': 10,
-        "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
-        },
+        "query": query,
         "aggs": {
             #TODO: FILL ME IN
         }
     }
     return query_obj
+
+
+def process_response(response):
+     products_response = {
+         "query_time": response['took'],
+         "total_results": response['hits']['total']['value'],
+         "products": response['hits']['hits']
+     }
+     return products_response

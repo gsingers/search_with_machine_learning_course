@@ -1,28 +1,28 @@
 <div id="search-results" class="search-results">
-  {% for hit in search_response.hits.hits %}
+  {% for product in search_response.products %}
     <div class="search-result search-result-{{ loop.cycle('odd', 'even') }}">
       <div class="search-result-name">{#do we have a highlight?#}
-        {% if hit.highlight and hit.highlight.name %}
-          {{ hit.highlight.name[0] }}
+        {% if product.highlight and product.highlight.name %}
+          {{ product.highlight.name[0] }}
         {% else%}
-          {{ hit._source.name[0] }}
+          {{ product._source.name[0] }}
         {% endif %}
       </div>
-      <div><span class="search-result-header">ID</span>: {{ hit._source.productId[0] }}</div>
+      <div><span class="search-result-header">ID</span>: {{ product._source.productId[0] }}</div>
       <div><span class="search-result-header">Description</span>:
-        {% if hit._source.longDescription %}
+        {% if product._source.longDescription %}
           {#do we have a highlight?#}
-          {% if hit.highlight and hit.highlight.longDescription %}
-            {{ hit.highlight.longDescription[0] }}
+          {% if product.highlight and product.highlight.longDescription %}
+            {{ product.highlight.longDescription[0] }}
           {% else %}
-            {{ hit._source.longDescription[0] }}
+            {{ product._source.longDescription[0] }}
           {% endif %}
-        {% elif hit._source.shortDescription %}
+        {% elif product._source.shortDescription %}
           {#do we have a highlight?#}
-          {% if hit.highlight and hit.highlight.shortDescription %}
-            {{ hit.highlight.shortDescription }}
+          {% if product.highlight and product.highlight.shortDescription %}
+            {{ product.highlight.shortDescription }}
           {% else %}
-            {{ hit._source.shortDescription[0] }}
+            {{ product._source.shortDescription[0] }}
           {% endif %}
         {% endif %}
       </div>

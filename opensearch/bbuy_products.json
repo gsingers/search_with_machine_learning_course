@@ -5,6 +5,25 @@
       "query": {
         "default_field": "name"
       }
+    },
+    "analysis": {
+      "filter": {
+        "edge_ngram_filter": {
+          "type": "edge_ngram",
+          "min_gram": 1,
+          "max_gram": 20
+        }
+      },
+      "analyzer": {
+        "autocomplete": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "edge_ngram_filter"
+          ]
+        }
+      }
     }
   },
   "mappings": {
@@ -21,6 +40,11 @@
           }
         }
       },
+      "text_entry": {
+        "type": "text",
+        "analyzer": "autocomplete",
+        "search_analyzer": "standard"
+      },
       "productId": {
         "type": "long"
       },
@@ -32,21 +56,28 @@
       },
       "name": {
         "type": "text",
-        "analyzer": "english",
+        "copy_to": "text_entry",
         "fields": {
           "keyword": {
             "type": "keyword",
             "ignore_above": 256
+          },
+          "stemmed": {
+            "type": "text",
+            "analyzer": "english"
           }
         }
       },
       "shortDescription": {
         "type": "text",
-        "analyzer": "english",
         "fields": {
           "keyword": {
             "type": "keyword",
             "ignore_above": 256
+          },
+          "stemmed": {
+            "type": "text",
+            "analyzer": "english"
           }
         }
       },
@@ -57,6 +88,10 @@
           "keyword": {
             "type": "keyword",
             "ignore_above": 256
+          },
+          "stemmed": {
+            "type": "text",
+            "analyzer": "english"
           }
         }
       },
@@ -70,10 +105,10 @@
         "type": "boolean"
       },
       "regularPrice": {
-        "type": "integer_range"
+        "type": "float"
       },
       "salePrice": {
-        "type": "integer_range"
+        "type": "float"
       },
       "onSale": {
         "type": "boolean"
@@ -135,6 +170,10 @@
           "keyword": {
             "type": "keyword",
             "ignore_above": 256
+          },
+          "stemmed": {
+            "type": "text",
+            "analyzer": "english"
           }
         }
       },
@@ -146,6 +185,93 @@
             "ignore_above": 256
           }
         }
+      },
+      "features": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "stemmed": {
+            "type": "text",
+            "analyzer": "english"
+          }
+        }
+      },
+      "shippingWeight": {
+        "type": "float"
+      },
+      "width": {
+        "type": "keyword",
+        "ignore_above": 256
+      },
+      "depth": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "height": {
+        "type": "keyword",
+        "ignore_above": 256
+      },
+      "weight": {
+        "type": "keyword",
+        "ignore_above": 256
+      },
+      "color": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "condition": {
+        "type": "keyword"
+      },
+      "modelNumber": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "stemmed": {
+            "type": "text",
+            "analyzer": "english"
+          }
+        }
+      },
+      "relatedProducts": {
+        "type": "keyword",
+        "ignore_above": 256
+      },
+      "class": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "classId": {
+        "type": "keyword"
+      },
+      "shippingCost": {
+        "type": "float"
+      },
+      "url": {
+        "type": "keyword"
       }
     }
   }

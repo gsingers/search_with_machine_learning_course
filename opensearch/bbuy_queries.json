@@ -26,7 +26,6 @@
       },
       "user": {
         "type": "text",
-        "analyzer": "english",
         "fields": {
           "keyword": {
             "type": "keyword",
@@ -45,13 +44,24 @@
       },
       "query": {
         "type": "text",
-        "analyzer": "english",
         "fields": {
           "keyword": {
             "type": "keyword",
             "ignore_above": 256
+          },
+          "stemmed" : {
+            "type": "text",
+            "analyzer": "english"
           }
         }
+      },
+      "click_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ssZ||yyyy-MM-dd||epoch_millis||strict_date_optional_time"
+      },
+      "query_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ssZ||yyyy-MM-dd||epoch_millis||strict_date_optional_time"
       }
     }
   }
