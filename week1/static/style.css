@@ -1,4 +1,7 @@
 /* Search stylings */
+* {
+    font-family: sans-serif;
+}
 #search-box {
     height: 50px;
     display: flex;
