@@ -6,6 +6,7 @@ from flask import (
 )
 
 from week1.opensearch import get_opensearch
+from opensearchpy.exceptions import ImproperlyConfigured
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
@@ -40,7 +41,11 @@ def process_filters(filters_input):
 # Our main query route.  Accepts POST (via the Search box) and GETs via the clicks on aggregations/facets
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
-    opensearch = get_opensearch() # Load up our OpenSearch client from the opensearch.py file.
+    try:
+        opensearch = get_opensearch() # Load up our OpenSearch client from the opensearch.py file.
+    except ImproperlyConfigured as conf_err: # catch all exceptions raised by opensearch while setup
+        print("Error in connecting to opensearch with " + conf_err)
+
     # Put in your code to query opensearch.  Set error as appropriate.
     error = None
     user_query = None
