@@ -30,7 +30,7 @@ def process_filters(filters_input):
                                                                                  display_name)
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
-        if type == "range":            
+        if type == "range":
             # Price range
             filters["range"] = {
                 "range": {
@@ -44,8 +44,13 @@ def process_filters(filters_input):
                 # print(filters["range"])
                 filters["range"]["range"]["regularPrice"]["lt"] = float(request.args.get("regularPrice.to"))
             pass
-        elif type == "terms":
-            pass #TODO: IMPLEMENT
+        elif type == "term":
+            filters["term"] = {
+                "term": {
+                    "department.keyword": request.args.get("departments.key")
+                }
+            }
+            pass
 
     return filters, display_filters, applied_filters
 
@@ -101,10 +106,9 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
     queries = [{
-        "multi_match": {
-            "fields": ["name", "shortDescription", "longDescription", "department", "manufacturer"],
-            "query": user_query,
-            "type": "most_fields"
+        "query_string": {
+            "fields": ["name^1000", "shortDescription^100", "longDescription^50", "department"],
+            "query": user_query
         }
     },{
         "multi_match": {
@@ -112,14 +116,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
             "query": user_query,
             "type": "phrase"
         }
-    }, {
-        "match_phrase_prefix": {
-            "name.word_bigram": {
-                "query": user_query,
-                "boost": 2000
-            },
-        },
-    }]
+    }, ]
 
     boolQuery = {
         "bool": {
@@ -128,12 +125,55 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         }
     }
 
-    if filters and filters["range"]:
+    if filters and "range" in filters:
         boolQuery["bool"]["filter"] = filters["range"]
-
+    elif filters and "term" in filters:
+        boolQuery["bool"]["filter"] = filters["term"]
+    
     query_obj = {
         'size': 10,
-        "query": boolQuery,
+        "query": {
+            "function_score": {
+                "query": boolQuery,
+                "boost_mode": "multiply",
+                "score_mode": "avg",
+                "functions": [
+                    {
+                        "field_value_factor": {
+                            "field": "bestSellingRank",
+                            "factor": 1.5,
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankShortTerm",
+                            "factor": 1.2,
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankMediumTerm",
+                            "factor": 1.3,
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    },
+                ]
+            }
+        },
+        "highlight" : {
+            "pre_tags" : ["<span class='bg-yellow'>"],
+            "post_tags" : ["</span>"],
+            "fields" : {
+            "name" : {},
+            "shortDescription": {},
+            "longDescription": {}
+            }
+        },
         "aggs": {
             "regularPrice": {
                 "range": {
@@ -151,6 +191,11 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     "from": 1000
                     }
                 ]
+                }
+            },
+            "departments": {
+                "terms": {
+                    "field": "department.keyword"
                 }
             },
             "missing_images": {
