@@ -99,7 +99,7 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    mustQuery = [{
+    queries = [{
         "multi_match": {
             "fields": ["name", "shortDescription", "longDescription", "department", "manufacturer"],
             "query": user_query,
@@ -121,13 +121,13 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     }]
 
     if filters and filters["range"]:
-        mustQuery.append(filters["range"])
+        queries.append(filters["range"])
 
     query_obj = {
         'size': 100,
         "query": {
             "bool": {
-                "should": mustQuery,
+                "should": queries,
                 "minimum_should_match": 1
             },
         },
