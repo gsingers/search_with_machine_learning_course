@@ -35,6 +35,11 @@ echo " Product file: $PRODUCTS_JSON_FILE"
 echo " Query file: $QUERIES_JSON_FILE"
 #curl -k -X PUT -u admin  "https://localhost:9200/bbuy_products" -H 'Content-Type: application/json' -d "@$PRODUCTS_JSON_FILE"
 echo ""
+
+# first delete it !
+curl -k -X DELETE -u admin  "https://localhost:9200/bbuy_queries" 
+
+
 curl -k -X PUT -u admin  "https://localhost:9200/bbuy_queries" -H 'Content-Type: application/json' -d "@$QUERIES_JSON_FILE"
 
 echo ""

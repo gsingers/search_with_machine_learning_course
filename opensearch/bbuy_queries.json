@@ -8,8 +8,7 @@
         "type": "keyword"
       },
       "click_time": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss.SSS",
+        "type": "keyword",
         "fields": {
           "keyword": {
             "type": "keyword",
@@ -27,8 +26,7 @@
         }
       },
       "query_time": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss.SSS"
+        "type": "keyword"
       },
       "sku": {
         "type": "keyword"
