@@ -1,4 +1,5 @@
 flask
 opensearch-py
+python-dotenv
 ipython
-pandas # extra dependency for eda
+pandas

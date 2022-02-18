@@ -1,3 +1,6 @@
+# Ignore environment variable set in .env and used by python-dotenv
+.env
+
 output/
 logstash-*
 # Byte-compiled / optimized / DLL files

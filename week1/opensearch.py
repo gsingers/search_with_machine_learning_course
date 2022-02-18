@@ -10,7 +10,9 @@ References:
 > https://github.com/opensearch-project/opensearch-py
 """
 
+
 import os
+from dotenv import load_dotenv
 from flask import g, current_app
 from opensearchpy import OpenSearch
 
@@ -18,14 +20,17 @@ from opensearchpy import OpenSearch
 HOST = "localhost"
 PORT = 9200
 
+
 # Create an OpenSearch client instance and put it into Flask shared space for use by the application
 def get_opensearch():
     if "opensearch" not in g:
         # Implement a client connection to OpenSearch so that the rest of the application can communicate with OpenSearch
 
+        load_dotenv()
+
         auth = (
-            os.environ.get("OPENSEARCH_USERNAME", "<add_fallback>"),
-            os.environ.get("OPENSEARCH_PW", "<add_fallback>")
+            os.environ.get("OPENSEARCH_USERNAME", None),
+            os.environ.get("OPENSEARCH_PW", None)
         )
 
         # Create the client with SSL/TLS disabled, and hostname verification disabled.
