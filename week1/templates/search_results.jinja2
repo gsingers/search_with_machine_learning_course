@@ -9,9 +9,9 @@
   {% if display_filters%}
     <div id="applied-filters">{% include 'display_filters.jinja2' %}</div>
   {% endif %}
-  {% if search_response.total_results and search_response.took and search_response.product %}
+  {% if search_response.total_results and search_response.query_time and search_response.products %}
     <div id="all-results">
-      <div id="search-meta-container">Your query of {{ query }} returned {{ "{:,d}".format(search_response.total_results) }} hits in {{ search_response.took }} ms.</div>
+      <div id="search-meta-container">Your query of {{ query }} returned {{ "{:,d}".format(search_response.total_results) }} hits in {{ search_response.query_time }} ms.</div>
       <div id="aggregations-container">{% include 'aggregations.jinja2' %}</div>
       <div id="search-results-container">{% include 'display_results.jinja2' %}</div>
       <div id="debug">{% include 'debug.jinja2' %}</div>
