@@ -10,13 +10,13 @@ TODO
 
 ### Do your counts match ours?
 
-- *Number of documents in the Product index: 1,275,077* : Yes.
+- *Number of documents in the Product index: 1,275,077* : **Yes**.
 
-- *Number of documents in the Query Log index: 1,865,269* : TODO
+- *Number of documents in the Query Log index: 1,865,269* : **TODO**
 
-- *There are 16,772 items in the “Computers” department when using a “match all” query (“*”) and faceting on “department.keyword”* : TODO
+- *There are 16,772 items in the “Computers” department when using a “match all” query (“*”) and faceting on “department.keyword”* : **TODO**
 
-- *Number of documents missing an “image” field: 4,434* TODO
+- *Number of documents missing an “image” field: 4,434* **TODO**
 
 
 ### What field types and analyzers did you use for the following fields and why?
