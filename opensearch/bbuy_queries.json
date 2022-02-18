@@ -5,22 +5,10 @@
   "mappings": {
     "properties": {
       "user": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
+        "type": "keyword"
       },
       "sku": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
+        "type": "keyword"
       },
       "category": {
         "type": "text",
@@ -41,10 +29,12 @@
         }
       },
       "click_time": {
-        "type": "date"
+        "type" : "date",
+        "format": "yyyy-MM-dd HH:mm:ss[.SSS][.SS][.S][Z]||strict_date_optional_time||epoch_millis"
       },
       "query_time": {
-        "type": "date"
+        "type" : "date",
+        "format": "yyyy-MM-dd HH:mm:ss[.SSS][.SS][.S][Z]||strict_date_optional_time||epoch_millis"
       }
     }
   }
