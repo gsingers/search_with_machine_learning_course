@@ -139,7 +139,8 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                 "salesRankMediumTerm",
                 "salesRankLongTerm",
                 "regularPrice",
-                "categoryPath"
+                "categoryPath",
+                "regularPrice"
             ]
         },
         "sort": [

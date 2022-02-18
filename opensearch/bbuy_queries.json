@@ -2,38 +2,40 @@
   "settings": {
     "index.refresh_interval": "30s"
   },
-  "mappings":   {
-    "properties" : {
-      "category" : {
-        "type" : "keyword"
+  "mappings": {
+    "properties": {
+      "category": {
+        "type": "keyword"
       },
-      "click_time" : {
-        "type" : "date",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
+      "click_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss.SSS",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
           }
         }
       },
-      "query" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
+      "query": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
           }
         }
       },
-      "query_time" : {
-        "type" : "date"
+      "query_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss.SSS"
       },
-      "sku" : {
-        "type" : "keyword"
+      "sku": {
+        "type": "keyword"
       },
-      "user" : {
-        "type" : "keyword"
+      "user": {
+        "type": "keyword"
+      }
     }
   }
-}
 }

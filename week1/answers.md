@@ -22,13 +22,21 @@ TODO
 ### What field types and analyzers did you use for the following fields and why?
 
 1. Name
+
+    I have used 
+
 2. shortDescription and longDescription
+
+    Here I have used the same analyzer as for the Name field.
+
 3. regularPrice
+
+    This is just a double field, without analyzer. 
 
 
 ### Compare your Field mappings with the instructors. Where did you align and where did you differ? What are the pros and cons to the different approaches?
 
-TODO Were are the instructors field mappings?
+TODO **Were are the instructors field mappings?**
 
 ### Were you able to get the “ipad 2” to show up in the top of your results? How many iterations did it take for you to get there, if at all?
 
