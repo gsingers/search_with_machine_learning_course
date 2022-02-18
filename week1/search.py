@@ -28,16 +28,19 @@ def process_filters(filters_input):
                                                                                  display_name)
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
-        if type == "range":
+        if type == "range":            
             # Price range
             filters["range"] = {
                 "range": {
                     "regularPrice": {
                         "gt": request.args.get("regularPrice.from"),
-                        "lt": request.args.get("regularPrice.to")
                     }
                 }
             }
+
+            if request.args.get("regularPrice.to") is not "":
+                # print(filters["range"])
+                filters["range"]["range"]["regularPrice"]["lt"] = request.args.get("regularPrice.to")
             pass
         elif type == "terms":
             pass #TODO: IMPLEMENT
@@ -85,7 +88,7 @@ def query():
     #print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index="bbuy_products", doc_type="_doc")
     # Postprocess results here if you so desire
-    print(response)
+    #print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
@@ -96,13 +99,26 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    mustQuery = []
-    mustQuery.append({
-                        "multi_match": {
-                            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"],
-                            "query": user_query
-                        }
-                    })
+    mustQuery = [{
+        "multi_match": {
+            "fields": ["name", "shortDescription", "longDescription", "department", "manufacturer"],
+            "query": user_query,
+            "type": "most_fields"
+        }
+    },{
+        "multi_match": {
+            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"],
+            "query": user_query,
+            "type": "phrase"
+        }
+    }, {
+        "match": {
+            "name.word_bigram": {
+                "query": user_query,
+                "boost": 2000
+            },
+        }
+    }]
 
     if filters and filters["range"]:
         mustQuery.append(filters["range"])
@@ -111,7 +127,8 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         'size': 100,
         "query": {
             "bool": {
-                "must": mustQuery
+                "should": mustQuery,
+                "minimum_should_match": 1
             },
         },
         "aggs": {
@@ -121,14 +138,14 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                 "ranges": [
                     {
                     "from": 0,
-                    "to": 100
-                    },
-                    {
-                    "from": 101,
                     "to": 250
                     },
                     {
-                    "from": 251
+                    "from": 250,
+                    "to": 1000
+                    },
+                    {
+                    "from": 1000
                     }
                 ]
                 }

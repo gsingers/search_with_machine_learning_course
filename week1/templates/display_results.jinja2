@@ -1,6 +1,6 @@
 <div id="search-results" class="search-results">
   {% for hit in search_response.hits.hits %}
-    <div class="search-result search-result-{{ loop.cycle('odd', 'even') }}">
+    <div class="search-result search-result-{{ loop.cycle('odd', 'even') }} pa3">
       <div class="search-result-name">{#do we have a highlight?#}
         {% if hit.highlight and hit.highlight.name %}
           {{ hit.highlight.name[0] }}
@@ -28,7 +28,7 @@
       </div>
       <div>
         <span class="search-result-header">Price: 
-          {{ hit.salePrice }}
+          {{ hit._source.regularPrice[0] }}
         </span>
       </div>
     </div>
