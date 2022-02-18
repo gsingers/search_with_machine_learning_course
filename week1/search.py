@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #
 # The main search hooks for the Search Flask application.
 #
