@@ -2,7 +2,7 @@
 
 ### Link to your Gitpod/Github repo 
 
-TODO 
+https://github.com/snikoyo/search_with_machine_learning_course
 
 ### Screenshot of UI
 
