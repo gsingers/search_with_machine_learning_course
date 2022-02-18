@@ -20,6 +20,27 @@
       {% endfor %}
     {% endif %}
   </div>
+  <div class="aggregations-result">
+    <div class="agg-header">Department</div>
+    {% if "filter.name=department" not in applied_filters %}
+      {% for agg in search_response.aggregations.departments.buckets %}
+        {% if agg.doc_count > 0 %}
+          <div class="aggregation">
+            <div><a
+                href="{{ url_for("search.query") }}?&query={{ query|e }}{{ applied_filters }}&filter.name=department&department.type=terms&department.key={{ agg.key }}">{{ agg.key }} : {{ agg.doc_count }}</a>
+            </div>
+          </div>{% endif %}
+      {% endfor %}
+    {% else %}
+      {# We've already applied it, just display it #}
+      {% for agg in search_response.aggregations.departments.buckets %}
+        {% if agg.doc_count > 0 %}
+          <div class="aggregation">
+            <div>{{ agg.key }}: {{ agg.doc_count }}</div>
+          </div>{% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
   {#Add in Department aggregation display here #}
   <div class="aggregations-result">
     <div class="agg-header">Missing Data</div>
