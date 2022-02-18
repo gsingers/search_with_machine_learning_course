@@ -9,7 +9,7 @@
       },
       "click_time" : {
         "type" : "date",
-        "format": "yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+        "format": "yyyy-MM-dd HH:mm:ss[.SSS][.SS][.S][Z]||strict_date_optional_time||epoch_millis"
       },
       "query" : {
         "type" : "text",
@@ -22,7 +22,7 @@
       },
       "query_time" : {
         "type" : "date",
-        "format": "yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+        "format": "yyyy-MM-dd HH:mm:ss[.SSS][.SS][.S][Z]||strict_date_optional_time||epoch_millis"
       },
       "sku" : {
         "type" : "keyword"
