@@ -53,7 +53,9 @@ TODO
 
 1. Name
 
-    I have used 
+    I have used my own analyzer that I called "default" so that it works automatically for all the text fields. It uses the Standard tokenizer that splits on Whitespace and Non-Alphanumeric symbols and has the following token filters:
+
+        - 
 
 2. shortDescription and longDescription
 

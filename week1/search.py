@@ -1,6 +1,9 @@
 #
 # The main search hooks for the Search Flask application.
 #
+
+from typing import List, Dict
+
 from flask import (
     Blueprint, redirect, render_template, request, url_for
 )
@@ -92,10 +95,10 @@ def query():
         redirect(url_for("index"))
 
 
-def create_query(user_query, filters, sort="_score", sortDir="desc"):
+def create_query(user_query: str, filters: List, sort="_score", sortDir="desc") -> Dict:
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
 
-    query_obj = {
+    query_dict = {
         "size": 10,
         "query": {
             "bool": {
@@ -162,4 +165,4 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         }
     }
 
-    return query_obj
+    return query_dict
