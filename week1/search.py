@@ -25,16 +25,15 @@ def process_filters(filters_input):
         display_name = request.args.get(filter + ".displayName", filter)
         #
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
-        applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(
-            filter, filter, type, filter, display_name
-        )
+        applied_filters += f"&filter.name={filter}&{filter}.type={type}&{filter}"
+        applied_filters += f".displayName={display_name}"
         # TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
             pass
         elif type == "terms":
             pass  # TODO: IMPLEMENT
-    print("Filters: {}".format(filters))
+    print(f"Filters: {filters}")
 
     return filters, display_filters, applied_filters
 
@@ -77,7 +76,7 @@ def query():
     else:
         query_obj = create_query("*", [], sort, sortDir)
 
-    print("query obj: {}".format(query_obj))
+    print(f"query obj: {query_obj}")
     response = None  # TODO: Replace me with an appropriate call to OpenSearch
     # Postprocess results here if you so desire
 
@@ -111,7 +110,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
 
     user_query = "vacuum"
 
-    print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+    print(f"Query: {user_query} Filters: {filters} Sort: {sort}")
     query_obj = {
         "size": 10,
         "query": {
@@ -121,6 +120,5 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
             # TODO: FILL ME IN
         },
     }
-    print(f"user_query: {user_query}")
-    print(f"query_obj: {query_obj}")
+
     return query_obj
