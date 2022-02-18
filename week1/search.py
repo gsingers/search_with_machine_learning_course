@@ -5,6 +5,8 @@ from flask import (
     Blueprint, redirect, render_template, request, url_for
 )
 
+import json
+
 from week1.opensearch import get_opensearch
 
 bp = Blueprint('search', __name__, url_prefix='/search')
@@ -33,18 +35,17 @@ def process_filters(filters_input):
             filters["range"] = {
                 "range": {
                     "regularPrice": {
-                        "gt": request.args.get("regularPrice.from"),
+                        "gt": float(request.args.get("regularPrice.from")),
                     }
                 }
             }
 
             if request.args.get("regularPrice.to") is not "":
                 # print(filters["range"])
-                filters["range"]["range"]["regularPrice"]["lt"] = request.args.get("regularPrice.to")
+                filters["range"]["range"]["regularPrice"]["lt"] = float(request.args.get("regularPrice.to"))
             pass
         elif type == "terms":
             pass #TODO: IMPLEMENT
-    print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
 
@@ -107,30 +108,32 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         }
     },{
         "multi_match": {
-            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"],
+            "fields": ["name^3000", "shortDescription^50", "longDescription^10", "department"],
             "query": user_query,
             "type": "phrase"
         }
     }, {
-        "match": {
+        "match_phrase_prefix": {
             "name.word_bigram": {
                 "query": user_query,
                 "boost": 2000
             },
-        }
+        },
     }]
 
+    boolQuery = {
+        "bool": {
+            "should": queries,
+            "minimum_should_match": 1
+        }
+    }
+
     if filters and filters["range"]:
-        queries.append(filters["range"])
+        boolQuery["bool"]["filter"] = filters["range"]
 
     query_obj = {
-        'size': 100,
-        "query": {
-            "bool": {
-                "should": queries,
-                "minimum_should_match": 1
-            },
-        },
+        'size': 10,
+        "query": boolQuery,
         "aggs": {
             "regularPrice": {
                 "range": {
@@ -158,5 +161,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         }
     }
     
-    print(query_obj)
+    # Pretty Print JSON
+    json_formatted_str = json.dumps(query_obj, indent=4)
+    print(json_formatted_str)
     return query_obj
