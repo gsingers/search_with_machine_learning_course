@@ -177,6 +177,15 @@
           }
         }
       },
+      "salesRankLongTerm": {
+        "type": "integer"
+      },
+      "salesRankMediumTerm": {
+        "type": "integer"
+      },
+      "salesRankShortTerm": {
+        "type": "integer"
+      },
       "manufacturer": {
         "type": "text",
         "fields": {

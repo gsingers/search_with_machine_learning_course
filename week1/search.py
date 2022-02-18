@@ -12,6 +12,7 @@ bp = Blueprint('search', __name__, url_prefix='/search')
 
 PRODUCTS_INDEX = "bbuy_products"
 QUERIES_INDEX = "bbuy_queries"
+RESPONSE_SIZE = 10
 
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
@@ -35,9 +36,28 @@ def process_filters(filters_input):
         # TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            _from = request.args.get(f"{filter}.from")
+            _to = request.args.get(f"{filter}.to")
+            _range = {
+                "gte": _from if _from else "*",
+                "lt": _to if _to else "*"
+            }
+            _filter = {"range": {filter: _range}}
+            filters.append(_filter)
+            display_filters.append(
+                f"{display_name}: {_range['gte']} to {_range['lt']}")
+            applied_filters = f"{applied_filters}&{filter}.from={_range['gte']}&{filter}.to={_range['lt']}"
         elif type == "terms":
-            pass  # TODO: IMPLEMENT
+            _field = request.args.get(f"{filter}.fieldName", filter)
+            _key = request.args.get(f"{filter}.key")
+            _filter = {
+                "term": {
+                    _field: _key
+                }
+            }
+            filters.append(_filter)
+            display_filters.append(f"{display_name}: {_key}")
+            applied_filters = f"{applied_filters}&{filter}.fieldName={_field}&{filter}.key={_key}"
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -99,19 +119,23 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         }
     else:
         query = {
-
+            "bool": {
+                "should": [
+                    {
+                        "multi_match": {
+                            "query": user_query,
+                            "fields": ["name^2", "shortDescription", "longDescription"]
+                        }
+                    }
+                ],
+                "filter": filters
+            },
         }
     return {
-        'size': 10,
+        'size': RESPONSE_SIZE,
         "query": query,
         "aggs": get_facets(),
-        "sort": [
-            {
-                sort: {
-                    "order": sortDir
-                }
-            }
-        ]
+        "sort": get_sort(sort, sortDir)
     }
 
 
@@ -125,38 +149,50 @@ def process_response(response):
     return products_response
 
 
+def get_sort(sort, sortDir):
+    return [
+        {
+            sort: {
+                "order": sortDir
+            }
+        }
+    ]
+
+
 def get_facets():
     return {
-        "regularPrice": {
-            "terms": {
-                "size": 5,
-                "field": "regularPrice"
-            },
-            # "ranges": [
-            #     {
-            #         "to": 0
-            #     },
-            #     {
-            #         "from": 10,
-            #         "to": 20
-            #     },
-            #     {
-            #         "from": 20,
-            #         "to": 50
-            #     },
-            #     {
-            #         "from": 50,
-            #         "to": 100
-            #     },
-            #     {
-            #         "from": 100
-            #     }
-            # ]
-        },
         "department": {
             "terms": {
-                "size": 5,
-                "field": "department.keyword"
+                "field": "department.keyword",
+                "min_doc_count": 1
+            }
+        },
+        "missing_images": {
+            "missing": {
+                "field": "image.keyword"
+            }
+        },
+        "regularPrice": {
+            "range": {
+                "field": "regularPrice",
+                "ranges": [
+                    {"key": "$", "to": 100},
+                    {"key": "$$", "from": 100, "to": 200},
+                    {"key": "$$$", "from": 200, "to": 300},
+                    {"key": "$$$$", "from": 300, "to": 400},
+                    {"key": "$$$$$", "from": 400, "to": 500},
+                    {"key": "$$$$$$", "from": 500}
+                ]
+            },
+            "aggs": {
+                "price_stats": {
+                    "stats": {"field": "regularPrice"}
+                }
             }
         }
     }
+
+def get_suggestion(term):
+    #TODO: Implement autosuggest
+    pass 
+
