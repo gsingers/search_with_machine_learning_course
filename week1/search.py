@@ -132,6 +132,8 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
             "includes": [
                 "productId",
                 "name",
+                "class",
+                "categoryPath",
                 "shortDescription",
                 "longDescription",
                 "department",
@@ -156,11 +158,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
             }
         ],
         "aggs": {
-            "class_agg": {
-                "terms": {
-                    "field": "class.keyword", "size": 100
-                }
-            }
+            
         }
     }
 

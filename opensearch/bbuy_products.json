@@ -64,13 +64,7 @@
         }
       },
       "categoryPathCount" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "double"
       },
       "categoryPathIds" : {
         "type" : "text",

@@ -1,24 +1,13 @@
 <div id="search-results" class="search-results">
   {% for hit in search_response.hits.hits %}
     <div class="search-result search-result-{{ loop.cycle('odd', 'even') }}">
-      <div><span class="search-result-header">ID</span>: {{ hit._source.productId[0] }}</div>
       <div><span class="search-result-header">Name</span>: {{ hit._source.name }}</div>
+      <div><span class="search-result-header">Class</span>: {{ hit._source.class }}</div>
+      <div><span class="search-result-header">categoryPath</span>: {{ hit._source.categoryPath }}</div>
       <div><span class="search-result-header">Description</span>:
-        {% if hit._source.longDescription %}
-          {#do we have a highlight?#}
-          {% if hit.highlight and hit.highlight.longDescription %}
-            {{ hit.highlight.longDescription[0] }}
-          {% else %}
-            {{ hit._source.longDescription[0] }}
-          {% endif %}
-        {% elif hit._source.shortDescription %}
-          {#do we have a highlight?#}
-          {% if hit.highlight and hit.highlight.shortDescription %}
-            {{ hit.highlight.shortDescription }}
-          {% else %}
-            {{ hit._source.shortDescription[0] }}
-          {% endif %}
-        {% endif %}
+        {% if hit._source.shortDescription %}
+          {{ hit._source.shortDescription[0] }}
+        {% endif %}}
       </div>
     </div>
   {% endfor %}

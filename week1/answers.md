@@ -12,11 +12,41 @@ TODO
 
 - *Number of documents in the Product index: 1,275,077* : **Yes**.
 
-- *Number of documents in the Query Log index: 1,865,269* : **TODO**
+- *Number of documents in the Query Log index: 1,865,269* : **Yes**
 
-- *There are 16,772 items in the “Computers” department when using a “match all” query (“*”) and faceting on “department.keyword”* : **TODO**
+- *There are 16,772 items in the “Computers” department when using a “match all” query (“*”) and faceting on “department.keyword”* : **YES**
 
-- *Number of documents missing an “image” field: 4,434* **TODO**
+    I didn't need the match all query. I also didn't need the `.keyword` subfield because I only indexed it as a keyword (don't intend to search it)
+
+    ```POST bbuy_products/_search
+        "size": 0, 
+        "aggs": {
+            "my_agg": {
+            "terms": {
+                "field": "department"
+            }
+            }
+    }```
+
+- *Number of documents missing an “image” field: 4,434* **YES**
+
+  Via Discover in OS Dashboards, Lucene Query Language: `NOT image:*`
+
+  Via Query DSL: 
+
+  ```POST bbuy_products/_search
+    {
+          "size": 0, 
+          "query": {
+          "bool": {
+          "must_not": {
+          "exists": {
+          "field": "image"
+            }
+          }
+        }
+      }
+    }```
 
 
 ### What field types and analyzers did you use for the following fields and why?
