@@ -1,5 +1,35 @@
 {
   "settings": {
     "index.refresh_interval": "5s"
-  }
+  },
+  "mappings" : {
+    "properties" : {
+      "category" : {
+        "type" : "keyword"
+      },
+      "click_time" : {
+        "type" : "date",
+        "format": "yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+      },
+      "query" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+      "query_time" : {
+        "type" : "date",
+        "format": "yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+      },
+      "sku" : {
+        "type" : "keyword"
+      },
+      "user" : {
+        "type" : "keyword"
+      }
+    }
+ }
 }
