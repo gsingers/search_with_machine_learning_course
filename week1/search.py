@@ -26,7 +26,7 @@ def process_filters(filters_input):
     for filter in filters_input:
         type = request.args.get(filter + ".type")
         display_name = request.args.get(filter + ".displayName", filter)
-        
+
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
         applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
                                                                                  display_name)
@@ -47,9 +47,10 @@ def process_filters(filters_input):
                 }
             })
 
-            applied_filters += "&regularPrice.key={}&regularPrice.from={}&regularPrice.to={}".format(agg_key, agg_from, agg_to)
+            applied_filters += "&regularPrice.key={}&regularPrice.from={}&regularPrice.to={}".format(
+                agg_key, agg_from, agg_to)
             display_filters.append("{} {}".format(display_name, agg_key))
- 
+
         elif type == "terms":
             agg_key = request.args.get(filter + ".key")
             #agg_val = request.args.get(filter + ".val")
@@ -127,10 +128,59 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     if user_query == "*":
         queries.append({"match_all": {}})
     else:
-        queries.append({"match_phrase": {"name": user_query}})
+        #queries.append({"match_phrase": {"name": user_query}})
+        # queries.append({"multi_match": {
+        #     "query": user_query,
+        #     "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+        # }})
+        #queries.append({"query_string": {
+        #    "query": user_query,
+        #    "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+        #}})
+        queries.append({
+            "function_score": {
+            "query": {
+              "query_string": {
+                "query": user_query,
+                "fields": [
+                  "name^100",
+                  "shortDescription^50",
+                  "longDescription^10",
+                  "department"
+                ]
+              }
+            },
+            "boost_mode": "multiply",
+            "score_mode": "avg",
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salesRankLongTerm",
+                  "missing": 100000000, 
+                  "modifier": "reciprocal"
+                }
+              },
+              {
+                "field_value_factor": {
+                  "field": "salesRankMediumTerm",
+                  "missing": 100000000, 
+                  "modifier": "reciprocal"
+                }
+              },
+              {
+                "field_value_factor": {
+                  "field": "salesRankShortTerm",
+                  "missing": 100000000, 
+                  "modifier": "reciprocal"
+                }
+              }
+            ]
+          }
+        })
 
     query_obj = {
         'size': 10,
+        "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm", "salesRankLongTerm", "regularPrice", "image"],
         "query": {
             "bool": {
                 "must": queries,
@@ -153,7 +203,17 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                         },
                         {
                             "key": "$$$",
-                            "from": 100
+                            "from": 100,
+                            "to": 1000
+                        },
+                        {
+                            "key": "$$$$",
+                            "from": 1000,
+                            "to": 5000
+                        },
+                        {
+                            "key": "$$$$$",
+                            "from": 5000
                         }
                     ]
                 }
