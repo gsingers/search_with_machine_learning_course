@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-  <div id="did-you-mean">DYM goes here</div>
+  <div id="did-you-mean">Did you mean ?: {{ autosuggest_response }}</div>
   {% if display_filters%}
     <div id="applied-filters">{% include 'display_filters.jinja2' %}</div>
   {% endif %}

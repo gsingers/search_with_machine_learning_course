@@ -72,8 +72,6 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
-
-# Our main query route.  Accepts POST (via the Search box) and GETs via the clicks on aggregations/facets
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
     opensearch = get_opensearch()
@@ -113,11 +111,12 @@ def query():
         query_obj = create_query("*", [], sort, sortDir, pageSize, pageNo)
 
     print("query obj: {}".format(query_obj))
-    response = opensearch.search(body=query_obj, index=PRODUCTS_INDEX)
-    search_response = process_response(response)
-    # Postprocess results here if you so desire
+    search_response = opensearch.search(body=query_obj, index=PRODUCTS_INDEX)
+    search_response = process_response(search_response)
+    autosuggest_response = get_suggestion(user_query)
+
     if error is None:
-        return render_template("search_results.jinja2", query=user_query, search_response=search_response,
+        return render_template("search_results.jinja2", query=user_query, search_response=search_response, autosuggest_response=autosuggest_response,
                                display_filters=display_filters, applied_filters=applied_filters,
                                sort=sort, sortDir=sortDir, pageNo=pageNo, pageSize=pageSize)
     else:
@@ -126,25 +125,24 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc", pageSize=10, pageNo=0):
     facets = get_facets()
-    query = ""
     if (user_query == "*"):
-        user_query = {
+        query = {
             "match_all": {},
         }
     else:
-        user_query = {
+        query = {
             "multi_match": {
                 "query": user_query,
                 "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
             }
         }
 
-    query = {
+    query_function = {
         "function_score": {
             "query": {
                 "bool": {
                     "must": [
-                        user_query
+                        query
                     ],
                     "filter": filters
                 }
@@ -180,7 +178,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", pageSize=10
         'size': RESPONSE_SIZE,
         "from": pageSize * pageNo,
         "track_total_hits": True,
-        "query": query,
+        "query": query_function,
         "aggs": get_facets(),
         "sort": get_sort(sort, sortDir)
     }
@@ -240,5 +238,21 @@ def get_facets():
 
 
 def get_suggestion(term):
-    # TODO: Implement autosuggest
-    pass
+    if term == "*":
+        return ""
+    opensearch = get_opensearch()
+    query = {
+        "suggest": {
+            "autocomplete": {
+                "prefix": term,
+                "completion": {
+                    "field": "text_entry"
+                }
+            }
+        }
+    }
+    autosuggest_response = opensearch.search(body=query, index=QUERIES_INDEX)
+    if autosuggest_response['suggest']['autocomplete'][0]['options'][0]['text']:
+        return autosuggest_response['suggest']['autocomplete'][0]['options'][0]['text']
+    else:
+        return ""

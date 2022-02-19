@@ -44,6 +44,7 @@
       },
       "query": {
         "type": "text",
+        "copy_to": "text_entry",
         "fields": {
           "keyword": {
             "type": "keyword",
@@ -62,6 +63,9 @@
       "query_time": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ssZ||yyyy-MM-dd||epoch_millis||strict_date_optional_time"
+      },
+      "text_entry": {
+        "type": "completion"
       }
     }
   }
