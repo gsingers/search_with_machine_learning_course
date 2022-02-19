@@ -58,7 +58,13 @@
         }
       },
       "department": {
-        "type": "keyword"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
       },
       "departmentId": {
         "type": "long"
@@ -189,7 +195,13 @@
         }
       },
       "manufacturer": {
-        "type": "keyword"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
       },
       "marketplace": {
         "type": "text",
@@ -287,6 +299,9 @@
       },
       "salePrice": {
         "type": "double"
+      },
+      "salesRankShortTerm" : {
+        "type" : "long"
       },
       "shippingWeight": {
         "type": "text",
