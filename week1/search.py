@@ -9,6 +9,8 @@ from week1.opensearch import get_opensearch
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
+INDEX_NAME = 'bbuy_products'
+
 
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
@@ -50,6 +52,7 @@ def query():
     filters = None
     sort = "_score"
     sortDir = "desc"
+
     if request.method == 'POST':  # a query has been submitted
         user_query = request.form['query']
         if not user_query:
@@ -74,7 +77,12 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+
+    response = opensearch.search(
+        body=query_obj,
+        index=INDEX_NAME
+    )
+
     # Postprocess results here if you so desire
 
     #print(response)
@@ -91,7 +99,13 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     query_obj = {
         'size': 10,
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+            "multi_match": {
+                "query": user_query,
+                "operator": "AND"
+            }
+        },
+        "sort": {
+            sort: sortDir
         },
         "aggs": {
             #TODO: FILL ME IN
