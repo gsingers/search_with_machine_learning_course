@@ -1,5 +1,15 @@
 flask
 opensearch-py
+requests
+ipython
+urljoin
+xgboost
+pandas
+numpy
+numba
+numexpr
+sklearn
+graphviz
+matplotlib
 fasttext
 nltk
-pandas
