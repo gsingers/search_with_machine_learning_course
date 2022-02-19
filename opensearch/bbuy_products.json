@@ -80,6 +80,7 @@
       },
       "name": {
         "type": "text",
+        "analyzer":"english",
         "fields": {
           "keyword": {
             "type": "keyword",
