@@ -29,13 +29,7 @@
         "type" : "boolean"
       },
       "bestBuyItemId" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "bestSellingRank" : {
         "type" : "text",
@@ -47,13 +41,7 @@
         }
       },
       "categoryLeaf" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "categoryPath" : {
         "type" : "text",
@@ -93,13 +81,7 @@
         }
       },
       "classId" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "color" : {
         "type" : "text",
@@ -149,13 +131,7 @@
         }
       },
       "departmentId" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "depth" : {
         "type" : "text",
@@ -244,13 +220,7 @@
         }
       },
       "modelNumber" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "name" : {
         "type" : "text",
@@ -269,13 +239,7 @@
         "type" : "boolean"
       },
       "productId" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "quantityLimit" : {
         "type" : "text",
@@ -369,13 +333,7 @@
         }
       },
       "sku" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "startDate" : {
         "type" : "date"
@@ -391,13 +349,7 @@
         }
       },
       "subclassId" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "tags" : {
         "type" : "text",
