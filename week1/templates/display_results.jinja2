@@ -1,6 +1,7 @@
 <div id="search-results" class="search-results">
   {% for hit in search_response.hits.hits %}
     <div class="search-result search-result-{{ loop.cycle('odd', 'even') }}">
+      <div><img src="{{ hit._source.image[0] }}" alt="{{ hit._source.image[0] }}"></div>
       <div class="search-result-name">{#do we have a highlight?#}
         {% if hit.highlight and hit.highlight.name %}
           {{ hit.highlight.name[0] }}
@@ -26,6 +27,9 @@
           {% endif %}
         {% endif %}
       </div>
+      <div><span class="search-result-header">Price</span>: {{ hit._source.regularPrice[0] }}</div>
+      <div><span class="search-result-header">onSale</span>: {{ hit._source.onSale[0] }}</div>
+      <div><span class="search-result-header">salePrice</span>: {{ hit._source.salePrice[0] }}</div>
     </div>
   {% endfor %}
 
