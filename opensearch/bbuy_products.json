@@ -242,13 +242,7 @@
         "type" : "keyword"
       },
       "quantityLimit" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "integer"
       },
       "regularPrice" : {
         "type" : "float"
@@ -296,22 +290,10 @@
         }
       },
       "shippingCost" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "float"
       },
       "shippingWeight" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "float"
       },
       "shortDescription" : {
         "type" : "text",

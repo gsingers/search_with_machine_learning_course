@@ -53,7 +53,7 @@
         }
       },
       "sku" : {
-        "type" : "long"
+        "type" : "keyword"
       },
       "user" : {
         "type" : "text",
