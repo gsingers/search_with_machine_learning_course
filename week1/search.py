@@ -27,28 +27,34 @@ def process_filters(filters_input):
         #
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
         applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}&{}.key={}".format(filter, filter, type, filter,
-                                                                                 display_name, filter, key)
-        print(f'filter type - {type}')
-        print(f'filter display name - {display_name}')
-        print(f'filter key - {key}')
-        print(f'applied filter - {applied_filters}')
+                                                                                           display_name, filter, key)
         # TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
-        display_filters.append(f'{display_name} {key}')
 
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
 
         search_filter = {}
         if type == "range":
-            gte = request.args.get(filter + ".from")
-            lte = request.args.get(filter + ".to")
-            search_filter = {'type': type, 'name': filter}
+            range_filter = {}
 
-            if gte:
-                search_filter['gte'] = gte
-            if lte:
-                search_filter['lte'] = lte
+            from_filter = request.args.get(filter + ".from") if request.args.get(filter + ".from") else 0
+            to_filter = request.args.get(filter + ".to")
+
+            range_filter['gt'] = from_filter
+            display = f'{from_filter}'
+
+            if to_filter:
+                range_filter['lt'] = to_filter
+                display = f'{display} to {to_filter}'
+
+            search_filter = {"range": {filter: range_filter}}
+
+            display_filters.append(f'{display_name}: {display}')
+
+            applied_filters += f'&{filter}.from={from_filter}&{filter}.to={to_filter}'
+
         elif type == "term":
-            search_filter = {'type': type, 'name': filter + '.keyword', 'key': key}
+            search_filter = {"term": {filter: key}}
+            display_filters.append(f'{display_name}: {key}')
 
         filters.append(search_filter)
     print("Filters: {}".format(filters))
@@ -117,7 +123,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         filters = []
     print("Query: {} Filters: {} Sort: {} sortDir: {}".format(user_query, filters, sort, sortDir))
 
-    searchQuery = _get_query_(user_query, filters)
+    searchQuery = _get_search_query_(user_query, filters)
     query_obj = {
         'size': 10,
         # Replace me with a query that both searches and filters
@@ -133,82 +139,54 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     "field": "regularPrice",
                     "ranges": [
                         {
-                            "to": 100
+                            "to": 100,
+                            "key": "$"
                         },
                         {
                             "from": 100,
-                            "to": 150
+                            "to": 200,
+                            "key": "$$"
                         },
                         {
-                            "from": 150
+                            "from": 200,
+                            "to": 300,
+                            "key": "$$$"
+                        },
+                        {
+                            "from": 300,
+                            "to": 400,
+                            "key": "$$$$"
+                        },
+                        {
+                            "from": 400,
+                            "key": "$$$$$"
                         }
                     ]
                 }
             },
             "department": {
                 "terms": {
-                    "field": "department.keyword"
+                    "field": "department"
                 }
             }
         },
-        "sort": {f"{sort}": {"order": sortDir}}
+        "sort": {sort: sortDir}
     }
     return query_obj
 
 
-def _get_query_(user_query, filters):
-    if not user_query or user_query == '*':
-        return _get_match_all_query(filters)
-
-    return _get_multi_match_query(user_query, filters)
-
-
-def _get_match_all_query(user_filters=[]):
-    filters = _create_search_filters_(user_filters)
+def _get_search_query_(user_query, filters=[]):
+    # filters = _create_search_filters_(user_filters)
     return {
         "bool": {
             "must": [
                 {
-                    "match_all": {}
-                }
-            ],
-            "filter": filters
-        }
-    }
-
-
-def _get_multi_match_query(user_query, user_filters=[]):
-    filters = _create_search_filters_(user_filters)
-    return {
-        "bool": {
-            "must": [
-                {
-                    "multi_match": {
+                    "simple_query_string": {
                         "query": user_query,
-                        "fields": ["name", "shortDescription", "longDescription"]
+                        "fields": ["name^10", "description^5", "shortDescription^2", "longDescription"]
                     }
                 }
             ],
             "filter": filters
         }
     }
-
-
-def _create_search_filters_(user_filters=[]):
-    filters = []
-    for user_filter in user_filters:
-        value = {}
-        if user_filter['type'] == "term":
-            value = user_filter['key']
-        elif user_filter['type'] == "range":
-            if 'gte' in user_filter and user_filter['gte']:
-                value['gte'] = user_filter['gte']
-
-            if 'lte' in user_filter and user_filter['lte']:
-                value['lte'] = user_filter['lte']
-
-        search_filter = {user_filter['type']: {user_filter['name']: value}}
-
-        filters.append(search_filter)
-
-    return filters
