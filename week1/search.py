@@ -123,6 +123,9 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     # Example query:
     # query_obj = {"size": 10, "query": {"match_all": {}}}
 
+    # size_results = 10
+    size_results = 100
+
     if user_query.strip() == "*":
         # Select all / match all
         query_type = "match_all"
@@ -135,7 +138,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         }
 
     query_obj = {
-        "size": 10,
+        "size": size_results,
         "query": {
             # DONE: TODO: "match_all": {}  # Replace me with a query that both searches and filters
             query_type: query_dict
