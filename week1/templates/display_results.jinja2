@@ -28,5 +28,12 @@
       </div>
     </div>
   {% endfor %}
-
+ <div>
+  {% if pageNo != 0 %}
+    <button type="button"><a href="{{ url_for("search.query") }}?&query={{ query|e }}{{ applied_filters }}&pageNo={{pageNo - 1}}">Previous</a></button>
+  {% endif %}
+  {% if (pageNo+1)*pageSize <= search_response.total_results %}
+    <button type="button"><a href="{{ url_for("search.query") }}?&query={{ query|e }}{{ applied_filters }}&pageNo={{pageNo + 1}}">Next</a></button>
+  {% endif %}
+  </div>
 </div>
