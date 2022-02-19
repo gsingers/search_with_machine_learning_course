@@ -50,6 +50,7 @@ else
       kill -9 $PIDTEMP
 fi
 
+
 echo "Indexing"
 echo " Product Logstash file: $PRODUCTS_LOGSTASH_FILE"
 echo " Query Logstash file: $QUERIES_LOGSTASH_FILE"
