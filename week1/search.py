@@ -15,24 +15,42 @@ bp = Blueprint('search', __name__, url_prefix='/search')
 # filters -- convert the URL GET structure into an OpenSearch filter query
 # display_filters -- return an array of filters that are applied that is appropriate for display
 # applied_filters -- return a String that is appropriate for inclusion in a URL as part of a query string.  This is basically the same as the input query string
-def process_filters(filters_input):
+def process_filters(filters_input: list)->(list, list, str):
     # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
     filters = []
     display_filters = []  # Also create the text we will use to display the filters that are applied
     applied_filters = ""
+
     for filter in filters_input:
         type = request.args.get(filter + ".type")
         display_name = request.args.get(filter + ".displayName", filter)
-        #
+
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
-        applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
-                                                                                 display_name)
-        #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
+        applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter, display_name)
+
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            key = request.args.get(filter + ".key", filter)
+            FROM = request.args.get(filter + ".from", filter) # Could be None
+            TO = request.args.get(filter + ".to", filter) # Could be None
+
+            applied_filters += f'''&{filter}.key={key}&{filter}.from={FROM}&{filter}.to={TO}'''
+            if FROM and TO: range_filter = {"range": {"regularPrice": { "lt": TO, "gte": FROM }}}
+            if FROM and not TO: range_filter = {"range": {"regularPrice": {"gte": FROM}}}
+            if TO and not FROM: range_filter = {"range": {"regularPrice": {"lt": TO}}}
+
+            filters.append(range_filter)
+            display_filters.append(f"filter.name={filter},filter.type={type},filter.key={key},filter.from={FROM},filter.to={TO}")
+
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            key = request.args.get(filter + ".key", filter)
+            applied_filters += f'''&{filter}.key={key}'''
+
+            term_filter = {"term": {"department.keyword": key}}
+            filters.append(term_filter)
+
+            display_filters.append(f"filter.name={filter},filter.type={type},filter.key={key}")
+
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -79,9 +97,8 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
     # Postprocess results here if you so desire
-
+    response = opensearch.search(index='bbuy_products', body=query_obj)
     #print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
@@ -93,13 +110,95 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    query_obj = {
-        'size': 10,
-        "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
-        },
-        "aggs": {
-            #TODO: FILL ME IN
+
+    # match_obj = {"match_all": {}}
+    multi_match = {"multi_match": {
+                    "query": user_query,
+                    "fields": ["name", "shortDescription", "longDescription", "department"]
+                  }}
+
+    multi_match_with_filter = {
+        "bool": {
+            "must": [multi_match],
+            "filter": filters,
         }
     }
+
+    match_all_with_filter = {
+        "bool": {
+            "must": [{"match_all": {}}],
+            "filter": filters
+        }
+    }
+
+    match_obj = match_all_with_filter if user_query == '*' else multi_match_with_filter
+
+    print(f"match_obj --> {match_obj}")
+
+    if user_query == '*':
+        query_obj = {
+            'size': 10,
+            "query": match_obj,
+            "aggs": {
+                "regularPrice": {
+                    "range": {
+                        "field": "regularPrice",
+                        "ranges": [
+                            { "to": 100},
+                            { "from": 100, "to": 200},
+                            { "from": 200, "to": 300},
+                            { "from": 400, "to": 500},
+                            { "from": 500, "to": 1000},
+                            { "from": 1000}
+                        ]
+                    }
+                },
+                "department": {
+                    "terms": {
+                        "field": "department.keyword",
+                    }
+                },
+                "missing_images": {
+                    "missing": { # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-missing-aggregation.html
+                        "field": "image"
+                    }
+                }
+            },
+            "sort": [{
+                sort: {"order": sortDir}
+            }]
+        }
+    else:
+        query_obj = {
+            'size': 10,
+            "query": match_obj,
+            "aggs": {
+                "regularPrice": {
+                    "range": {
+                        "field": "regularPrice",
+                        "ranges": [
+                            { "to": 100},
+                            { "from": 100, "to": 200},
+                            { "from": 200, "to": 300},
+                            { "from": 400, "to": 500},
+                            { "from": 500, "to": 1000},
+                            { "from": 1000}
+                        ]
+                    }
+                },
+                "department": {
+                    "terms": {
+                        "field": "department.keyword",
+                    }
+                },
+                "missing_images": {
+                    "missing": { # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-missing-aggregation.html
+                        "field": "image"
+                    }
+                }
+            },
+            "sort": [{
+                sort: {"order": sortDir}
+            }]
+        }
     return query_obj
