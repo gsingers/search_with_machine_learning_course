@@ -123,14 +123,22 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     # Example query:
     # query_obj = {"size": 10, "query": {"match_all": {}}}
 
+    if user_query.strip() == "*":
+        # Select all / match all
+        query_type = "match_all"
+        query_dict = {}
+    else:
+        query_type = "multi_match"
+        query_dict = {
+            "query": user_query,
+            "fields": ["name^2", "longDescription", "relatedProducts"],
+        }
+
     query_obj = {
         "size": 10,
         "query": {
-            # "match_all": {}  # Replace me with a query that both searches and filters
-            "multi_match": {
-                "query": user_query,
-                "fields": ["name^2", "longDescription", "relatedProducts"],
-            }
+            # DONE: TODO: "match_all": {}  # Replace me with a query that both searches and filters
+            query_type: query_dict
         },
         "aggs": {
             # TODO: FILL ME IN
@@ -152,7 +160,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                         {
                             "from": 100,
                         },
-                    ]
+                    ],
                 }
             },
             "department": {
@@ -163,11 +171,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     "min_doc_count": 0,
                 }
             },
-            "missing_images": {
-                "missing": {
-                    "field": "image.keyword"
-                }
-            },
+            "missing_images": {"missing": {"field": "image.keyword"}},
         },
     }
 
