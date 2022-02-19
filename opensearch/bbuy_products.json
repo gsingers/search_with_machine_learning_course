@@ -26,13 +26,7 @@
         }
       },
       "active" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "boolean"
       },
       "bestBuyItemId" : {
         "type" : "text",
@@ -90,6 +84,7 @@
       },
       "class" : {
         "type" : "text",
+        "analyzer": "english",
         "fields" : {
           "keyword" : {
             "type" : "keyword",
@@ -144,6 +139,7 @@
       },
       "department" : {
         "type" : "text",
+        "analyzer": "english",
         "fielddata" : true,
         "fields" : {
           "keyword" : {
@@ -220,6 +216,7 @@
       },
       "longDescription" : {
         "type" : "text",
+        "analyzer": "english",
         "fields" : {
           "keyword" : {
             "type" : "keyword",
@@ -238,6 +235,7 @@
       },
       "manufacturer" : {
         "type" : "text",
+        "analyzer": "english",
         "fields" : {
           "keyword" : {
             "type" : "keyword",
@@ -256,6 +254,7 @@
       },
       "name" : {
         "type" : "text",
+        "analyzer": "english",
         "fields" : {
           "keyword" : {
             "type" : "keyword",
@@ -352,6 +351,7 @@
       },
       "shortDescription" : {
         "type" : "text",
+        "analyzer": "english",
         "fields" : {
           "keyword" : {
             "type" : "keyword",
@@ -382,6 +382,7 @@
       },
       "subclass" : {
         "type" : "text",
+        "analyzer": "english",
         "fields" : {
           "keyword" : {
             "type" : "keyword",
