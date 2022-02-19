@@ -35,7 +35,7 @@
       },
       "description": {
         "type": "text",
-        "analyzer":"my_analyzer",
+        "analyzer":"english",
         "fields": {
           "keyword": {
             "type": "keyword",
@@ -267,7 +267,7 @@
       },
       "longDescription": {
         "type": "text",
-        "analyzer":"my_analyzer",
+        "analyzer":"english",
         "fields": {
           "keyword": {
             "type": "keyword",
@@ -360,31 +360,13 @@
         }
       },
       "salesRankLongTerm": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
+        "type": "integer"
       },
       "salesRankMediumTerm": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
+        "type": "integer"
       },
       "salesRankShortTerm": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
+        "type": "integer"
       },
       "shippingCost": {
         "type": "text",
@@ -406,7 +388,7 @@
       },
       "shortDescription": {
         "type": "text",
-        "analyzer":"my_analyzer",
+        "analyzer":"english",
         "fields": {
           "keyword": {
             "type": "keyword",
