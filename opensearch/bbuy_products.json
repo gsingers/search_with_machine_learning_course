@@ -144,6 +144,7 @@
       },
       "department" : {
         "type" : "text",
+        "fielddata" : true,
         "fields" : {
           "keyword" : {
             "type" : "keyword",
@@ -323,13 +324,7 @@
         }
       },
       "regularPrice" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "float"
       },
       "relatedProducts" : {
         "type" : "text",
@@ -344,13 +339,7 @@
         "type" : "date"
       },
       "salePrice" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "float"
       },
       "salesRankLongTerm" : {
         "type" : "text",
