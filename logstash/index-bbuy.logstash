@@ -36,7 +36,7 @@ input {
             "/product/depth/text()", "depth",
             "/product/description/text()", "description",
             "/product/digital/text()", "digital",
-            "/product/features/*/text()", "features" # Note the match all here to get the subfields
+            "/product/features/*/text()", "features", # Note the match all here to get the subfields
             "/product/frequentlyPurchasedWith/*/text()", "frequentlyPurchasedWith",# Note the match all here to get the subfields
             "/product/height/text()", "height",
             "/product/homeDelivery/text()", "homeDelivery",
