@@ -7,15 +7,14 @@ services:
       - discovery.type=single-node
       - http.max_content_length=1000mb
       - "OPENSEARCH_JAVA_OPTS=-Xms4G -Xmx4G"
-
+      - TAKE_FILE_OWNERSHIP=true
     volumes:
-      - opensearch-data1:/usr/share/opensearch/data  #todo: figure this out so we can have persistent storage
+#      - opensearch-data1:/usr/share/opensearch/data  #todo: figure this out so we can have persistent storage
+      - ./data:/usr/share/opensearch/data
     ports:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
-    networks:
-      - opensearch-net
-  
+
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:latest
     container_name: opensearch-dashboards
@@ -27,13 +26,3 @@ services:
       OPENSEARCH_HOSTS: '["https://opensearch-node1:9200"]'
     depends_on:
       - opensearch-node1
-    networks:
-      - opensearch-net
-
-
-volumes:
-  opensearch-data1:
-
-networks:
-  opensearch-net:
-    driver: bridge
