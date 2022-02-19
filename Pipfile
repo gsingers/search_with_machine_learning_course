@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+opensearch-py = "*"
+requests = "*"
+ipython = "*"
+urljoin = "*"
+xgboost = "*"
+pandas = "*"
+numpy = "*"
+numba = "*"
+numexpr = "*"
+sklearn = "*"
+graphviz = "*"
+matplotlib = "*"
+fasttext = "*"
+nltk = "*"
+pytest = "*"
+
+[dev-packages]
+
+[requires]
+python_full_version = "3.9.7"
