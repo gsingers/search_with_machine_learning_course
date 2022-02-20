@@ -122,7 +122,7 @@ def query():
 
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
-    print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+    print("Query: {} Filters: {} Sort: {} SortDIR:{}".format(user_query, filters, sort, sortDir))
 
     queries = []
     if user_query == "*":
@@ -180,6 +180,11 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
 
     query_obj = {
         'size': 10,
+        "sort": {
+            sort : {
+                "order": sortDir
+            }
+        },
         "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm", "salesRankLongTerm", "regularPrice", "image"],
         "query": {
             "bool": {
