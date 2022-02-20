@@ -40,7 +40,7 @@ def process_filters(filters_input: list)->(list, list, str):
             if TO and not FROM: range_filter = {"range": {"regularPrice": {"lt": TO}}}
 
             filters.append(range_filter)
-            display_filters.append(f"filter.name={filter},filter.type={type},filter.key={key},filter.from={FROM},filter.to={TO}")
+            display_filters.append(f"Price: {FROM} TO {TO}")
 
         elif type == "terms":
             key = request.args.get(filter + ".key", filter)
@@ -49,7 +49,7 @@ def process_filters(filters_input: list)->(list, list, str):
             term_filter = {"term": {"department.keyword": key}}
             filters.append(term_filter)
 
-            display_filters.append(f"filter.name={filter},filter.type={type},filter.key={key}")
+            display_filters.append(f"Department: {key}")
 
     print("Filters: {}".format(filters))
 
@@ -111,15 +111,40 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
 
-    # match_obj = {"match_all": {}}
-    multi_match = {"multi_match": {
-                    "query": user_query,
-                    "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
-                  }}
+    aggr_obj = {
+                "regularPrice": {
+                    "range": {
+                        "field": "regularPrice",
+                        "ranges": [
+                            { "key": "$", "from": 0.0, "to": 50.0},
+                            { "key": "$$", "from": 50.0, "to": 100.0},
+                            { "key": "$$$", "from": 100.0, "to": 300.0},
+                            { "key": "$$$$", "from": 300.0, "to": 500.0},
+                            { "key": "$$$$$", "from": 500.0, "to": 1000.0},
+                            { "key": "$$$$$$", "from": 1000.0}
+                        ]
+                    }
+                },
+                "department": {
+                    "terms": {
+                        "field": "department.keyword",
+                    }
+                },
+                "missing_images": {
+                    "missing": { # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-missing-aggregation.html
+                        "field": "image"
+                    }
+                }
+            }
+
 
     multi_match_with_filter = {
         "bool": {
-            "must": [multi_match],
+            "must": [{"multi_match": {
+                        "query": user_query, "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]}}],
+            "should": [{"match_phrase": {
+                            "longDescription": {
+                                "query": user_query, "analyzer": "english"}}}],
             "filter": filters,
         }
     }
@@ -135,35 +160,33 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
 
     print(f"match_obj --> {match_obj}")
 
+    function_score = {"function_score": {
+      "query": match_obj,
+      "functions": [{
+          "field_value_factor": {
+            "field": "salesRankShortTerm", "modifier": "reciprocal", "missing": 100000000
+            }
+        },
+        {
+          "field_value_factor": {
+            "field": "salesRankMediumTerm", "modifier": "reciprocal", "missing": 100000000
+          }
+        },
+        {
+          "field_value_factor": {
+            "field": "salesRankLongTerm", "modifier": "reciprocal", "missing": 100000000
+          }
+        }
+      ],
+      "boost_mode": "multiply",
+      "score_mode": "avg"
+    }}
+
     if user_query == '*':
         query_obj = {
             'size': 10,
             "query": match_obj,
-            "aggs": {
-                "regularPrice": {
-                    "range": {
-                        "field": "regularPrice",
-                        "ranges": [
-                            { "to": 100},
-                            { "from": 100, "to": 200},
-                            { "from": 200, "to": 300},
-                            { "from": 400, "to": 500},
-                            { "from": 500, "to": 1000},
-                            { "from": 1000}
-                        ]
-                    }
-                },
-                "department": {
-                    "terms": {
-                        "field": "department.keyword",
-                    }
-                },
-                "missing_images": {
-                    "missing": { # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-missing-aggregation.html
-                        "field": "image"
-                    }
-                }
-            },
+            "aggs": aggr_obj,
             "sort": [{
                 sort: {"order": sortDir}
             }]
@@ -171,32 +194,8 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     else:
         query_obj = {
             'size': 10,
-            "query": match_obj,
-            "aggs": {
-                "regularPrice": {
-                    "range": {
-                        "field": "regularPrice",
-                        "ranges": [
-                            { "to": 100},
-                            { "from": 100, "to": 200},
-                            { "from": 200, "to": 300},
-                            { "from": 400, "to": 500},
-                            { "from": 500, "to": 1000},
-                            { "from": 1000}
-                        ]
-                    }
-                },
-                "department": {
-                    "terms": {
-                        "field": "department.keyword",
-                    }
-                },
-                "missing_images": {
-                    "missing": { # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-missing-aggregation.html
-                        "field": "image"
-                    }
-                }
-            },
+            "query": function_score,
+            "aggs": aggr_obj,
             "sort": [{
                 sort: {"order": sortDir}
             }]
