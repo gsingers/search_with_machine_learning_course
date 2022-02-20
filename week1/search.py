@@ -33,6 +33,7 @@ def process_filters(filters_input):
             pass
         elif type == "terms":
             pass  # TODO: IMPLEMENT
+
     print(f"Filters: {filters}")
 
     return filters, display_filters, applied_filters
@@ -82,7 +83,6 @@ def query():
     print(f"query obj: {query_obj}")
 
     # DONE: TODO: Replace me with an appropriate call to OpenSearch
-    # response = None
 
     index_name_products = "bbuy_products"
     response = opensearch_client.search(body=query_obj, index=index_name_products)
@@ -108,23 +108,6 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc", size_results=10):
 
     print(f"Query: {user_query} Filters: {filters} Sort: {sort}")
-
-    ########################################################
-
-    # query_obj = {
-    #     "size": 10,
-    #     "query": {
-    #         "match_all": {}  # Replace me with a query that both searches and filters
-    #     },
-    #     "aggs": {
-    #         # TODO: FILL ME IN
-    #     },
-    # }
-
-    ########################################################
-
-    # Example query:
-    # query_obj = {"size": 10, "query": {"match_all": {}}}
 
     if user_query.strip() == "*":
         # Select all / match all
