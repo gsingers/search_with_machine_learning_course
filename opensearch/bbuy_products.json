@@ -1,5 +1,52 @@
 {
   "settings": {
     "index.refresh_interval": "5s"
+  },
+  "mappings": {
+    "properties": {
+      "salesRankLongTerm": {
+        "type": "long"
+      },
+      "salesRankShortTerm": {
+        "type": "long"
+      },
+      "salesRankMediumTerm": {
+        "type": "long"
+      },
+      "regularPrice" : {
+        "type" : "float"
+      },
+      "shortDescription": {
+        "type": "text",
+        "analyzer": "english",
+        "search_analyzer": "english" 
+      },
+      "description": {
+        "type": "text",
+        "analyzer": "english",
+        "search_analyzer": "english" 
+      },
+      "longDescription": {
+        "type": "text",
+        "analyzer": "english",
+        "search_analyzer": "english" 
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "english",
+        "search_analyzer": "english" 
+      },
+      "department": {
+        "type": "text",
+        "analyzer": "english",
+        "search_analyzer": "english",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      }
+    }
   }
 }
