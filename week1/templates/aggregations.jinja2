@@ -29,7 +29,9 @@
         {% if agg.doc_count > 0 %}
           <div class="aggregation">
             <div><a
-                href="{{ url_for("search.query") }}?&query={{ query|e }}{{ applied_filters }}&filter.name=department&department.type=terms&department.key={{ agg.key }}&department.from={{ agg.from }}&department.to={{ agg.to }}&department.displayName=Department">{{ agg.key }} (${{ agg.from }} TO ${{ agg.to }}): {{ agg.doc_count }}</a>
+                href="{{ url_for("search.query") }}?&query={{ query|e }}{{ applied_filters }}&filter.name=department&department.type=terms&department.key={{ agg.key }}&department.displayName=Department">
+                {{ agg.key }}: {{ agg.doc_count }}
+              </a>
             </div>
           </div>{% endif %}
       {% endfor %}
