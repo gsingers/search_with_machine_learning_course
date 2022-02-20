@@ -1,6 +1,4 @@
 {
-  "bbuy_products" : {
-    "aliases" : { },
     "mappings" : {
       "properties" : {
         "@timestamp" : {
@@ -126,7 +124,7 @@
         },
         "department" : {
           "type" : "text",
-          "analyzer" : "english"
+          "analyzer" : "english",
           "fields" : {
             "keyword" : {
               "type" : "keyword",
@@ -272,8 +270,9 @@
             }
           }
         },
-        "regularPrice" : {
-          "type" : "float"
+        "regularPrice": {
+          "type": "scaled_float",
+          "scaling_factor": 100
         },
         "relatedProducts" : {
           "type" : "text",
@@ -413,58 +412,50 @@
                 "default_field": "name"
           },
         "refresh_interval" : "5s",
-        "number_of_shards" : "1",
-        "provided_name" : "bbuy_products",
-        "creation_date" : "1645034479333",
-        "number_of_replicas" : "1",
-        "uuid" : "X6bxtx0ITi-Gf2O6lhXn0w",
-        "version" : {
-          "created" : "135238127"
-        }
-      }
-    },
-    "analysis": {
-            "char_filter": {
-                "xml_unescape_char_filter": {
-                    "type": "mapping",
-                    "mappings": [
-                        "&lt; => <",
-                        "&gt; => >",
-                        "&amp; => &",
-                        "&quot; => \"",
-                        "&apos; => '"
-                    ]
-                }
+        "number_of_shards" : "1"
+      },
+      "analysis": {
+        "char_filter": {
+            "xml_unescape_char_filter": {
+                "type": "mapping",
+                "mappings": [
+                    "&lt; => <",
+                    "&gt; => >",
+                    "&amp; => &",
+                    "&quot; => \"",
+                    "&apos; => '"
+                ]
+            }
+        },
+        "filter": {
+            "english_stop": {
+                "type": "stop",
+                "stopwords": "_english_"
             },
-            "filter": {
-                "english_stop": {
-                    "type": "stop",
-                    "stopwords": "_english_"
-                },
-                "english_stemmer": {
-                    "type": "stemmer",
-                    "language": "english"
-                },
-                "english_possessive_stemmer": {
-                    "type": "stemmer",
-                    "language": "possessive_english"
-                }
+            "english_stemmer": {
+                "type": "stemmer",
+                "language": "english"
             },
-            "analyzer": {
-                "english_html": {
-                    "char_filter": [
-                        "xml_unescape_char_filter",
-                        "html_strip"
-                    ],
-                    "tokenizer": "standard",
-                    "filter": [
-                        "english_possessive_stemmer",
-                        "lowercase",
-                        "english_stop",
-                        "english_stemmer"
-                    ]
-                }
+            "english_possessive_stemmer": {
+                "type": "stemmer",
+                "language": "possessive_english"
+            }
+        },
+        "analyzer": {
+            "english_html": {
+                "char_filter": [
+                    "xml_unescape_char_filter",
+                    "html_strip"
+                ],
+                "tokenizer": "standard",
+                "filter": [
+                    "english_possessive_stemmer",
+                    "lowercase",
+                    "english_stop",
+                    "english_stemmer"
+                ]
             }
         }
-  }
+    }
+    }   
 }

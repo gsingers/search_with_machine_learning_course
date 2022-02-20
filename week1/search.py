@@ -41,7 +41,7 @@ def process_filters(filters_input):
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
     opensearch = get_opensearch() # Load up our OpenSearch client from the opensearch.py file.
-    # Put in your code to query opensearch.  Set error as appropriate.
+    index_name = "bbuy_products"
     error = None
     user_query = None
     query_obj = None
@@ -74,9 +74,8 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(body=query_obj,index=index_name)   # call to OpenSearch
     # Postprocess results here if you so desire
-
     #print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
@@ -84,7 +83,6 @@ def query():
                                sort=sort, sortDir=sortDir)
     else:
         redirect(url_for("index"))
-
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
@@ -94,7 +92,32 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
             "match_all": {} # Replace me with a query that both searches and filters
         },
         "aggs": {
-            #TODO: FILL ME IN
+            "department": {
+                "terms": { "field": "department.keyword" }
+              },
+            "missing_images": {
+                "missing": {
+                    "field": "image.keyword"
+                }
+            },
+            "regularPrice": {
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        {"key": "0-100", "from": 0, "to": 100},
+                        {"key": "100-200", "from": 100, "to": 200},
+                        {"key": "200-300", "from": 200, "to": 300},
+                        {"key": "300-400", "from": 300, "to": 400},
+                        {"key": "400-500", "from": 400, "to": 500},
+                        {"key": "500 and above", "from": 500}
+                    ]
+                },
+                "aggs": {
+                    "price_stats": {
+                        "stats": {"field": "regularPrice"}
+                    }
+                }
+            }
         }
     }
     return query_obj
