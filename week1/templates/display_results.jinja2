@@ -2,11 +2,8 @@
   {% for hit in search_response.hits.hits %}
     <div class="search-result search-result-{{ loop.cycle('odd', 'even') }}">
       {#Handle missing images (example: search "test")#}
-      {% if hit._source.image %}
-        {% if hit._source.image[0] %}
-          {#do we have an image?#}
-          <div><img src="{{ hit._source.image[0] }}" alt="{{ hit._source.image[0] }}"></div>
-        {% endif %}
+      {% if hit._source.image and hit._source.image[0] %}
+        <div><img src="{{ hit._source.image[0] }}" alt="{{ hit._source.image[0] }}"></div>
       {% endif %}
       <div class="search-result-name">{#do we have a highlight?#}
         {% if hit.highlight and hit.highlight.name %}
