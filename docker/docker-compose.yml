@@ -6,7 +6,7 @@ services:
     environment:
       - discovery.type=single-node
       - http.max_content_length=1000mb
-      - "OPENSEARCH_JAVA_OPTS=-Xms4G -Xmx4G"
+      - "OPENSEARCH_JAVA_OPTS=-Xms8G -Xmx8G"
 
     volumes:
       - opensearch-data1:/usr/share/opensearch/data  #todo: figure this out so we can have persistent storage

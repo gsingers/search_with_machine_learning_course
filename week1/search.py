@@ -50,6 +50,7 @@ def query():
     filters = None
     sort = "_score"
     sortDir = "desc"
+    index_name = "bbuy_products"
     if request.method == 'POST':  # a query has been submitted
         user_query = request.form['query']
         if not user_query:
@@ -74,7 +75,7 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(body = query_obj, index = index_name)
     # Postprocess results here if you so desire
 
     #print(response)
@@ -87,14 +88,99 @@ def query():
 
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
-    print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+    print("Query: {} Filters: {} Sort: {} SortDir: {}".format(user_query, filters, sort, sortDir))
+    sorting = {
+      sort: {
+        "order": sortDir
+      }
+    }
+    querying = None
+    if user_query == '*':
+        querying = {
+            "match_all": {}
+        }
+    else:
+        querying = {
+            "bool": {
+                "should": [
+                    {
+                        "script_score": {
+                            "query": {
+                            "bool": {
+                                "must": [
+                                {
+                                    "match_phrase": {
+                                    "name": {
+                                        "query": user_query,
+                                        "slop": 2
+                                    }
+                                    }
+                                },
+                                {
+                                    "range": {
+                                    "regularPrice": {
+                                        "lte": 1000
+                                    }
+                                    }
+                                }
+                                ]
+                            }
+                            },
+                            "script": {
+                            "source": "int sum  = 0; sum += 1000 * doc['regularPrice'].value;  return sum",
+                            "lang": "painless"
+                            }
+                        }
+                        },
+                    {
+                        "multi_match": {
+                            "query": user_query,
+                            "fields": [
+                                "name^16",
+                                "name.non_stemmed^16", 
+                                "name.shingled^16",
+                                "shortDescription^8",
+                                "shortDescription.non_stemmed^8",
+                                "shortDescription.shingled^8", 
+                                "description^4",
+                                "longDescription^2",
+                                "department"
+                            ] 
+                        }
+                    }
+                ]
+            }
+        }
+
+    aggregations = {
+       "regularPrice": {
+            "range": {
+                "field": "regularPrice",
+                "ranges": [
+                    {'key': '$', 'to': 100.0},
+                    {'key': '$$', 'from': 100.0, 'to': 200.0},
+                    {'key': '$$$', 'from': 200.0, 'to': 300.0},
+                    {'key': '$$$$', 'from': 300.0, 'to': 400.0},
+                    {'key': '$$$$$', 'from': 400.0, 'to': 500.0},
+                    {'key': '$$$$$$', 'from': 500.0}
+                ]
+            }
+        },
+        "missing_images": {
+            "missing": { "field": "image" }
+        },
+        "department": {
+            "terms": {
+                "field": "department",
+                "size": 10
+            }
+        }
+    }
+
     query_obj = {
         'size': 10,
-        "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
-        },
-        "aggs": {
-            #TODO: FILL ME IN
-        }
+        "query": querying,
+        "aggs": aggregations,
+        "sort": [sorting]
     }
     return query_obj
