@@ -17,13 +17,7 @@
         }
       },
       "category" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       },
       "click_time" : {
         "type" : "text",
@@ -36,6 +30,7 @@
       },
       "query" : {
         "type" : "text",
+        "analyzer": "english",
         "fields" : {
           "keyword" : {
             "type" : "keyword",
@@ -56,13 +51,7 @@
         "type" : "keyword"
       },
       "user" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword"
       }
     }
   }
