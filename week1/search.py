@@ -16,6 +16,7 @@ bp = Blueprint('search', __name__, url_prefix='/search')
 # applied_filters -- return a String that is appropriate for inclusion in a URL as part of a query string.  This is basically the same as the input query string
 def process_filters(filters_input):
     # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
+    print('filters_input: {}'.format(filters_input))
     filters = []
     display_filters = []  # Also create the text we will use to display the filters that are applied
     applied_filters = ""
@@ -29,10 +30,26 @@ def process_filters(filters_input):
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            min_value = request.args.get(filter + ".from")
+            max_value = request.args.get(filter + ".to")
+            clause = {}
+            if min_value:
+                clause['gte'] = min_value
+                applied_filters += "&{}.from={}".format(filter, min_value)
+            if max_value:
+                clause['lt'] = max_value
+                applied_filters += "&{}.to={}".format(filter, max_value)
+            filters.append({type: {
+                filter: clause
+            }})
+            display_filters.append(display_name)
         elif type == "terms":
-            pass #TODO: IMPLEMENT
-    print("Filters: {}".format(filters))
+            key = request.args.get(filter + ".key")
+            filters.append({'term': {
+                filter: key
+            }})
+            applied_filters += "&{}.key={}".format(filter, key)
+            display_filters.append(display_name)
 
     return filters, display_filters, applied_filters
 
@@ -74,7 +91,10 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(
+        body = query_obj,
+        index = 'bbuy_products'
+    )
     # Postprocess results here if you so desire
 
     #print(response)
@@ -86,15 +106,55 @@ def query():
         redirect(url_for("index"))
 
 
+def create_must_clause(user_query):
+    if user_query == '*':
+        # return all products
+        return {
+            'match_all': {}
+        }
+    else:
+        # use the user query to search against the main fields
+        return {
+            'multi_match': {
+                'query': user_query,
+                'fields': ['name', 'longDescription', 'shortDescription']
+            }}
+
+
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
     query_obj = {
         'size': 10,
-        "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+        'query': {
+            'bool': {
+                'must': [
+                    create_must_clause(user_query)
+                ],
+                'filter': filters
+            }
         },
-        "aggs": {
-            #TODO: FILL ME IN
+        'aggs': {
+            'regularPrice': {
+                'range': {
+                    'field': 'regularPrice',
+                    'ranges': [
+                        {'key': '$', 'to': 100.0},
+                        {'key': '$$', 'from': 100.0, 'to': 200.0},
+                        {'key': '$$$', 'from': 200.0, 'to': 300.0},
+                        {'key': '$$$$', 'from': 300.0, 'to': 400.0},
+                        {'key': '$$$$$', 'from': 400.0, 'to': 500.0},
+                        {'key': '$$$$$$', 'from': 500.0}
+                    ]
+                }
+            },
+            'department': {
+                'terms': {
+                    'field': 'department'
+                }
+            },
+            'missing_images': {
+                'missing': {'field': 'image'}
+            }
         }
     }
     return query_obj
