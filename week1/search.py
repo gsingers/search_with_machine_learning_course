@@ -114,7 +114,7 @@ def create_must_clause(user_query):
         return {
             'multi_match': {
                 'query': user_query,
-                'fields': ['name', 'longDescription', 'shortDescription']
+                'fields': ['name^100', 'longDescription^10', 'shortDescription^50']
             }}
 
 
