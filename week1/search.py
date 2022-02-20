@@ -25,22 +25,20 @@ def process_filters(filters_input):
         filter_type = request.args.get(filter_ + ".type")
         filter_key = request.args.get(filter_ + ".key")
         display_name = request.args.get(filter_ + ".displayName", filter_)
-        min_value = request.args.get(filter_ + '.from')
-        max_value = request.args.get(filter_ + '.to')
+        from_value = request.args.get(filter_ + '.from')
+        to_value = request.args.get(filter_ + '.to')
         #
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
-        applied_filters += f"&filter.name={filter_}&{filter_}.type={filter_type}&{filter_}.displayName={display_name}&{filter_}.key={filter_key}&{filter_}.from={min_value}&{filter_}.to={max_value}"
-
-        #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
+        applied_filters += f"&filter.name={filter_}&{filter_}.type={filter_type}&{filter_}.displayName={display_name}&{filter_}.key={filter_key}&{filter_}.from={from_value}&{filter_}.to={to_value}"
 
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if filter_type == "range":
-            display_filters.append(f'{display_name}: from {min_value} to {max_value}')
+            display_filters.append(f'{display_name}: from {from_value} to {to_value}')
             filters.append({
                 "range": {
                     filter_: {
-                        "gte": min_value,
-                        "lte": max_value
+                        "gte": from_value,
+                        "lte": to_value
                     }
                 }
             })
@@ -115,9 +113,38 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
     if user_query and user_query != '*':
         match = {
-            "multi_match": {
-                "query": user_query,
-                "operator": "AND"
+            "function_score": {
+                "query": {
+                "query_string": {
+                            "query": f"\"{user_query}\"",
+                            "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department",  "manufacturer"]
+                    }
+                },
+                "boost_mode": "replace",
+                "score_mode": "avg",
+                "functions": [
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankLongTerm",
+                            "missing": 100000000,
+                            "modifier": "reciprocal"
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankMediumTerm",
+                            "missing": 100000000,
+                            "modifier": "reciprocal"
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankShortTerm",
+                            "missing": 100000000,
+                            "modifier": "reciprocal"
+                        }
+                    }
+                ]
             }
         }
     else:
@@ -142,9 +169,33 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         },
         "aggs": {
             "regularPrice": {
-                "variable_width_histogram": {
+                "range": {
                     "field": "regularPrice",
-                    "buckets": 6
+                    "ranges": [
+                        {
+                            "from": 0,
+                            "to": 100
+                        },
+                        {
+                            "from": 100,
+                            "to": 200
+                        },
+                        {
+                            "from": 200,
+                            "to": 300
+                        },
+                        {
+                            "from": 300,
+                            "to": 400
+                        },
+                        {
+                            "from": 400,
+                            "to": 500
+                        },
+                        {
+                            "from": 500
+                        }
+                    ]
                 }
             },
 
