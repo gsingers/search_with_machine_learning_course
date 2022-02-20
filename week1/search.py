@@ -23,11 +23,11 @@ def process_filters(filters_input):
     for filter in filters_input:
         type = request.args.get(filter + ".type")
         display_name = request.args.get(filter + ".displayName", filter)
-        #
-        # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
+        key = request.args.get(filter + ".key")
+        display_filters.append("{}: {}".format(display_name, key))
+
         applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
                                                                                  display_name)
-        # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
             min_value = request.args.get(filter + ".from")
             max_value = request.args.get(filter + ".to")
@@ -41,14 +41,12 @@ def process_filters(filters_input):
             filters.append({type: {
                 filter: clause
             }})
-            display_filters.append(display_name)
         elif type == "terms":
             key = request.args.get(filter + ".key")
             filters.append({'term': {
                 filter: key
             }})
             applied_filters += "&{}.key={}".format(filter, key)
-            display_filters.append(display_name)
 
     return filters, display_filters, applied_filters
 
