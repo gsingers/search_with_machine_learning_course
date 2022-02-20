@@ -25,20 +25,32 @@
     grid-column-gap: 15px;
 }
 
+em {
+    color: red;
+}
+
 .search-results {
 
 }
 
 .search-result{
-    margin-bottom: 10px;
+    padding-top: 20px;
+    clear: both;
+    min-height: 150px;
 }
 
-.search-result > img{
-    padding-left: 50px;
+.search-result-image > img{
+    padding-left: 25px;
+    max-height: 135px;
 }
 
 .search-result-odd{
     background: lightgray;
+}
+
+.search-result-image {
+    float: left;
+    margin-right: 25px;
 }
 
 .search-result-name {
@@ -60,12 +72,12 @@
     grid-row-end: 1;
     grid-column: 1/span 2;
     justify-self: center;
-    
 }
 
 
 #aggregations-container{
     grid-row-start: 2;
+    font-size: 13px;
 }
 
 #search-results-container{
@@ -112,4 +124,8 @@ Headers and footers
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+* {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
