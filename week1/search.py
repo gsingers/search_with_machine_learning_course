@@ -18,7 +18,7 @@ def process_filters(filters_input):
     # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
     filters = []
     display_filters = []  # Also create the text we will use to display the filters that are applied
-    applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter, display_name)
+    applied_filters=''
     for filter in filters_input:
         type = request.args.get(filter + ".type")
         display_name = request.args.get(filter + ".displayName", filter)
@@ -121,82 +121,112 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
 
-    queries = []
-    if user_query == "*":
-        queries.append({"match_all": {}})
-    else:
-        queries.append({
-            "function_score": {
-            "query": {
-              "query_string": {
-                "query": user_query,
-                "fields": [
-                  "name^100",
-                  "shortDescription^50",
-                  "longDescription^10",
-                  "department"
-                ]
-              }
-            },
-            "boost_mode": "multiply",
-            "score_mode": "avg"
-          }
-        })
 
-    query_obj = {
-        'size': 10,
-        "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm",  "regularPrice", "image"],
-        "query": {
-            "bool": {
-                "must": queries,
-                "filter": filters
+    aggs = {
+        "regularPrice": {
+            "range": {
+                "field": "regularPrice",
+                    "ranges": [
+                    { "key": "$", "from": 0.0, "to": 100.0 },
+                    { "key": "$", "from": 100.0, "to": 1000.0 },
+                    { "key": "$", "from": 1000.0, "to": 50000.0 }
+                ]
             }
         },
-        "aggs": {
-            "regularPrice": {
-                "range": {
-                    "field": "regularPrice",
-                    "ranges": [
-                        {
-                            "key": "$",
-                            "to": 10
-                        },
-                        {
-                            "key": "$$",
-                            "from": 10,
-                            "to": 100
-                        },
-                        {
-                            "key": "$$$",
-                            "from": 100,
-                            "to": 1000
-                        },
-                        {
-                            "key": "$$$$",
-                            "from": 1000,
-                            "to": 5000
-                        },
-                        {
-                            "key": "$$$$$",
-                            "from": 5000
-                        }
-                    ]
-                }
-            },
-            "department": {
-                "terms": {
-                    "field": "department.keyword",
-                    "size": 10
-                }
-            },
-            "missing_images": {
-                "missing": {
-                    "field": "image.keyword"
+        "missing_images": {
+            "missing": { "field": "image.keyword" }        
+        },
+        "department": {
+            "terms" : {
+                "field": "department.keyword",
+                "order": { 
+                    "_count": "desc" 
                 }
             }
         }
     }
 
-    #print(json.dumps(query_obj))
+    if user_query == "*":
+        query_obj = {
+            'size': 10,
+            "query": {
+                "bool": {
+                    "must": {
+                        "match_all": {}
+                    }
+                }
+            }
+        }
+        query_obj['query']["bool"]["filter"] = filters
+    else:
+        query_obj = {
+            "size": 10,
+            "query": {
+                "function_score": {
+                    "query": {
+                        "bool": {
+                            "filter": [],
+                            "must": {
+                                "multi_match": {
+                                    "fields": [
+                                        "name^100",
+                                        "shortDescription^50",
+                                        "longDescription^10",
+                                        "department"
+                                    ],
+                                    "query": user_query
+                                }
+                            },
+                            "should": {
+                                "match_phrase": {
+                                    "name": {
+                                        "query":  user_query,
+                                        "analyzer": "english",
+                                        "boost": 200,                                        
+                                        "slop": 1                                    
+                                    }                                    
+                                }
+                            }
+                        }
+                    },
+                    "boost_mode": "multiply",
+                    "score_mode": "avg",
+                    "functions": [
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankLongTerm",
+                            "modifier": "reciprocal",
+                            "missing": 1000000000
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankMediumTerm",
+                            "modifier": "reciprocal",
+                            "missing": 1000000000
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankShortTerm",
+                            "modifier": "reciprocal",
+                            "missing": 1000000000
+                        }
+                    }
+                    
+                    ]
+                }
 
+            }
+            
+        }
+
+        query_obj['query']["function_score"]['query']["bool"]["filter"] = filters
+
+    query_obj['aggs'] = aggs
+    sortBy = {}    
+    sortBy[sort] = sortDir
+    
+    query_obj["sort"] = [sortBy]
+    
     return query_obj
