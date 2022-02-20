@@ -26,16 +26,26 @@ def process_filters(filters_input):
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
         applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
                                                                                  display_name)
-        #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            filters.append(generateRangeFilter(filter, request.args.get(filter + ".from"), request.args.get(filter + ".to")))
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            filters.append(generateTermsFilter(filter, request.args.get(filter + ".key")))
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
 
+
+def generateRangeFilter(field, priceFrom, priceTo):
+    filter = {"range": {field: {}}}
+    if priceFrom:
+        filter["range"][field]["gte"] = priceFrom
+    if priceTo:
+        filter["range"][field]["lt"] = priceTo
+    return filter
+
+def generateTermsFilter(field, term):
+    return {"terms": {field + ".keyword" : [term]}}
 
 # Our main query route.  Accepts POST (via the Search box) and GETs via the clicks on aggregations/facets
 @bp.route('/query', methods=['GET', 'POST'])
@@ -74,7 +84,8 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(body=query_obj, index="bbuy_products")
+    # TODO: Replace me with an appropriate call to OpenSearch
     # Postprocess results here if you so desire
 
     #print(response)
@@ -91,10 +102,41 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     query_obj = {
         'size': 10,
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+            "bool": {
+                "must" : [
+                    {
+                        "multi_match": {
+                            "query": user_query,
+                            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+                        }
+                    }
+                ],
+                "filter": filters
+            }
         },
         "aggs": {
-            #TODO: FILL ME IN
+            "regularPrice": {
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        { "key": "$", "to": 200 },
+                        { "key": "$$", "from": 200, "to": 400 },
+                        { "key": "$$$", "from": 400, "to": 600 },
+                        { "key": "$$$$", "from": 600, "to": 800 },
+                        { "key": "$$$$$", "from": 800}
+                    ]
+                }
+            },
+            "department": {
+                "terms": {
+                    "field": "department.keyword"
+                }
+            },
+            "missing_images": {
+                "missing": { "field": "image.keyword" }
+            }
         }
     }
-    return query_obj
+    if user_query == '*':
+        query_obj['query']['bool']['must'] = [{'match_all': {}}]
+    return query_obj 
