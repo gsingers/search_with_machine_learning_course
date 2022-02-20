@@ -53,6 +53,8 @@ def query():
     filters = None
     sort = "_score"
     sortDir = "desc"
+    size_results = 25 # Make this smaller in the future (~10)
+
     if request.method == "POST":  # a query has been submitted
         user_query = request.form["query"]
         if not user_query:
@@ -63,7 +65,7 @@ def query():
         sortDir = request.form["sortDir"]
         if not sortDir:
             sortDir = "desc"
-        query_obj = create_query(user_query, [], sort, sortDir)
+        query_obj = create_query(user_query, [], sort, sortDir, size_results)
     elif request.method == "GET":
         # Handle the case where there is no query or just loading the page
         user_query = request.args.get("query", "*")
@@ -73,9 +75,9 @@ def query():
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
 
-        query_obj = create_query(user_query, filters, sort, sortDir)
+        query_obj = create_query(user_query, filters, sort, sortDir, size_results)
     else:
-        query_obj = create_query("*", [], sort, sortDir)
+        query_obj = create_query("*", [], sort, sortDir, size_results)
 
     print(f"query obj: {query_obj}")
 
@@ -97,12 +99,13 @@ def query():
             applied_filters=applied_filters,
             sort=sort,
             sortDir=sortDir,
+            size_results=size_results,
         )
     else:
         redirect(url_for("index"))
 
 
-def create_query(user_query, filters, sort="_score", sortDir="desc"):
+def create_query(user_query, filters, sort="_score", sortDir="desc", size_results=10):
 
     print(f"Query: {user_query} Filters: {filters} Sort: {sort}")
 
@@ -122,9 +125,6 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
 
     # Example query:
     # query_obj = {"size": 10, "query": {"match_all": {}}}
-
-    # size_results = 10
-    size_results = 100
 
     if user_query.strip() == "*":
         # Select all / match all
