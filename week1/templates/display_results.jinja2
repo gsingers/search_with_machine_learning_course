@@ -26,6 +26,7 @@
           {% endif %}
         {% endif %}
       </div>
+      {% if hit._source.image and hit._source.image[0] %}<img src="{{ hit._source.image[0] }}"/>{% endif %}
     </div>
   {% endfor %}
 
