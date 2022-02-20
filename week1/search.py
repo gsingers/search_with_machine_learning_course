@@ -18,7 +18,7 @@ def process_filters(filters_input):
     # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
     filters = []
     display_filters = []  # Also create the text we will use to display the filters that are applied
-    applied_filters = ""
+    applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter, display_name)
     for filter in filters_input:
         type = request.args.get(filter + ".type")
         display_name = request.args.get(filter + ".displayName", filter)
@@ -29,9 +29,37 @@ def process_filters(filters_input):
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            agg_key = request.args.get(filter + ".key")
+            agg_from = request.args.get(filter + ".from")
+            agg_to = request.args.get(filter + ".to")
+
+            rangeFilter = {}
+            if agg_from != "":
+                rangeFilter["gte"] = agg_from
+            if agg_to != "":
+                rangeFilter["lte"] = agg_to
+
+            filters.append({
+                "range": {
+                    "regularPrice": rangeFilter
+                }
+            })
+
+            applied_filters += "&regularPrice.key={}&regularPrice.from={}&regularPrice.to={}".format(
+                agg_key, agg_from, agg_to)
+            display_filters.append("{} {}".format(display_name, agg_key))
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            #pass #TODO: IMPLEMENT
+            agg_key = request.args.get(filter + ".key")
+            filters.append({
+                "term": {
+                    "department.keyword": agg_key
+                }
+            })
+
+            applied_filters += "&department.key={}".format(agg_key)
+            display_filters.append("{} {}".format(display_name, agg_key))
+
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -74,8 +102,12 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    #response = None   # TODO: Replace me with an appropriate call to OpenSearch
     # Postprocess results here if you so desire
+    response = opensearch.search(
+        body=query_obj,
+        index="bbuy_products"
+    )
 
     #print(response)
     if error is None:
@@ -88,13 +120,83 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+
+    queries = []
+    if user_query == "*":
+        queries.append({"match_all": {}})
+    else:
+        queries.append({
+            "function_score": {
+            "query": {
+              "query_string": {
+                "query": user_query,
+                "fields": [
+                  "name^100",
+                  "shortDescription^50",
+                  "longDescription^10",
+                  "department"
+                ]
+              }
+            },
+            "boost_mode": "multiply",
+            "score_mode": "avg"
+          }
+        })
+
     query_obj = {
         'size': 10,
+        "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm",  "regularPrice", "image"],
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+            "bool": {
+                "must": queries,
+                "filter": filters
+            }
         },
         "aggs": {
-            #TODO: FILL ME IN
+            "regularPrice": {
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        {
+                            "key": "$",
+                            "to": 10
+                        },
+                        {
+                            "key": "$$",
+                            "from": 10,
+                            "to": 100
+                        },
+                        {
+                            "key": "$$$",
+                            "from": 100,
+                            "to": 1000
+                        },
+                        {
+                            "key": "$$$$",
+                            "from": 1000,
+                            "to": 5000
+                        },
+                        {
+                            "key": "$$$$$",
+                            "from": 5000
+                        }
+                    ]
+                }
+            },
+            "department": {
+                "terms": {
+                    "field": "department.keyword",
+                    "size": 10
+                }
+            },
+            "missing_images": {
+                "missing": {
+                    "field": "image.keyword"
+                }
+            }
         }
     }
+
+    #print(json.dumps(query_obj))
+
     return query_obj
