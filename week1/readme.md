@@ -108,10 +108,10 @@ Team :tada:, our Week 1 Project is due by the end of the day (in your own timezo
 Self Assessment Questions :male-detective:
 
 Do your counts match ours?
-- Number of documents in the Product index: 1,275,077
-- Number of documents in the Query Log index: 1,865,269
-- There are 16,772 items in the “Computers” department when using a “match all” query (“*”) and faceting on “department.keyword”.
-- Number of documents missing an “image” field: 4,434
+- Number of documents in the Product index: 1,275,077 -> 1,274,821 (after fresh reindex)
+- Number of documents in the Query Log index: 1,865,269 -> 1,865,269 (after fresh reindex)
+- There are 16,772 items in the “Computers” department when using a “match all” query (“*”) and faceting on “department.keyword”. -> COMPUTERS: 16766 (aftre fresh reindex)
+- Number of documents missing an “image” field: 4,434 -> 4432 (aftre fresh reindex)
 
 What field types and analyzers did you use for the following fields and why?
 - Name
