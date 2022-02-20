@@ -8,40 +8,19 @@
         "type" : "date"
       },
       "@version" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "integer"
       },
       "category" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword",
+        "ignore_above" : 256
       },
       "cd user" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword",
+        "ignore_above" : 256
       },
       "click_time" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "date",
+        "format" : "yyyy-MM-dd[T]HH:mm:ss.[SSS][SS][S][Z]"
       },
       "query" : {
         "type" : "text",
@@ -49,26 +28,20 @@
           "keyword" : {
             "type" : "keyword",
             "ignore_above" : 256
+          },
+          "english" : { 
+            "type":     "text",
+            "analyzer": "english"
           }
         }
       },
       "query_time" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "date",
+        "format" : "yyyy-MM-dd[T]HH:mm:ss.[SSS][SS][S][Z]"
       },
       "sku" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "keyword",
+        "ignore_above" : 256
       }
     }
   }
