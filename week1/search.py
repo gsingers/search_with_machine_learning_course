@@ -47,7 +47,7 @@ def process_filters(filters_input):
         elif type == "terms":
             term_filter = {"term": {filter + ".keyword": filter_key}}
             filters += [term_filter]
-            display_filters += [f"filter.name={filter}, type={type}, key={filter_key}"]
+            display_filters += [f"{display_name}:{filter_key}"]
             applied_filters += f"&{filter}.key={filter_key}"
 
     print("Filters: {}".format(filters))
@@ -108,9 +108,12 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
 
-    function_score_query = {
-        "function_score": {
-            "query": {
+    if user_query == '*':
+        query_obj = {
+            "match_all": {}
+        }
+    else:
+        query_obj = {
                 "bool": {
                     "must": {
                         "multi_match": {
@@ -120,7 +123,11 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     },
                     "filter": filters
                 }
-            },
+            }
+
+    function_score_query = {
+        "function_score": {
+            "query": query_obj,
             "score_mode": "avg",
             "boost_mode": "multiply",
             "functions": [
@@ -151,6 +158,12 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         'size': 10,
         "query": function_score_query,
         "aggs": {
+            "departments": {
+                "terms": {
+                    "field": "department.keyword",
+                    "size": 10
+                }
+             },
             "regularPrice": {
                 "range": {
                     "field": "regularPrice",
@@ -168,6 +181,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         },
         "sort": [
             {sort: sortDir}
-        ]
+        ],
+        "_source": ["productId", "name", "image", "description","shortDescription"]
     }
     return query_obj
