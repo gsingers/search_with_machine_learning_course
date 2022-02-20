@@ -122,7 +122,8 @@ def query():
 
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
-    print("Query: {} Filters: {} Sort: {} SortDIR:{}".format(user_query, filters, sort, sortDir))
+    print("Query: {} Filters: {} Sort: {} SortDIR:{}".format(
+        user_query, filters, sort, sortDir))
 
     queries = []
     if user_query == "*":
@@ -133,55 +134,55 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         #     "query": user_query,
         #     "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
         # }})
-        #queries.append({"query_string": {
+        # queries.append({"query_string": {
         #    "query": user_query,
         #    "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
-        #}})
+        # }})
         queries.append({
             "function_score": {
-            "query": {
-              "query_string": {
-                "query": user_query,
-                "fields": [
-                  "name^100",
-                  "shortDescription^50",
-                  "longDescription^10",
-                  "department"
+                "query": {
+                    "query_string": {
+                        "query": user_query,
+                        "fields": [
+                            "name^100",
+                            "shortDescription^50",
+                            "longDescription^10",
+                            "department"
+                        ]
+                    }
+                },
+                "boost_mode": "multiply",
+                "score_mode": "avg",
+                "functions": [
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankLongTerm",
+                            "missing": 100000000,
+                            "modifier": "reciprocal"
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankMediumTerm",
+                            "missing": 100000000,
+                            "modifier": "reciprocal"
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankShortTerm",
+                            "missing": 100000000,
+                            "modifier": "reciprocal"
+                        }
+                    }
                 ]
-              }
-            },
-            "boost_mode": "multiply",
-            "score_mode": "avg",
-            "functions": [
-              {
-                "field_value_factor": {
-                  "field": "salesRankLongTerm",
-                  "missing": 100000000, 
-                  "modifier": "reciprocal"
-                }
-              },
-              {
-                "field_value_factor": {
-                  "field": "salesRankMediumTerm",
-                  "missing": 100000000, 
-                  "modifier": "reciprocal"
-                }
-              },
-              {
-                "field_value_factor": {
-                  "field": "salesRankShortTerm",
-                  "missing": 100000000, 
-                  "modifier": "reciprocal"
-                }
-              }
-            ]
-          }
+            }
         })
 
     query_obj = {
         'size': 10,
         "sort": {
-            sort : {
+            sort: {
                 "order": sortDir
             }
         },
@@ -233,6 +234,20 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                 "missing": {
                     "field": "image.keyword"
                 }
+            }
+        },
+        "highlight": {
+            "type": "unified",
+            "fragmenter": "span",
+            "pre_tags": [
+                "<em style=background:yellow>"
+            ],
+            "post_tags": [
+                "</em>"
+            ],
+            "fields": {
+                "longDescription": {},
+                "name": {}
             }
         }
     }
