@@ -21,17 +21,17 @@ def process_filters(filters_input):
     display_filters = []
     applied_filters = ""
     for filter in filters_input:
-        type = request.args.get(filter + ".type")
-        display_name = request.args.get(filter + ".displayName", filter)
-        #
+        agg_type = request.args.get(filter + ".type")
+        agg_display_name = request.args.get(filter + ".displayName", filter)
+
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
-        applied_filters += f"&filter.name={filter}&{filter}.type={type}&{filter}"
-        applied_filters += f".displayName={display_name}"
+        applied_filters += f"&filter.name={filter}&{filter}.type={agg_type}&{filter}"
+        applied_filters += f".displayName={agg_display_name}"
         # TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
-        if type == "range":
+        if agg_type == "range":
             pass
-        elif type == "terms":
+        elif agg_type == "terms":
             pass  # TODO: IMPLEMENT
 
     print(f"Filters: {filters}")
