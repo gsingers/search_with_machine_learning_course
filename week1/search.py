@@ -43,6 +43,7 @@ def query():
     opensearch = get_opensearch() # Load up our OpenSearch client from the opensearch.py file.
     # Put in your code to query opensearch.  Set error as appropriate.
     error = None
+    index_name = "bbuy_products"
     user_query = None
     query_obj = None
     display_filters = None
@@ -74,10 +75,10 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(query_obj,index_name)   
     # Postprocess results here if you so desire
 
-    #print(response)
+    print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
