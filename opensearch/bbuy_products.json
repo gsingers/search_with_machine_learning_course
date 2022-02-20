@@ -1,5 +1,57 @@
 {
   "settings": {
-    "index.refresh_interval": "5s"
+    "index.refresh_interval": "5s",
+    "index": {
+      "number_of_shards": 10,
+      "number_of_replicas": 0
+    }
+  },
+  "mappings": {
+    "properties": {
+    "regularPrice" : {
+      "type" : "float"
+    },
+    "shortDescription" : {
+      "type" : "text",
+      "analyzer": "english",
+      "search_analyzer": "english" 
+    },
+    "longDescription" : {
+      "type" : "text",
+      "analyzer": "english",
+      "search_analyzer": "english" 
+    },
+    "name": {
+      "type": "text",
+      "analyzer": "english",
+      "search_analyzer": "english" 
+    },
+    "department": {
+      "type": "text",
+      "analyzer": "english",
+      "search_analyzer": "english",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "description": {
+      "type": "text",
+      "analyzer": "english",
+      "search_analyzer": "english" 
+    },
+    "salesRankLongTerm": {
+      "type": "long"
+    },
+    "salesRankShortTerm": {
+      "type": "long"
+    },
+    "salesRankMediumTerm": {
+      "type": "long"
+    }
   }
+  }
+
 }
