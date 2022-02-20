@@ -40,14 +40,14 @@ input {
             "/product/categoryPath/*/id/text()", "categoryPathIds", # Note the match all here to get the subfields
             "/product/categoryPath/category[last()]/id/text()", "categoryLeaf",
             "count(/product/categoryPath/*/name)", "categoryPathCount",
-            "/product/customerReviewCount/text()", "customerReviewCount", # temp: should i delete it 
+            "/product/customerReviewCount/text()", "customerReviewCount", 
             "/product/customerReviewAverage/text()", "customerReviewAverage",
             "/product/inStoreAvailability/text()", "inStoreAvailability",
             "/product/onlineAvailability/text()", "onlineAvailability",
             "/product/releaseDate/text()", "releaseDate",
             "/product/shippingCost/text()", "shippingCost",
-            "/product/shortDescription/text()", "shortDescription",  # temp: should i delete it
-            "/product/shortDescriptionHtml/text()", "shortDescriptionHtml",# temp: should i delete it
+            "/product/shortDescription/text()", "shortDescription", 
+            "/product/shortDescriptionHtml/text()", "shortDescriptionHtml",
             "/product/class/text()", "class",
             "/product/classId/text()", "classId",
             "/product/subclass/text()", "subclass",
@@ -55,7 +55,7 @@ input {
             "/product/department/text()", "department",
             "/product/departmentId/text()", "departmentId",
             "/product/bestBuyItemId/text()", "bestBuyItemId",
-            "/product/description/text()", "description",  # temp: should i delete it
+            "/product/description/text()", "description",  
             "/product/manufacturer/text()", "manufacturer",
             "/product/modelNumber/text()", "modelNumber",
             "/product/image/text()", "image",
