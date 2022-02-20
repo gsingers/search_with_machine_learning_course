@@ -39,8 +39,8 @@
     width: 100px;
 }
 
-.search-results {
-
+.search-results em {
+    background-color: yellow;
 }
 
 .search-result{

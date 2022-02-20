@@ -111,13 +111,19 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    if user_query and user_query != '*':
+    if not user_query or user_query == '*':
+        match = {
+            "match_all": {
+
+            }
+        }
+    else:
         match = {
             "function_score": {
                 "query": {
-                "query_string": {
-                            "query": f"\"{user_query}\"",
-                            "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department",  "manufacturer"]
+                    "query_string": {
+                        "query": f"\"{user_query}\"",
+                        "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
                     }
                 },
                 "boost_mode": "replace",
@@ -127,32 +133,30 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                         "field_value_factor": {
                             "field": "salesRankLongTerm",
                             "missing": 100000000,
-                            "modifier": "reciprocal"
+                            "modifier": "reciprocal",
+                            "factor": 0.8
                         }
                     },
                     {
                         "field_value_factor": {
                             "field": "salesRankMediumTerm",
                             "missing": 100000000,
-                            "modifier": "reciprocal"
+                            "modifier": "reciprocal",
+                            "factor": 0.9
                         }
                     },
                     {
                         "field_value_factor": {
                             "field": "salesRankShortTerm",
                             "missing": 100000000,
-                            "modifier": "reciprocal"
+                            "modifier": "reciprocal",
+                            "factor": 1
                         }
                     }
                 ]
             }
         }
-    else:
-        match = {
-            "match_all": {
 
-            }
-        }
 
     bool_query = {
         "bool": {
@@ -210,6 +214,14 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                 "missing": {
                     "field": "image"
                 }
+            }
+        },
+        "highlight": {
+            "fields": {
+            "name": {"number_of_fragments":0},
+            "longDescription": {"number_of_fragments":0},
+            "shortDescription": {"number_of_fragments":0},
+            "department": {"number_of_fragments":0}
             }
         }
     }
