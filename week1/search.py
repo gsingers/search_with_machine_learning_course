@@ -22,6 +22,10 @@ def process_filters(filters_input):
     for filter in filters_input:
         type = request.args.get(filter + ".type")
         display_name = request.args.get(filter + ".displayName", filter)
+
+        filter_from = request.args.get(filter + ".from")
+        filter_to = request.args.get(filter + ".to")
+        filter_key = request.args.get(filter + ".key", None)
         #
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
         applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
@@ -29,9 +33,23 @@ def process_filters(filters_input):
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            range_filter={"range": {filter: {}}}
+            if filter_from:
+                range_filter['range'][filter]['gte'] = filter_from
+                filter_from_display = filter_from
+            else:
+                filter_from_display = 0.0
+            if filter_to:
+                range_filter['range'][filter]['lt'] = filter_to
+            filters+=[range_filter]
+            display_filters += [f"{display_name}: {filter_key}"]
+            applied_filters += f"&{filter}.key={filter_key}&{filter}.from={filter_from}&{filter}.to={filter_to}"
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            term_filter = {"term": {filter + ".keyword": filter_key}}
+            filters += [term_filter]
+            display_filters += [f"filter.name={filter}, type={type}, key={filter_key}"]
+            applied_filters += f"&{filter}.key={filter_key}"
+
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -73,8 +91,9 @@ def query():
     else:
         query_obj = create_query("*", [], sort, sortDir)
 
+    index_name = "bbuy_products"
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(index=index_name, body=query_obj)
     # Postprocess results here if you so desire
 
     #print(response)
@@ -88,13 +107,67 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+
+    function_score_query = {
+        "function_score": {
+            "query": {
+                "bool": {
+                    "must": {
+                        "multi_match": {
+                            "query": user_query,
+                            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+                        }
+                    },
+                    "filter": filters
+                }
+            },
+            "score_mode": "avg",
+            "boost_mode": "multiply",
+            "functions": [
+                {   
+                    "field_value_factor": {
+                        "field": "salesRankShortTerm",
+                        "missing": 10000000,
+                        "modifier": "reciprocal"
+                    }
+                },
+                {  "field_value_factor": {
+                        "field": "salesRankMediumTerm",
+                        "missing": 10000000,
+                        "modifier": "reciprocal"
+                    }
+                },
+                {  "field_value_factor": {
+                        "field": "salesRankLongTerm",
+                        "missing": 10000000,
+                        "modifier": "reciprocal"
+                    }
+                }
+            ]
+        }
+    }
+
     query_obj = {
         'size': 10,
-        "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
-        },
+        "query": function_score_query,
         "aggs": {
-            #TODO: FILL ME IN
-        }
+            "regularPrice": {
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        {"key": "Up to $50", "to": 50},
+                        {"key": "$50 to $100", "from": 50, "to": 100},
+                        {"key": "$100 to $250", "from": 100, "to": 250},
+                        {"key": "$250 & above", "from": 250}
+                    ]
+                }   
+            },
+            "missing_images": {
+                "missing": { "field": "image.keyword" }
+            }
+        },
+        "sort": [
+            {sort: sortDir}
+        ]
     }
     return query_obj
