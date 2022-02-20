@@ -114,7 +114,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     # match_obj = {"match_all": {}}
     multi_match = {"multi_match": {
                     "query": user_query,
-                    "fields": ["name", "shortDescription", "longDescription", "department"]
+                    "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
                   }}
 
     multi_match_with_filter = {
