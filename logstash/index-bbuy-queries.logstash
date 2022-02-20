@@ -27,5 +27,5 @@ output {
     password => "admin"
     ssl_certificate_verification => false
   }
-  stdout{}
+  # stdout{}
 }

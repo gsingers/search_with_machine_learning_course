@@ -20,10 +20,13 @@
       {% endfor %}
     {% endif %}
   </div>
+  <div class="agg-header">Department</div>
   {% for agg in search_response.aggregations.department.buckets %}
         {% if agg.doc_count > 0 %}
           <div class="aggregation">
-            <div>{{ agg.key }}: {{ agg.doc_count }}</div>
+            <div><a
+                href="{{ url_for("search.query") }}?&query={{ query|e }}{{ applied_filters }}&filter.name=department&department.type=terms&department.key={{ agg.key }}">{{ agg.key }}: {{ agg.doc_count }}</a>
+            </div>
           </div>{% endif %}
   {% endfor %}
   <div class="aggregations-result">

@@ -34,10 +34,20 @@ def process_filters(filters_input):
         if type == "range":
             range_from = request.args.get(filter + ".from")
             range_to = request.args.get(filter + ".to")
-            range_filter = {"from": range_from, "to": range_to}
+            #range_filter = {"from": range_from, "to": range_to}
+
+            range_filter = {}
+            if range_from is not None and range_from != '':
+                range_filter["range"] = {"regularPrice": {"gte": range_from}}
+            if range_to is not None and range_to != '':
+                range_filter["range"]["regularPrice"]["lte"] = range_to
             filters.append(range_filter)
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            field_name = request.args.get("filter.name")
+            field_value = request.args.get(field_name+".key")
+            terms_filter = {"term": {field_name + ".keyword": field_value}}
+            filters.append(terms_filter)
+            
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -98,46 +108,59 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
 
-    if filters is not None and len(filters) > 0:
-        range_from = None if filters is None else filters[0].get("from")
-        range_to = None if filters is None else filters[0].get("to")
-
-        user_filter = None
-
-        if range_from is not None and range_from != '':
-            if user_filter == None:
-                user_filter = []
-                user_filter.append({"range": {"regularPrice": {"gte": range_from}}})
-            else:
-                user_filter[0]["range"]["regularPrice"]["gte"] = range_from
-
-        if range_to is not None and range_to != '':
-            if user_filter == None:
-                user_filter = []
-                user_filter.append({"range": {"regularPrice": {"lte": range_to}}})
-            else:
-                user_filter[0]["range"]["regularPrice"]["lte"] = range_to
-
-        #user_filter = [ { "range":  {"regularPrice": {"gte": range_from, "lte": range_to}} } ]
-    else:
-        user_filter = None
-
     if user_query == '*':
         query = {
             "bool": {
                 "must": [
                     { 'match_all': {} }
                 ],
-                "filter": user_filter
+                "filter": filters
             }
        }
     else:
         query = {
-            "bool": {
-                "must": [
-                    { 'match_phrase': { 'name': {"query": user_query} } }
-                ],
-                "filter": user_filter
+            "function_score": {
+                "query": {
+                    "bool": {
+                        "must": [
+                        { 
+                            "query_string": {
+                                "query": user_query,
+                                "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+                            }
+                        }
+                        ],
+                    "filter": filters
+                    }
+                },
+                "boost_mode": "multiply",
+                "score_mode": "avg",
+                "functions": [
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankLongTerm",
+                            "factor": 1.2,
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankShortTerm",
+                            "factor": 1.2,
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankMediumTerm",
+                            "factor": 1.2,
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    }
+                ]
             }
        }
 

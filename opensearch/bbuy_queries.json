@@ -45,6 +45,9 @@
       "query_time": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSS"
+      },
+      "user" : {
+        "type" : "string"
       }
     }
   }

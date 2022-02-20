@@ -130,7 +130,13 @@
         "type" : "integer"
       },
       "depth" : {
-        "type" : "float"
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
       },
       "description" : {
         "type" : "text",
@@ -213,10 +219,16 @@
         }
       },
       "modelNumber" : {
-        "type" : "integer"
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
       },
       "productId" : {
-        "type" : "integer"
+        "type" : "long"
       },
       "quantityLimit" : {
         "type" : "integer"
@@ -237,22 +249,10 @@
         "type" : "integer"
       },
       "salesRankMediumTerm" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "integer"
       },
       "salesRankShortTerm" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
-        }
+        "type" : "integer"
       },
       "shippingCost" : {
         "type" : "text",
@@ -365,7 +365,6 @@
           }
         }
       }
-    }
     }
   }
 }
