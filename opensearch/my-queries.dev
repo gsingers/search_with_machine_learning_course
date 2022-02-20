@@ -1,0 +1,131 @@
+GET bbuy_products/_count
+
+GET bbuy_products/_mapping
+
+GET bbuy_products/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "car",
+      "operator": "and"
+    }
+  },
+  "sort": {
+    "field": "_score"
+  }
+}
+
+GET bbuy_products/_analyze/
+{
+  "field": "longDescription",
+  "text": "disks"
+}
+
+GET bbuy_products/_search
+{
+  "size":0,
+  "aggs": {
+    "missing-image": {
+      "missing": {
+        "field": "image"
+      }
+    }
+  }
+}
+
+GET bbuy_products/_search
+{
+  "size":0,
+  "aggs": {
+    "department-agg": {
+      "terms": {
+        "field": "department.keyword",
+        "size": 10
+      }
+    }
+  }
+}
+
+GET bbuy_products/_search
+{
+  "size":0,
+  "aggs": {
+    "my-agg": {
+      "terms": {
+        "field": "color.keyword"
+      },
+      "aggs": {
+        "price-agg": {
+          "avg": {
+            "field": "regularPrice"
+          }
+        }
+      }
+    },
+    "max_price" : { "max" : { "field" : "salePrice" } },
+    "min_price" : { "min" : { "field" : "salePrice" } } ,
+    "avg-price-agg": {
+      "avg": {
+        "field": "regularPrice"
+      }
+    },
+    "pct-price": {
+      "percentiles": {
+        "field": "regularPrice"
+      }
+    },
+    "composite-price": {
+      "composite": {
+        "sources": [
+          {
+            "regularPrice": {
+              "histogram": {
+                "interval": 5,
+                "field": "salePrice"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "price_ranges": {
+      "range": {
+        "field": "regularPrice",
+        "ranges": [
+          { "to": 10.0 },
+          { "from": 10.0, "to": 20.0 },
+          { "from": 20.0 }
+        ]
+      }
+    },
+    "class": {
+      "rare_terms": {
+        "field": "class.keyword"
+      }
+    },
+    "dynamic-prices-buckets": {
+      "variable_width_histogram": {
+        "field": "regularPrice",
+        "buckets": 3
+      }
+    }
+  }
+}
+
+######################################
+
+GET bbuy_queries/_count
+
+GET bbuy_queries/_mapping
+
+GET bbuy_queries/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+
+GET _cat/indices
+
+

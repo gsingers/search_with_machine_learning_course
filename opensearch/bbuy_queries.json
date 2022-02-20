@@ -8,8 +8,7 @@
         "type" : "keyword"
       },
       "click_time" : {
-        "type" : "date",
-        "format": "yyyy-MM-dd'T'HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SS"
+        "type" : "date"
       },
       "query" : {
         "type" : "text",
@@ -21,8 +20,7 @@
         }
       },
       "query_time" : {
-        "type" : "date",
-        "format": "yyyy-MM-dd'T'HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SS"
+        "type" : "date"
       },
       "sku" : {
         "type" : "keyword"
