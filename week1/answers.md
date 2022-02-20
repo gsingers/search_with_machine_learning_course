@@ -187,7 +187,7 @@ However, in search.py I used another query, using cross_fields, filtering out in
   }
 ```
 
- The reason is that in ecommerce you will often have queries with multiple 
+ The reason for using cross_fields is that in ecommerce you will often have queries with multiple 
 words where the matches should be in different fields. For example "Ipad sleeve black" - "Ipad sleeve" should be found in the name field but 
 "black" should be found in the color field. 
 
