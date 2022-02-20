@@ -132,8 +132,49 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     else:
         query_obj = {
             "size": 10,
-            "query": {"bool": { "must": [{"multi_match": {"query": user_query, "fields": ["name^100", "shortDescription^50", "LongDescription^10", "Department"]}}],  "filter": filters}},
-            "aggs": {
+            "query": {
+                "function_score": {
+                    "query": {
+                            "bool": {
+                            "must": [
+                                {
+                                "query_string": {
+                                    "query": "\"{}\"".format(user_query),
+                                    "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department"]
+                                }
+                                }
+                            ],
+                            "filter": filters
+                            }
+                        },
+                    "boost_mode": "replace",
+                    "score_mode": "avg",
+                    "functions": [
+                        {
+                        "field_value_factor": {
+                            "field": "salesRankLongTerm",
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    },
+                        {
+                        "field_value_factor": {
+                            "field": "salesRankMediumTerm",
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    },
+                        {
+                        "field_value_factor": {
+                            "field": "salesRankShortTerm",
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                     }
+                ]
+            }
+        },
+        "aggs": {
                 "regularPrice": {
                     "range": {
                         "field": "regularPrice",
@@ -142,6 +183,6 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                 },
                 "missing_images": {"missing": {"field": "image.keyword"}},
                 "department": {"terms": {"field": "department.keyword"}}
-            },
         }
+    }
     return query_obj
