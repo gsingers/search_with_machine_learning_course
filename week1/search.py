@@ -79,6 +79,7 @@ def query():
         query_obj = create_query(user_query, filters, sort, sortDir)
     else:
         query_obj = create_query("*", [], sort, sortDir)
+        
 
     response = opensearch.search(
             body=query_obj,
