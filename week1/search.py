@@ -71,6 +71,46 @@ def process_filters(filters_input):
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
+    # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
+    # eg. query=ipad%202&filter.name=regularPrice&regularPrice.type=range&regularPrice.key=Under%20$50&regularPrice.from=&regularPrice.to=50.0&regularPrice.displayName=Price
+    filters = []
+    # Also create the text we will use to display the filters that are applied
+    display_filters = []
+    applied_filters = ""
+    for filter in filters_input:
+        type = request.args.get(filter + ".type")
+        name = request.args.get(filter + ".name")
+        filter_from = request.args.get(filter + ".from")
+        filter_to = request.args.get(filter + ".to")
+        filter_key = request.args.get(filter + ".key", None)
+        filter_display_name = request.args.get(filter + ".displayName", filter)
+        #
+        # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
+        applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
+                                                                                 filter_display_name)
+        # TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
+        # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
+        if type == "range":
+            range_filter = {"range": {filter: {}}}
+            if filter_from:
+                range_filter['range'][filter]['gte'] = filter_from
+            if filter_to:
+                range_filter['range'][filter]['lt'] = filter_to
+            filters += [range_filter]
+
+            display_filters.append(
+                f"Showing results for {filter_display_name} between {filter_from} and {filter_to}")
+            applied_filters += "&{}.key={}&{}.from={}&{}.to={}".format(
+                filter, filter_key, filter, filter_from, filter, filter_to)
+        elif type == "terms":
+            term_filter = {"term": {filter: filter_key}}
+            filters += [term_filter]
+
+            applied_filters += "&{}.key={}".format(filter, filter_key)
+
+    print("Filters: {}".format(filters))
+    return filters, display_filters, applied_filters
+
 
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
@@ -220,12 +260,10 @@ def get_facets():
             "range": {
                 "field": "regularPrice",
                 "ranges": [
-                    {"key": "$", "to": 100},
-                    {"key": "$$", "from": 100, "to": 200},
-                    {"key": "$$$", "from": 200, "to": 300},
-                    {"key": "$$$$", "from": 300, "to": 400},
-                    {"key": "$$$$$", "from": 400, "to": 500},
-                    {"key": "$$$$$$", "from": 500}
+                    {"key": "Under $50", "to": 50},
+                    {"key": "$50 to $100", "from": 50, "to": 100},
+                    {"key": "$100 to $250", "from": 100, "to": 250},
+                    {"key": "Over $250", "from": 250}
                 ]
             },
             "aggs": {
