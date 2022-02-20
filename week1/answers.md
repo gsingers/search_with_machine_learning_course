@@ -145,3 +145,49 @@ GET bbuy_products/_search
 
 In a real-world ecommerce search, we would probably use the Querqy Plugin with rules curated by the product management. 
 Then we would restrict the search to the "correct" category if it is only the term "ipad 2" (and not something like "ipad 2 sleeve").
+
+However, in search.py I used another query, using cross_fields, filtering out inactive items:
+
+```
+ "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "active": true
+          }
+        }
+      ],
+    "must": [
+        {
+          "multi_match": {
+            "query": "ipad",
+            "fields": [
+              "name^10.0",
+              "manufacturer^2.0",
+              "color",
+              "class^5.0"`
+              "categoryPath^7"
+            ],
+            "type": "cross_fields",
+            "operator": "AND",
+            "slop": 0,
+            "prefix_length": 0,
+            "max_expansions": 50,
+            "minimum_should_match": "3<80%",
+            "tie_breaker": 0.1,
+            "zero_terms_query": "NONE",
+            "auto_generate_synonyms_phrase_query": true,
+            "fuzzy_transpositions": true,
+            "boost": 1.0
+          }
+        }
+      ]
+    }
+  }
+```
+
+ The reason is that in ecommerce you will often have queries with multiple 
+words where the matches should be in different fields. For example "Ipad sleeve black" - "Ipad sleeve" should be found in the name field but 
+"black" should be found in the color field. 
+
