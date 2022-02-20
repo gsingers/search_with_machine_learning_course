@@ -134,7 +134,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size_result
         query_type = "multi_match"
         query_dict = {
             "query": user_query,
-            "fields": ["name^2", "longDescription", "relatedProducts"],
+            "fields": ["name^100", "shortDescription^25", "longDescription^10", "relatedProducts"],
         }
 
     query_obj = {
