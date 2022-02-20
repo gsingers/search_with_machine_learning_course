@@ -1,6 +1,6 @@
 <div id="search-box"> 
   <form method="post" action="{{ url_for('search.query') }}">
-    <input name="query" id="query" type="search" value="{{ query|e }}" required>
+    <input name="query" id="query" type="search" value="{{ query|e }}" required autocomplete="off">
     <input type="submit" value="Query">
     <select name="sort">
       <option value="_score" {% if sort == "_score" %}selected{% endif %} >Relevance</option>

@@ -23,3 +23,17 @@
     </div>
   {% endblock %}
 </section>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.6/dist/css/autoComplete.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.6/dist/autoComplete.min.js"></script>
+<script>
+  const autoCompleteJS = new autoComplete({
+    selector: '#query',
+    data: {
+      src: (query) => {
+        return fetch('/search/suggest?query='+query)
+          .then(x => x.json())
+      }
+    }
+  });
+</script>
