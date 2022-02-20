@@ -287,6 +287,10 @@
           "keyword" : {
             "type" : "keyword",
             "ignore_above" : 256
+          },
+          "stemmed": {
+            "type": "text",
+            "analyzer": "english"
           }
         }
       },
