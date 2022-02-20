@@ -89,7 +89,17 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     query_obj = {
         'size': 10,
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+             "bool": {
+                        "must": [
+                            {
+                                "query_string": {
+                                    "query": user_query,
+                                    "fields": ["name^5", "shortDescription^2", "longDescription", "description"]
+                                }
+                            }
+                        ],
+                        "filter": filters
+                    }
         },
         "aggs": {
             "department": {
