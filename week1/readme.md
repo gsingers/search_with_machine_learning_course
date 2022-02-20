@@ -97,3 +97,46 @@ This may suggest that keyword frequency may not be good indicator, let's see how
 
 Didn't change anything. 
 Let's stop plaing.
+
+
+## Self assesment
+Team :tada:, our Week 1 Project is due by the end of the day (in your own timezone) on SUNDAY in this channel. When you submit your project, please:
+- Post the link to your Gitpod/Github repo (optional - you can also submit a screenshot of your UI)
+- Post your answers to the self assessment questions below
+- And tag your code review partners (I will DM them to you later today)
+
+Self Assessment Questions :male-detective:
+
+Do your counts match ours?
+- Number of documents in the Product index: 1,275,077
+- Number of documents in the Query Log index: 1,865,269
+- There are 16,772 items in the “Computers” department when using a “match all” query (“*”) and faceting on “department.keyword”.
+- Number of documents missing an “image” field: 4,434
+
+What field types and analyzers did you use for the following fields and why?
+- Name
+  - `text` with `english`
+  - `keyword` - to enable sorting by name
+  - `completion` - to play around with completion, doing it on search queries could be closer to autocomplete 
+  
+- shortDescription and longDescription
+  - `text` with `english`
+  - `keyword` - just to be
+
+- regularPrice
+  - `float` for aggregationand sorting
+  
+- Compare your Field mappings with the instructors. Where did you align and where did you differ? What are the pros and cons to the different approaches?
+  - Not a lot of difference, 
+
+- Were you able to get the “ipad 2” to show up in the top of your results? How many iterations did it take for you to get there, if at all? (we’re not scoring this, of course, it’s just worth noting that hand tuning like this can often be quite time consuming.)
+  - Yes. Few iterations, mostly I spend time on explaining how first postition weights differ from desider iPad possition. My findings are in week1 readme. 
+  - Most important that term frequecy play big role, iPad accessories had much more mentions of iPad in every field, iPad had different shortDescription where it didn't mention it's name but specs.
+  - I was playing with few other approches to combat terms frequecy like with slope, downbusting queries but it was hard and I gave up. Leason learn, relevance tuning is supppppppper hard.
+  - Using popularity of an item break problem of relevance, but introduce popularity bias, which means more popular items are in top, which may result in them beeing purchased more offten, which in tirn will increase mid and long term rank values when index would be automaticlay update on production. 
+
+Peer Review Questions: :handshake:
+- What are 1 or 2 things they did well in the homework?
+- What are 1 or 2 concrete ways they could improve their work?
+- If they indicated that they were stuck and/or want focused feedback please provide responses if you can...
+- Feel free to add words of encouragement as well!
