@@ -29,7 +29,7 @@
         {% endif %}
       </div>
       <div><span class="search-result-header">Image</span>:
-        {% if hit._source.image[0] %}
+        {% if hit._source.image and hit._source.image[0] %}
         <img src={{ hit._source.image[0] }} />
         {% endif %}
       </div>
