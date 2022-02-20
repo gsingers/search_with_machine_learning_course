@@ -28,22 +28,47 @@ def process_filters(filters_input):
         applied_filters += f"&filter.name={filter}&{filter}.type={agg_type}&{filter}"
         applied_filters += f".displayName={agg_display_name}"
 
-        # ?&query=test
-        # &filter.name=regularPrice
-        # &regularPrice.type=range
-        # &regularPrice.key=10.0-50.0
-        # &regularPrice.from=10.0
-        # &regularPrice.to=50.0
-        # &regularPrice.displayName=Price
-
-
-        # TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
+        # DONE: TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
-        if agg_type == "range":
-            pass  # TODO: IMPLEMENT
-        elif agg_type == "terms":
-            pass  # TODO: IMPLEMENT
 
+        if agg_type == "range":
+            # pass  # DONE: TODO: IMPLEMENT
+            agg_from = request.args.get(filter + ".from", filter)
+            agg_to = request.args.get(filter + ".to", filter)
+
+            if agg_from:
+                applied_filters += "&{}.from={}".format(filter, agg_from)
+            if agg_to:
+                applied_filters += "&{}.to={}".format(filter, agg_to)
+
+            range_filter = {"range": {filter: {}}}
+            display = ""
+
+            minimum = request.args.get(filter + ".from")
+            maximum = request.args.get(filter + ".to")
+
+            if minimum:
+                range_filter["range"][filter]["gte"] = minimum
+                display += f"{minimum} <= "
+
+            display += agg_display_name
+
+            if maximum:
+                range_filter["range"][filter]["lt"] = maximum
+                display += f" < {maximum} "
+
+            print(f"range_filter: {range_filter}")
+            filters.append(range_filter)
+            display_filters.append(display)
+
+        elif agg_type == "terms":
+            # pass  # DONE: TODO: IMPLEMENT
+            agg_key = request.args.get(filter + ".key", filter)
+            if agg_key:
+                applied_filters += f"&{filter}.key={agg_key}"
+                terms_filter = {"terms": {filter + ".keyword": [agg_key]}}
+                filters.append(terms_filter)
+                display_filters.append(f"{filter} = {agg_key}")
 
     print(f"Filters: {filters}")
 
@@ -65,7 +90,7 @@ def query():
     filters = None
     sort = "_score"
     sortDir = "desc"
-    size_results = 25 # Make this smaller in the future (~10)
+    size_results = 25  # Make this smaller in the future (~10)
 
     if request.method == "POST":  # a query has been submitted
         user_query = request.form["query"]
@@ -94,7 +119,6 @@ def query():
     print(f"query obj: {query_obj}")
 
     # DONE: TODO: Replace me with an appropriate call to OpenSearch
-
     index_name_products = "bbuy_products"
     response = opensearch_client.search(body=query_obj, index=index_name_products)
 
@@ -128,14 +152,26 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size_result
         query_type = "multi_match"
         query_dict = {
             "query": user_query,
-            "fields": ["name^100", "shortDescription^25", "longDescription^10", "relatedProducts"],
+            "fields": [
+                "name^100",
+                "shortDescription^25",
+                "longDescription^10",
+                "relatedProducts",
+            ],
         }
 
+    # DONE: TODO: "match_all": {}  # Replace me with a query that both searches and filters
     query_obj = {
         "size": size_results,
         "query": {
-            # DONE: TODO: "match_all": {}  # Replace me with a query that both searches and filters
-            query_type: query_dict
+            "bool": {
+                "must": [
+                    {
+                        query_type: query_dict,
+                    }
+                ],
+                "filter": filters,
+            }
         },
         "aggs": {
             # TODO: FILL ME IN
