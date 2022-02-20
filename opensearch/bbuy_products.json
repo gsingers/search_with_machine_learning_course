@@ -110,9 +110,9 @@
         "fields": {
           "keyword": {
             "type": "keyword",
-            "analyzer": "std_english",
             "ignore_above": 256
-          }
+          },
+          "analyzer": "std_english"
         }
       },
       "shortDescription": {

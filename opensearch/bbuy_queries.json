@@ -47,7 +47,7 @@
         }
       },
       "sku" : {
-        "type" : "integer"
+        "type" : "long"
       },
       "user" : {
         "type" : "text",

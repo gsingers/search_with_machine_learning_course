@@ -8,12 +8,18 @@ from flask import (
 from week1.opensearch import get_opensearch
 
 bp = Blueprint('search', __name__, url_prefix='/search')
+INDEX_NAME = "bbuy_products"
 
+# Process the filters requested by the user and return a tuple that is appropriate for use in: the query, 
+# URLs displaying the filter and the display of the applied filters
 
-# Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
+
 # display_filters -- return an array of filters that are applied that is appropriate for display
-# applied_filters -- return a String that is appropriate for inclusion in a URL as part of a query string.  This is basically the same as the input query string
+
+# applied_filters -- return a String that is appropriate for inclusion in a URL as part of a query string.  
+#This is basically the same as the input query string
+
 def process_filters(filters_input):
     # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
     filters = []
@@ -42,8 +48,8 @@ def process_filters(filters_input):
 def query():
     opensearch = get_opensearch() # Load up our OpenSearch client from the opensearch.py file.
     # Put in your code to query opensearch.  Set error as appropriate.
-    error = None
-    user_query = None
+    error = 'Something is incorrect in your query syntax'
+    user_query = ''
     query_obj = None
     display_filters = None
     applied_filters = ""
@@ -74,8 +80,11 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
-    # Postprocess results here if you so desire
+    response = opensearch.search(
+        body=query_obj,
+        index=INDEX_NAME
+    )
+
 
     #print(response)
     if error is None:
