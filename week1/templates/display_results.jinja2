@@ -1,14 +1,20 @@
 <div id="search-results" class="search-results">
   {% for hit in search_response.hits.hits %}
     <div class="search-result search-result-{{ loop.cycle('odd', 'even') }}">
+      <div class="image-container">
+        {% if hit._source.image %}
+          <img class="image" src="{{ hit._source.image[0] }}" >
+        {% endif %}
+      </div>
       <div class="search-result-name">{#do we have a highlight?#}
         {% if hit.highlight and hit.highlight.name %}
           {{ hit.highlight.name[0] }}
-        {% else%}
+        {% elif hit._source.name %}
           {{ hit._source.name[0] }}
         {% endif %}
       </div>
       <div><span class="search-result-header">ID</span>: {{ hit._source.productId[0] }}</div>
+      <div><span class="search-result-header">Price</span>: {{ hit._source.regularPrice[0] }}</div>
       <div><span class="search-result-header">Description</span>:
         {% if hit._source.longDescription %}
           {#do we have a highlight?#}

@@ -21,19 +21,36 @@ def process_filters(filters_input):
     filters = []
     display_filters = []  # Also create the text we will use to display the filters that are applied
     applied_filters = ""
-    for filter in filters_input:
-        type = request.args.get(filter + ".type")
-        display_name = request.args.get(filter + ".displayName", filter)
+    for filter_ in filters_input:
+        filter_type = request.args.get(filter_ + ".type")
+        filter_key = request.args.get(filter_ + ".key")
+        display_name = request.args.get(filter_ + ".displayName", filter_)
+        min_value = request.args.get(filter_ + '.from')
+        max_value = request.args.get(filter_ + '.to')
         #
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
-        applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
-                                                                                 display_name)
+        applied_filters += f"&filter.name={filter_}&{filter_}.type={filter_type}&{filter_}.displayName={display_name}&{filter_}.key={filter_key}&{filter_}.from={min_value}&{filter_}.to={max_value}"
+
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
+
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
-        if type == "range":
-            pass
-        elif type == "terms":
-            pass #TODO: IMPLEMENT
+        if filter_type == "range":
+            display_filters.append(f'{display_name}: from {min_value} to {max_value}')
+            filters.append({
+                "range": {
+                    filter_: {
+                        "gte": min_value,
+                        "lte": max_value
+                    }
+                }
+            })
+        elif filter_type == "terms":
+            display_filters.append(f'{display_name}: {filter_key}')
+            filters.append({
+                "term": {
+                    f'{filter_}.keyword': filter_key
+                }
+            })
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -96,19 +113,53 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    query_obj = {
-        'size': 10,
-        "query": {
+    if user_query and user_query != '*':
+        match = {
             "multi_match": {
                 "query": user_query,
                 "operator": "AND"
             }
-        },
+        }
+    else:
+        match = {
+            "match_all": {
+
+            }
+        }
+
+    bool_query = {
+        "bool": {
+            "must": [match],
+            "filter": filters
+        }
+    }
+
+    query_obj = {
+        'size': 10,
+        "query": bool_query,
         "sort": {
             sort: sortDir
         },
         "aggs": {
-            #TODO: FILL ME IN
+            "regularPrice": {
+                "variable_width_histogram": {
+                    "field": "regularPrice",
+                    "buckets": 6
+                }
+            },
+
+            "department_agg": {
+                "terms": {
+                    "field": "department.keyword",
+                    "size": 10
+                }
+            },
+
+            "missing_images": {
+                "missing": {
+                    "field": "image"
+                }
+            }
         }
     }
     return query_obj

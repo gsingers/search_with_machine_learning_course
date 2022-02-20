@@ -25,6 +25,20 @@
     grid-column-gap: 15px;
 }
 
+.image {
+    float: left;
+    padding-left: 0;
+    margin-right: 20px;
+    height: inherit;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.image-container {
+    height: 100px;
+    width: 100px;
+}
+
 .search-results {
 
 }
@@ -60,7 +74,7 @@
     grid-row-end: 1;
     grid-column: 1/span 2;
     justify-self: center;
-    
+
 }
 
 
