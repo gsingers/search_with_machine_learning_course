@@ -27,12 +27,23 @@ def process_filters(filters_input):
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
         applied_filters += f"&filter.name={filter}&{filter}.type={agg_type}&{filter}"
         applied_filters += f".displayName={agg_display_name}"
+
+        # ?&query=test
+        # &filter.name=regularPrice
+        # &regularPrice.type=range
+        # &regularPrice.key=10.0-50.0
+        # &regularPrice.from=10.0
+        # &regularPrice.to=50.0
+        # &regularPrice.displayName=Price
+
+
         # TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if agg_type == "range":
-            pass
+            pass  # TODO: IMPLEMENT
         elif agg_type == "terms":
             pass  # TODO: IMPLEMENT
+
 
     print(f"Filters: {filters}")
 
