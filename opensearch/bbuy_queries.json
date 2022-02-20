@@ -1,5 +1,23 @@
 {
   "settings": {
     "index.refresh_interval": "5s"
+  },
+  "mappings": {
+    "properties": {
+      "user": {"type": "keyword"},
+      "sku": {"type": "long"},
+      "category": {"type": "keyword"},
+      "query":{
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "click_time": {"type": "date", "format": "yyyy-MM-dd HH:mm:ss.[SSS][SS][S][Z]"},
+      "query_time": {"type": "date", "format": "yyyy-MM-dd HH:mm:ss.[SSS][SS][S][Z]"}
+    }
   }
 }
