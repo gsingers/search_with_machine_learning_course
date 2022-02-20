@@ -153,9 +153,15 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size_result
         query_dict = {
             "query": user_query,
             "fields": [
-                "name^100",
-                "shortDescription^25",
-                "longDescription^10",
+                "name.shingled^100",
+                "name.non_stemmed^90",
+                "name^80",
+                "shortDescription.shingled^70",
+                "shortDescription.non_stemmed^60",
+                "shortDescription^50",
+                "longDescription.shingled^40",
+                "longDescription.non_stemmed^30",
+                "longDescription^20",
                 "relatedProducts",
             ],
         }
