@@ -172,7 +172,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
         },
         "sort": {sort: sortDir},
         "_source": ["productId", "name", "shortDescription", "longDescription", "department",
-                    "salesRankShortTerm", "salesRankMediumTerm", "salesRankLongTerm", "regularPrice"]
+                    "salesRankShortTerm", "salesRankMediumTerm", "salesRankLongTerm", "regularPrice", "image"]
     }
     return query_obj
 
