@@ -105,9 +105,9 @@ def create_query(user_query,filters,sort='_score',sortDir='desc'):
                 'missing_images': {'missing': {'field': 'image.keyword'}}}}
     
     if user_query != '*':
-        query_obj['query']['bool']['must'] = {'multi_match': {'query': user_query,'fields': ['name.stem^5','shortDescriptionHtml.stem', 'longDescription.stem']}}
+        query_obj['query']['bool']['must'] = {'multi_match': {'query': user_query,'fields': ['name.stem^1000','shortDescriptionHtml.stem^50','longDescription.stem']}}
     
-    query_obj['query']['bool']['should'] = [{"function_score":{"score_mode":"sum","boost_mode":"sum","functions":[{"field_value_factor":{"field":"salesRankLongTerm","factor":1,"missing":0}}]}}]
+    query_obj['query']['bool']['should'] = [{'function_score':{'score_mode':'sum','boost_mode':'sum','functions':[{'field_value_factor':{'field':'salesRankLongTerm','factor':1.2,'modifier':'sqrt','missing':0}},{'field_value_factor':{'field':'customerReviewCount','factor':10,'missing':0}}]}}]
 
     queryFilters = []
     for filter in filters:

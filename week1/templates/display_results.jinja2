@@ -11,7 +11,7 @@
       <div class="search-result-image">{#do we have a highlight?#}
         {% if hit.highlight and hit.highlight.image %}
           <img src="{{hit._source.image[0]}}">
-        {% else%}
+        {% elif hit._source.image%}
           <img src="{{hit._source.image[0]}}">
         {% endif %}
       </div>
