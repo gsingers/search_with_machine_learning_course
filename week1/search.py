@@ -74,7 +74,7 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(body=query_obj, index="bbuy_products")
     # Postprocess results here if you so desire
 
     #print(response)
@@ -89,12 +89,39 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
     query_obj = {
-        'size': 10,
+        "size": 10, 
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+            "script_score": {
+            "query": {
+                "query_string": {
+                "query": user_query,
+                "fields": [
+                    "name^10",
+                    "name.english^10",
+                    "shortDescription^5",
+                    "shortDescription.english^5",
+                    "longDescription",
+                    "longDescription.english"
+                ],
+                "type": "most_fields"
+                }
+            },
+            "script": {
+                "source": "double reviewAverage = doc['customerReviewAverage'].empty? 2.5 : doc['customerReviewAverage'].value; long reviewCount = doc['customerReviewCount'].empty? 0 : doc['customerReviewCount'].value; return _score * Math.exp((reviewAverage-2.5)*reviewCount/500);"
+            }
+            }
         },
-        "aggs": {
-            #TODO: FILL ME IN
-        }
+        "_source": [
+            "productId",
+            "name",
+            "shortDescription",
+            "longDescription",
+            "salesRankShortTerm",
+            "salesRankMediumTerm",
+            "salesRankLongTerm",
+            "categoryPath",
+            "customerReviewAverage",
+            "customerReviewCount"
+        ]
     }
     return query_obj
