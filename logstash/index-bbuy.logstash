@@ -2,6 +2,11 @@ input {
   file {
     path => ["/workspace/datasets/product_data/products/*.xml"]  #Put in the path to the ungzipped/untarred product data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
     start_position => "beginning"
+    mode => "read"
+    exit_after_read => true
+    sincedb_path => "/dev/null"
+    file_completed_action => "log"
+    file_completed_log_path => "/dev/null"
     codec => multiline {
             pattern => "<product>"
             negate => "true"
