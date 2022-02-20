@@ -175,7 +175,13 @@
         "type" : "boolean"
       },
       "productId" : {
-        "type" : "long"
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
       },
       "quantityLimit" : {
         "type" : "long"
@@ -228,7 +234,13 @@
         }
       },
       "sku" : {
-        "type" : "long"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
       },
       "startDate" : {
         "type" : "date",
