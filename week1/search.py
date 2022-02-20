@@ -39,7 +39,7 @@ def process_filters(filters_input):
             from_filter = request.args.get(filter + ".from") if request.args.get(filter + ".from") else 0
             to_filter = request.args.get(filter + ".to")
 
-            range_filter['gt'] = from_filter
+            range_filter['gte'] = from_filter
             display = f'{from_filter}'
 
             if to_filter:
@@ -53,7 +53,7 @@ def process_filters(filters_input):
             applied_filters += f'&{filter}.from={from_filter}&{filter}.to={to_filter}'
 
         elif type == "term":
-            search_filter = {"term": {filter: key}}
+            search_filter = {"term": {filter + ".keyword": key}}
             display_filters.append(f'{display_name}: {key}')
 
         filters.append(search_filter)
@@ -166,24 +166,54 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
             },
             "department": {
                 "terms": {
-                    "field": "department"
+                    "field": "department.keyword"
                 }
             }
         },
-        "sort": {sort: sortDir}
+        "sort": {sort: sortDir},
+        "_source": ["productId", "name", "shortDescription", "longDescription", "department",
+                    "salesRankShortTerm", "salesRankMediumTerm", "salesRankLongTerm", "regularPrice"]
     }
     return query_obj
 
 
 def _get_search_query_(user_query, filters=[]):
-    # filters = _create_search_filters_(user_filters)
     return {
         "bool": {
             "must": [
                 {
-                    "simple_query_string": {
-                        "query": user_query,
-                        "fields": ["name^10", "description^5", "shortDescription^2", "longDescription"]
+                    "function_score": {
+                        "query": {
+                            "simple_query_string": {
+                                "query": user_query,
+                                "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department"]
+                            }
+                        },
+                        "boost_mode": "replace",
+                        "score_mode": "avg",
+                        "functions": [
+                            {
+                                "field_value_factor": {
+                                    "field": "salesRankLongTerm",
+                                    "modifier": "reciprocal",
+                                    "missing": 100000000
+                                }
+                            },
+                            {
+                                "field_value_factor": {
+                                    "field": "salesRankMediumTerm",
+                                    "modifier": "reciprocal",
+                                    "missing": 100000000
+                                }
+                            },
+                            {
+                                "field_value_factor": {
+                                    "field": "salesRankShortTerm",
+                                    "modifier": "reciprocal",
+                                    "missing": 100000000
+                                }
+                            }
+                        ]
                     }
                 }
             ],
