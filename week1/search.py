@@ -6,6 +6,7 @@ from flask import (
 )
 
 from week1.opensearch import get_opensearch
+from collections import defaultdict
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
@@ -16,6 +17,7 @@ bp = Blueprint('search', __name__, url_prefix='/search')
 # applied_filters -- return a String that is appropriate for inclusion in a URL as part of a query string.  This is basically the same as the input query string
 def process_filters(filters_input):
     # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
+    print(f"process_filters(): filters_input={filters_input}")
     filters = []
     display_filters = []  # Also create the text we will use to display the filters that are applied
     applied_filters = ""
@@ -26,10 +28,14 @@ def process_filters(filters_input):
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
         applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
                                                                                  display_name)
+        print(f"applied_filters={applied_filters}̋")
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            range_from = request.args.get(filter + ".from")
+            range_to = request.args.get(filter + ".to")
+            range_filter = {"from": range_from, "to": range_to}
+            filters.append(range_filter)
         elif type == "terms":
             pass #TODO: IMPLEMENT
     print("Filters: {}".format(filters))
@@ -74,7 +80,10 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = get_opensearch().search(
+        body=query_obj,
+        index='bbuy_products'
+    )
     # Postprocess results here if you so desire
 
     #print(response)
@@ -88,13 +97,86 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+
+    if filters is not None and len(filters) > 0:
+        range_from = None if filters is None else filters[0].get("from")
+        range_to = None if filters is None else filters[0].get("to")
+
+        user_filter = None
+
+        if range_from is not None and range_from != '':
+            if user_filter == None:
+                user_filter = []
+                user_filter.append({"range": {"regularPrice": {"gte": range_from}}})
+            else:
+                user_filter[0]["range"]["regularPrice"]["gte"] = range_from
+
+        if range_to is not None and range_to != '':
+            if user_filter == None:
+                user_filter = []
+                user_filter.append({"range": {"regularPrice": {"lte": range_to}}})
+            else:
+                user_filter[0]["range"]["regularPrice"]["lte"] = range_to
+
+        #user_filter = [ { "range":  {"regularPrice": {"gte": range_from, "lte": range_to}} } ]
+    else:
+        user_filter = None
+
+    if user_query == '*':
+        query = {
+            "bool": {
+                "must": [
+                    { 'match_all': {} }
+                ],
+                "filter": user_filter
+            }
+       }
+    else:
+        query = {
+            "bool": {
+                "must": [
+                    { 'match_phrase': { 'name': {"query": user_query} } }
+                ],
+                "filter": user_filter
+            }
+       }
+
     query_obj = {
         'size': 10,
-        "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
-        },
-        "aggs": {
-            #TODO: FILL ME IN
+        'query': query,
+        "aggs": {            
+            "regularPrice": {
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        {
+                            "from": 0,
+                            "to": 100
+                        },
+                        {
+                            "from": 100,
+                            "to": 500
+                        },
+                        {
+                            "from": 500
+                        }
+                    ]
+                }
+            },
+            "department": {
+                "terms": {
+                    "field": "department.keyword",
+                    "size": 20,
+                    "missing": "N/A",
+                    "min_doc_count": 0
+                }
+            },
+            "missing_images": {
+              "missing": {
+                "field": "image.keyword"
+              }
+            }
         }
     }
+
     return query_obj

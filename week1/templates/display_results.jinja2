@@ -26,6 +26,14 @@
           {% endif %}
         {% endif %}
       </div>
+      <div><span class="search-result-header">Regular price</span>: {{ hit._source.regularPrice[0] }}</div>
+      <div>
+        {% if hit._source.image %}
+          <img src="{{ hit._source.image[0] }}"
+        {% else %}
+          <img src="https://img.icons8.com/dotty/80/000000/product.png"/>
+        {% endif %}
+      </div>
     </div>
   {% endfor %}
 
