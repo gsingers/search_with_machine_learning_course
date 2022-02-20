@@ -8,7 +8,9 @@
           "stopwords": "_english_",
           "filter": [ "lowercase" ]
         }
-      }
+      
+    }
+  }
   },
   "mappings": {
     "properties": {
@@ -74,7 +76,7 @@
       
       },
       "homeDelivery": {
-        "type": "boolean",
+        "type": "boolean"
         
       },
       "image": {
