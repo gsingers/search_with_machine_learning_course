@@ -2,18 +2,6 @@ GET bbuy_products/_count
 
 GET bbuy_products/_mapping
 
-GET bbuy_products/_search
-{
-  "query": {
-    "multi_match": {
-      "query": "car",
-      "operator": "and"
-    }
-  },
-  "sort": {
-    "field": "_score"
-  }
-}
 
 GET bbuy_products/_analyze/
 {
@@ -32,6 +20,7 @@ GET bbuy_products/_search
     }
   }
 }
+
 
 GET bbuy_products/_search
 {
@@ -106,8 +95,25 @@ GET bbuy_products/_search
     "dynamic-prices-buckets": {
       "variable_width_histogram": {
         "field": "regularPrice",
-        "buckets": 3
+        "buckets": 6
       }
+    }
+  }
+}
+
+GET bbuy_products/_search
+{
+  "query": {
+    "match": {
+      "name": "ipad"
+    }
+  },
+  "highlight": {
+    "fields": {
+      "name": {"number_of_fragments":0},
+      "longDescription": {"number_of_fragments":0},
+      "shortDescription": {"number_of_fragments":0},
+      "department": {"number_of_fragments":0}
     }
   }
 }
@@ -129,3 +135,8 @@ GET bbuy_queries/_search
 GET _cat/indices
 
 
+
+
+
+
+GET bbuy_products/_count
