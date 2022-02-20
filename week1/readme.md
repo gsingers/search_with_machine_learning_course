@@ -96,7 +96,6 @@ This may suggest that keyword frequency may not be good indicator, let's see how
 ```
 
 Didn't change anything. 
-
 Let's stop plaing.
 
 
