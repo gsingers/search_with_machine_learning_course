@@ -1,6 +1,17 @@
 {
   "settings": {
-    "index.refresh_interval": "5s"
+    "index.refresh_interval": "5s",
+    "analysis": {
+      "analyzer": {
+        "standard_shingle": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "shingle"
+          ]
+        }
+      }
+    }
   },
   "mappings" : {
     "properties" : {
@@ -13,6 +24,14 @@
           "keyword" : {
             "type" : "keyword",
             "ignore_above" : 256
+          },
+          "shingled" : {
+            "type" : "text",
+            "analyzer" : "standard_shingle"
+          },
+          "non_stemmed" : {
+            "type" : "text",
+            "analyzer" : "standard"
           }
         }
       },
@@ -197,6 +216,14 @@
           "keyword" : {
             "type" : "keyword",
             "ignore_above" : 256
+          },
+          "shingled" : {
+            "type" : "text",
+            "analyzer" : "standard_shingle"
+          },
+          "non_stemmed" : {
+            "type" : "text",
+            "analyzer" : "standard"
           }
         }
       },
@@ -206,6 +233,14 @@
           "keyword" : {
             "type" : "keyword",
             "ignore_above" : 256
+          },
+          "shingled" : {
+            "type" : "text",
+            "analyzer" : "standard_shingle"
+          },
+          "non_stemmed" : {
+            "type" : "text",
+            "analyzer" : "standard"
           }
         }
       },
@@ -229,6 +264,14 @@
           "keyword" : {
             "type" : "keyword",
             "ignore_above" : 256
+          },
+          "shingled" : {
+            "type" : "text",
+            "analyzer" : "standard_shingle"
+          },
+          "non_stemmed" : {
+            "type" : "text",
+            "analyzer" : "standard"
           }
         }
       },
