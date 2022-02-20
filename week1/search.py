@@ -22,16 +22,40 @@ def process_filters(filters_input):
     for filter in filters_input:
         type = request.args.get(filter + ".type")
         display_name = request.args.get(filter + ".displayName", filter)
-        #
-        # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
-        applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
-                                                                                 display_name)
-        #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
-        # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
+        key = request.args.get(filter + ".key")
+        range_from = request.args.get(filter + ".from")
+        range_to = request.args.get(filter + ".to")
+        display_name = request.args.get(filter + ".displayName", filter)
+
+        applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}&{}.key={}".format(filter, filter, type, filter,
+                                                                                 display_name, filter, key)
+        # Range Filter 
+        range_filter = {
+            "range": {
+                filter: {
+                }
+            }
+        } 
+
+        if range_from:
+            range_filter["range"][filter]["gte"] = range_from
+        if range_to:
+            range_filter["range"][filter]["lte"] = range_to
+
         if type == "range":
-            pass
+            filters.append(range_filter)
+            applied_filters += "&{}.from={}&{}.to={}".format(filter, range_from, filter, range_to)
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            filters.append(
+            {
+                "term": {
+                    "{}.keyword".format(filter): {
+                        "value": key
+                    }
+                }
+            })
+
+        print("Filters: {}".format(filters))
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -74,7 +98,7 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search( body = query_obj, index = 'bbuy_products')
     # Postprocess results here if you so desire
 
     #print(response)
@@ -89,12 +113,130 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
     query_obj = {
-        'size': 10,
-        "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
-        },
-        "aggs": {
-            #TODO: FILL ME IN
-        }
+   "size":10,
+   "highlight": {
+    "fields": {
+      "name": {},
+      "shortDescription": {}, 
+      "longDescriptionlongDescription": {}
     }
+  },
+   "sort" : [
+      {sort : {"order" : sortDir}}
+   ],
+   "query":{
+      "function_score":{
+         "query":{
+            "bool":{
+               "must":[
+                  {
+                     "query_string":{
+                        "query": user_query,
+                        "fields":[
+                           "name^1000",
+                           "shortDescription^50",
+                           "longDescription^10",
+                           "department"
+                        ]
+                     }
+                  }
+               ],
+               "filter": filters
+            }
+         },
+         "boost_mode":"replace",
+         "score_mode":"avg",
+         "functions":[
+            {
+               "field_value_factor":{
+                  "field":"salesRankLongTerm",
+                  "modifier":"reciprocal",
+                  "missing":100000000
+               }
+            },
+            {
+               "field_value_factor":{
+                  "field":"salesRankMediumTerm",
+                  "modifier":"reciprocal",
+                  "missing":100000000
+               }
+            },
+            {
+               "field_value_factor":{
+                  "field":"salesRankShortTerm",
+                  "modifier":"reciprocal",
+                  "missing":100000000
+               }
+            }
+         ]
+      }
+   },
+   "aggs":{
+      "department":{
+         "terms":{
+            "field":"department.keyword",
+            "min_doc_count":1
+         }
+      },
+      "missing_images":{
+         "missing":{
+            "field":"image.keyword"
+         }
+      },
+      "regularPrice":{
+         "range":{
+            "field":"regularPrice",
+            "ranges":[
+               {
+                  "key":"$",
+                  "to":100
+               },
+               {
+                  "key":"$$",
+                  "from":100,
+                  "to":200
+               },
+               {
+                  "key":"$$$",
+                  "from":200,
+                  "to":300
+               },
+               {
+                  "key":"$$$$",
+                  "from":300,
+                  "to":400
+               },
+               {
+                  "key":"$$$$$",
+                  "from":400,
+                  "to":500
+               },
+               {
+                  "key":"$$$$$$",
+                  "from":500
+               }
+            ]
+         },
+         "aggs":{
+            "price_stats":{
+               "stats":{
+                  "field":"regularPrice"
+               }
+            }
+         }
+      }
+   },
+   "_source":[
+      "productId",
+      "name",
+      "shortDescription",
+      "longDescription",
+      "department",
+      "salesRankShortTerm",
+      "salesRankMediumTerm",
+      "salesRankLongTerm",
+      "regularPrice",
+      "image"
+   ]
+}
     return query_obj

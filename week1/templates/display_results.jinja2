@@ -9,6 +9,10 @@
         {% endif %}
       </div>
       <div><span class="search-result-header">ID</span>: {{ hit._source.productId[0] }}</div>
+      {% if hit._source.image %}
+        <div><span class="search-result-header">Image</span>: <img src= {{ hit._source.image[0]}} />  </div>
+      {% else %}
+      {% endif %}    
       <div><span class="search-result-header">Description</span>:
         {% if hit._source.longDescription %}
           {#do we have a highlight?#}
