@@ -2,7 +2,7 @@
 # The main search hooks for the Search Flask application.
 #
 from flask import (
-    Blueprint, redirect, render_template, request, url_for
+    Blueprint, redirect, render_template, request, url_for, jsonify
 )
 
 from week1.opensearch import get_opensearch
@@ -66,6 +66,39 @@ def process_filters(filters_input):
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
+
+
+@bp.route('/suggest', methods=['GET'])
+def suggest():
+    opensearch = get_opensearch()
+    user_query = request.args.get("query", "*")
+
+    query_obj = {
+        "size": 5,
+        "_source": ["query"],
+        "query": {
+            "multi_match": {
+                "query": user_query,
+                "type": "bool_prefix",
+                "fields": [
+                    "query_as_you_type",
+                    "query_as_you_type._2gram",
+                    "query_as_you_type._3gram"
+                ]
+            }
+        }
+    }
+
+    response = opensearch.search(
+        body=query_obj,
+        index="bbuy_queries"
+    )
+
+    results = []
+    for i in response['hits']['hits']:
+        results.append(i['_source']['query'])
+
+    return jsonify(results)
 
 
 # Our main query route.  Accepts POST (via the Search box) and GETs via the clicks on aggregations/facets
