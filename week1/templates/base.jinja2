@@ -29,11 +29,20 @@
 <script>
   const autoCompleteJS = new autoComplete({
     selector: '#query',
+    submit: true,
+    resultsList: {
+      tabSelect: true
+    },
     data: {
       src: (query) => {
         return fetch('/search/suggest?query='+query)
           .then(x => x.json())
       }
-    }
+    },
   });
+
+  autoCompleteJS.input.addEventListener("selection", function (event) {
+    autoCompleteJS.input.value = event.detail.selection.value
+    autoCompleteJS.input.submit();
+  })
 </script>

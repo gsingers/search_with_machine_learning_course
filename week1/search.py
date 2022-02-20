@@ -72,9 +72,11 @@ def process_filters(filters_input):
 def suggest():
     opensearch = get_opensearch()
     user_query = request.args.get("query", "*")
+    results = []
 
+    # Suggest queries
     query_obj = {
-        "size": 5,
+        "size": 3,
         "_source": ["query"],
         "query": {
             "multi_match": {
@@ -88,15 +90,34 @@ def suggest():
             }
         }
     }
-
     response = opensearch.search(
         body=query_obj,
         index="bbuy_queries"
     )
-
-    results = []
     for i in response['hits']['hits']:
         results.append(i['_source']['query'])
+
+    # Suggest product names
+    product_names_query_obj = {
+        "suggest": {
+            "name_suggest": {
+                "prefix": user_query,
+                "completion": {
+                    "field": "name.completion",
+                    "size": 2,
+                    "skip_duplicates": True
+                }
+            }
+        }
+    }
+    print(json.dumps(product_names_query_obj))
+    response = opensearch.search(
+        body=product_names_query_obj,
+        index="bbuy_products"
+    )
+    for i in response['suggest']['name_suggest']:
+        for o in i['options']:
+            results.append(o['text'])
 
     return jsonify(results)
 
