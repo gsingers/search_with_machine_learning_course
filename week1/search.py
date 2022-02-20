@@ -26,12 +26,26 @@ def process_filters(filters_input):
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
         applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
                                                                                  display_name)
-        #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
+        display_filters.append(display_name)
+        
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            from_val = request.args.get(filter + ".from")
+            to_val = request.args.get(filter + ".to")
+            range_filter = dict()
+            if from_val:
+                range_filter["gte"] = from_val
+            if to_val:
+                range_filter["lte"] = to_val
+            filters.append({"range": {filter: range_filter}})
+            display_filters.append("{}: from={} to={}".format(display_name, from_val, to_val))
+            applied_filters += "&{}.from={}&{}.to={}".format(filter, from_val, filter, to_val)
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            field = request.args.get(filter + ".fieldName", filter)
+            key = request.args.get(filter + ".key") 
+            filters.append({"term": {field: key}})
+            display_filters.append("{}: {}".format(display_name, key))
+            applied_filters += "&{}.fieldName={}&{}.key={}".format(filter, field, filter, key)
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -42,6 +56,7 @@ def process_filters(filters_input):
 def query():
     opensearch = get_opensearch() # Load up our OpenSearch client from the opensearch.py file.
     # Put in your code to query opensearch.  Set error as appropriate.
+    index_name = "bbuy_products"
     error = None
     user_query = None
     query_obj = None
@@ -74,10 +89,13 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(
+                    body = query_obj,
+                    index = index_name
+                )
     # Postprocess results here if you so desire
 
-    #print(response)
+    print(f"error: {error}")
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
@@ -85,16 +103,91 @@ def query():
     else:
         redirect(url_for("index"))
 
-
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+
+    search_query = {
+        "query_string": {
+            "query": user_query,
+            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+        }
+    }
+
     query_obj = {
+        "_source": ["productId", "name", "regularPrice", "shortDescription", "longDescription", "department"],
         'size': 10,
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+            "function_score": {
+                "query": {
+                    "bool": {
+                        "must": [search_query],
+                        "filter": filters
+                    }
+                },
+                "boost_mode": "multiply",
+                "score_mode": "avg",
+                "functions": [
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankLongTerm",
+                            "factor": 1.5,
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankMediumTerm",
+                            "factor": 1,
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    },
+                    {
+                        "field_value_factor": {
+                            "field": "salesRankShortTerm",
+                            "factor": 1.5,
+                            "modifier": "reciprocal",
+                            "missing": 100000000
+                        }
+                    }
+                ]
+            }
         },
+        "sort": [
+            {
+                sort: {
+                    "order": sortDir
+                }
+            }
+        ],
         "aggs": {
-            #TODO: FILL ME IN
+            "departments": {
+                "terms": {
+                    "field": "department.keyword",
+                }
+            },
+            "missing_images": {
+                "missing": {
+                    "field": "image.keyword"
+                }
+            },
+            "regularPrice": {
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        {"key": "Under $50", "to": 50},
+                        {"key": "$50 to $100", "from": 50, "to": 100},
+                        {"key": "$100 to $250", "from": 100, "to": 250},
+                        {"key": "Over $250", "from": 250}
+                    ]
+                },
+                "aggs": {
+                    "price_stats": {
+                        "stats": {"field": "regularPrice"}
+                    }
+                }
+            }
         }
     }
     return query_obj
