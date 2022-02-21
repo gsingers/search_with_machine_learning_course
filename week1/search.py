@@ -74,7 +74,8 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    index_name = "bbuy_products"
+    response = opensearch.search(body=query_obj, index=index_name)   # TODO: Replace me with an appropriate call to OpenSearch
     # Postprocess results here if you so desire
 
     #print(response)
@@ -89,12 +90,39 @@ def query():
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
     query_obj = {
-        'size': 10,
+        "size": 10,
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+            'multi_match': {
+                'query': user_query,
+                "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department"]
+            } # Replace me with a query that both searches and filters
         },
         "aggs": {
             #TODO: FILL ME IN
-        }
+            "department":{
+                "terms":{
+                    "field":"department.keyword",
+                    "size":10,
+                    "missing":"N/A",
+                    "min_doc_count": 0
+                }
+            },
+            "regularPrice":{
+                "range":{
+                    "field":"regularPrice",
+                    "ranges": [
+                        { "from":0.0, "to": 5.0 },
+                        { "from": 5.0, "to": 20.0 },
+                        { "from": 21.0 }
+                        ]
+                    }
+            },
+            "missing_images":{
+                "missing":{
+                    "field":"image"
+                }
+            }
+        },
+        "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm", "salesRankLongTerm", "regularPrice","image"]
     }
     return query_obj
