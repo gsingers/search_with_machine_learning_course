@@ -130,6 +130,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                 }
             }
         },
+        "track_total_hits": "true",
         "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm", "salesRankLongTerm", "regularPrice","image"]
     }
     return query_obj
