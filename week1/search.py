@@ -89,14 +89,21 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    query_obj = {
-        "size": 10,
-        "query": {
+
+    query_type = ""
+    if user_query == "*":
+        query_type = {
+            "match_all":{}
+        }
+    else:
+        query_type = {
             'multi_match': {
                 'query': user_query,
                 "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department"]
-            } # Replace me with a query that both searches and filters
-        },
+            } }
+    query_obj = {
+        "size": 10,
+        "query": query_type,
         "aggs": {
             #TODO: FILL ME IN
             "department":{
