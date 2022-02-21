@@ -107,8 +107,10 @@ def query():
         # Handle the case where there is no query or just loading the page
         user_query = request.args.get("query", "*")
         filters_input = request.args.getlist("filter.name")
+
         sort = request.args.get("sort", sort)
         sortDir = request.args.get("sortDir", sortDir)
+
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
 
@@ -144,6 +146,8 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size_result
 
     print(f"Query: {user_query} Filters: {filters} Sort: {sort}")
 
+    sort_obj = {sort: {"order": sortDir}}
+
     if user_query.strip() == "*":
         # Select all / match all
         query_type = "match_all"
@@ -175,6 +179,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size_result
     # DONE: TODO: "match_all": {}  # Replace me with a query that both searches and filters
     query_obj = {
         "size": size_results,
+        "sort": sort_obj,
         "query": {
             "bool": {
                 "must": [
