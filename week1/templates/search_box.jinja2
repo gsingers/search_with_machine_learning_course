@@ -1,16 +1,28 @@
 <div id="search-box"> 
   <form method="post" action="{{ url_for('search.query') }}">
-    <input name="query" id="query" type="search" value="{{ query|e }}" required>
-    <input type="submit" value="Query">
-    <select name="sort">
-      <option value="_score" {% if sort == "_score" %}selected{% endif %} >Relevance</option>
-      <option value="name.keyword" {% if sort == "name.keyword" %}selected{% endif %}>Name</option>
-      <option value="salesRankShortTerm" {% if sort == "salesRankShortTerm" %}selected{% endif %}>Popularity</option>
-      <option value="regularPrice" {% if sort == "regularPrice" %}selected{% endif %}>Price</option>
-    </select>
-    <select name="sortDir">
-      <option value="asc" {% if sortDir == "asc" %}selected{% endif %}>Ascending</option>
-      <option value="desc" {% if sortDir == "desc" %}selected{% endif %}>Descending</option>
-    </select>
+    <div class='row'>
+      <div class='col'>
+        <input class='form-control' name="query" id="query" type="search" value="{{ query|e }}">
+      </div>
+      <div class='col'>
+        <button type="submit" class='btn btn-primary'>Query</button>
+      </div>
+    </div>
+    <div class='row'>
+      <div class='col'>
+        <select class='form-select' name="sort">
+          <option value="_score" {% if sort == "_score" %}selected{% endif %} >Relevance</option>
+          <option value="name.keyword" {% if sort == "name.keyword" %}selected{% endif %}>Name</option>
+          <option value="salesRankShortTerm" {% if sort == "salesRankShortTerm" %}selected{% endif %}>Popularity</option>
+          <option value="regularPrice" {% if sort == "regularPrice" %}selected{% endif %}>Price</option>
+        </select>
+      </div>
+      <div class='col'>
+        <select class='form-select' name="sortDir">
+          <option value="asc" {% if sortDir == "asc" %}selected{% endif %}>Ascending</option>
+          <option value="desc" {% if sortDir == "desc" %}selected{% endif %}>Descending</option>
+        </select>
+      </div>
+    </div>
   </form>
 </div>

@@ -3,7 +3,6 @@ GET bbuy_products/_search
 {
  "size": 10,
   "query": {
-
       "bool":{
         "must":[
             {"query_string": {
@@ -11,7 +10,6 @@ GET bbuy_products/_search
                 "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
             }}
         ]
-
       }
   },
   "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm", "salesRankLongTerm", "regularPrice"]
@@ -24,12 +22,30 @@ GET bbuy_products/_search
   "query": {
     "boosting": {
       "positive": {
-        #FILL IN
+        "bool":{
+          "must":[
+            {
+              "query_string": {
+                "query": "\"ipad 2\"",
+                "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+              }
+            }
+          ]
+        }
       },
       "negative": {
-        #FILL IN
+        "bool": {
+          "must": [
+            {
+              "query_string": {
+                "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"],
+                "query": "\"Compatible with Apple iPad 2\""
+              }
+            }
+          ]
+        }
       },
-      "negative_boost": 0.2
+      "negative_boost": 0.3
     }
   },
   "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm", "salesRankLongTerm", "regularPrice", "categoryPath"]
@@ -41,21 +57,79 @@ GET bbuy_products/_doc/1218321299000
 # Write a function query
 GET bbuy_products/_search
 {
- "size": 10,
   "query": {
-      "function_score": {
-        "query": {
-           "query_string": {
-                    "query": "\"ipad 2\"",
-                    "fields": ["name^1000", "shortDescription^50", "longDescription^10", "department"]
-            }
+    "function_score": {
+      "query": {
+        "query_string": {
+            "query": "Apple iPad 2",
+            "fields": ["name^100", "shortDescription^50", "longDescription^10", "department"]
+          }
+      },
+      "boost_mode": "multiply", 
+      "score_mode": "avg", 
+      "functions": [
+        {
+          "field_value_factor": {
+            "field": "salesRankLongTerm",
+            "modifier": "reciprocal",
+            "missing": 100000000,
+            "factor": 1.0
+          }
         },
-        "boost_mode": "multiply"
-        "score_mode": "#SETME",
-        "functions": [
-        ]
+        {
+          "field_value_factor": {
+            "field": "salesRankMediumTerm",
+            "modifier": "reciprocal",
+            "missing": 100000000,
+            "factor": 0.8
+          }
+        },
+        {
+          "field_value_factor": {
+            "field": "salesRankShortTerm",
+            "modifier": "reciprocal",
+            "missing": 100000000,
+            "factor": 0.5
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "categories": {
+      "terms": {
+        "field": "department.keyword",
+        "size": 10
       }
-
+    },
+    "prices": {
+      "range": {
+          "field": "regularPrice",
+          "keyed": true, 
+          "ranges": [
+            {
+              "from": 0,
+              "to": 25
+            },
+            {
+              "from": 25,
+              "to": 50
+            },
+            {
+              "from": 50,
+              "to": 100
+            },
+            {
+              "from": 100,
+              "to": 200
+            },
+            {
+              "from": 200,
+              "to": 500
+            }
+          ]
+      }
+    }
   },
   "_source": ["productId", "name", "shortDescription", "longDescription", "department", "salesRankShortTerm",  "salesRankMediumTerm", "salesRankLongTerm", "regularPrice"]
 }

@@ -26,6 +26,12 @@
           {% endif %}
         {% endif %}
       </div>
+      <div><span class="search-result-header">Price</span>: {{ hit._source.regularPrice[0] }}</div>
+      {% if hit.highlight and hit.highlight.image %}
+      <div><img src="{{ hit.highlight.image[0] }}"/></div>
+      {% elif hit._source.image %}
+      <div><img style="margin-left: 5vw" src="{{ hit._source.image[0] }}"/></div>
+      {% endif %}
     </div>
   {% endfor %}
 
