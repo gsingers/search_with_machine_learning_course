@@ -15,6 +15,10 @@ pyenv activate search_with_ml_week3
 pip install -r /workspace/search_with_machine_learning_course/requirements_week3.txt
 pyenv activate search_with_ml_week4
 pip install -r /workspace/search_with_machine_learning_course/requirements_week4.txt
+pip install opensearch-py
+pip install lxml
+
+
 
 
 cd docker
