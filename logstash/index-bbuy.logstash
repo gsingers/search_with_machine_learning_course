@@ -77,6 +77,27 @@ input {
 
       mutate{
         remove_field => ["message", "host", "path"] # clean up some stuff we don't need
+        convert => {
+          "salePrice" => "float"
+          "regularPrice" => "float"
+          "subclassId" => "integer"
+          "productId" => "integer"
+          "sku" => "integer"
+          "quantityLimit" => "integer"
+          "departmentId" => "integer"
+          "classId" => "integer"
+          "bestBuyItemId" => "integer"
+          "salesRankLongTerm" => "integer"
+          "salesRankMediumTerm" => "integer"
+          "salesRankShortTerm" => "integer"
+          "onlineAvailability" => "boolean"
+          "digital" => "boolean"
+          "inStorePickup" => "boolean"
+          "onSale" => "boolean"
+          "homeDelivery" => "boolean"
+          "inStoreAvailability" => "boolean"
+          "active" => "boolean"
+        }
       }
       # Drop the root event, which doesn't contain any product information
       if ![productId] {

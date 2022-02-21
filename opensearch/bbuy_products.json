@@ -1,5 +1,153 @@
 {
   "settings": {
-    "index.refresh_interval": "5s"
+    "index.refresh_interval": "5s",
+    "analysis": {
+      "analyzer": {
+        "search_analyzer": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "filter_stemmer",
+            "lowercase"
+          ]
+        }
+      },
+      "filter": {
+        "filter_stemmer" : {
+          "type" : "stemmer",
+          "name" : "porter2"
+        }
+      }
+    }
+  },
+    "mappings": {
+      "properties": {
+        "categoryPath": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 2048
+            }
+          }
+        },
+        "class": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 512
+            }
+          }
+        },
+        "department": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 512
+            }
+          }
+        },
+        "name": {
+          "type": "text",
+          "analyzer": "english",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 2048
+            },
+            "hyphens": {
+              "type": "text",
+              "analyzer": "search_analyzer"
+            },
+            "suggest": {
+              "type": "completion"
+            }
+  
+          }
+        },
+        "onSale": {
+          "type": "boolean"
+        },
+        "regularPrice": {
+          "type": "float"
+        },
+        "salePrice": {
+          "type": "float"
+        },
+        "shortDescription": {
+          "type": "text",
+          "analyzer": "english"
+        },
+        "sku": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "subclass": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "type": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "image": {
+          "type": "keyword",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "longDescription": {
+          "type": "text",
+          "analyzer": "english"
+        },
+        "manufacturer": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "features": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 512
+            }
+          }
+        },
+        "salesRankLongTerm": {
+          "type": "long"
+        },
+        "salesRankMediumTerm": {
+          "type": "long"
+        },
+        "salesRankShortTerm": {
+          "type": "long"
+        }
+      }
+    }
   }
 }
