@@ -19,8 +19,8 @@ general.add_argument("--output", default="/workspace/datasets/fasttext/output.fa
 # Consuming all of the product data will take over an hour! But we still want to be able to obtain a representative sample.
 general.add_argument("--sample_rate", default=1.0, type=float, help="The rate at which to sample input (default is 1.0)")
 
-# Setting min_products removes infrequent categories and makes the classifier's task easier.
-general.add_argument("--min_products", default=5, type=int, help="The minimum number of products per category.")
+# IMPLEMENT: Setting min_products removes infrequent categories and makes the classifier's task easier.
+general.add_argument("--min_products", default=0, type=int, help="The minimum number of products per category (default is 0).")
 
 args = parser.parse_args()
 output_file = args.output
