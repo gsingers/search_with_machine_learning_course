@@ -19,11 +19,8 @@ general.add_argument("--output", default="/workspace/datasets/fasttext/output.fa
 # Consuming all of the product data will take over an hour! But we still want to be able to obtain a representative sample.
 general.add_argument("--sample_rate", default=1.0, type=float, help="The rate at which to sample input (default is 1.0)")
 
-# Setting min_product_names removes infrequent categories and makes the classifier's task easier.
-general.add_argument("--min_product_names", default=5, type=int, help="The minimum number of products per category.")
-
-# Setting max_product_names makes the category distribution more balanced.
-general.add_argument("--max_product_names", default=50, type=int, help="The maximum number of products per category.")
+# Setting min_products removes infrequent categories and makes the classifier's task easier.
+general.add_argument("--min_products", default=5, type=int, help="The minimum number of products per category.")
 
 args = parser.parse_args()
 output_file = args.output
@@ -34,9 +31,8 @@ if os.path.isdir(output_dir) == False:
 
 if args.input:
     directory = args.input
-# IMPLEMENT:  Track the number of items in each category and only output if above the min and below the max
-min_product_names = args.min_product_names
-max_product_names = args.max_product_names
+# IMPLEMENT:  Track the number of items in each category and only output if above the min
+min_products = args.min_products
 sample_rate = args.sample_rate
 
 print("Writing results to %s" % output_file)
