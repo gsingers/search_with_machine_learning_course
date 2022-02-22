@@ -173,14 +173,17 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     "ranges": [
                         {
                             "from": 0,
+                            "key": "$",
                             "to": 100
                         },
                         {
                             "from": 100,
+                            "key": "$$",
                             "to": 500
                         },
                         {
-                            "from": 500
+                            "from": 500,
+                            "key": "$$$",
                         }
                     ]
                 }

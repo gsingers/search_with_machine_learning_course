@@ -6,7 +6,6 @@
     "properties": {
       "name": {
         "type": "text",
-        "analyzer": "english",
         "fields": {
           "keyword": {
             "type": "keyword",
@@ -167,7 +166,7 @@
         "type" : "integer"
       },
       "height" : {
-        "type" : "float"
+        "type" : "text"
       },
       "homeDelivery" : {
         "type" : "boolean"
