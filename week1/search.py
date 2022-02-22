@@ -22,6 +22,7 @@ def process_filters(filters_input):
     for filter in filters_input:
         type = request.args.get(filter + ".type")
         display_name = request.args.get(filter + ".displayName", filter)
+        key = request.args.get(filter +".key")
         #
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
         applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
@@ -29,9 +30,23 @@ def process_filters(filters_input):
         #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            from_key = filter + ".from"
+            to_key = filter + ".to"
+            from_value = request.args.get(from_key) if request.args.get(from_key) else 0
+            to_value = request.args.get(to_key) if request.args.get(to_key) else None
+
+            range_filter = {"range": {filter: {"gte": from_value}}} if to_value is None else {"range": {filter: {"gte": from_value, "lt": to_value}}}
+            filters.append(range_filter)
+            display_filters.append(f"{filter}.{key}")
+            applied_filters +="&{}.from={}&{}.to={}".format(filter, from_value, filter, to_value)
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            filters.append({
+                "term": {
+                    filter: key
+                }
+            })
+            display_filters.append(f"{filter}.{key}")
+            applied_filters += "&{}.key={}".format(filter, key)
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -74,7 +89,10 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(
+        body = query_obj,
+        index = 'bbuy_products'
+    )
     # Postprocess results here if you so desire
 
     #print(response)
@@ -91,10 +109,65 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     query_obj = {
         'size': 10,
         "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+            "function_score": {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "query_string": {
+                                    "query": user_query,
+                                    "fields": ["name^5", "shortDescription^2", "longDescription", "description"]
+                                }
+                            }
+                        ],
+                        "filter": filters
+                    }
+                }
+            }
         },
         "aggs": {
-            #TODO: FILL ME IN
+            "department": {
+                "terms": {
+                    "field": "department",
+                    "size": 10,
+                    "missing": "N/A",
+                    "min_doc_count": 0
+                }
+            },
+            "regularPrice": {
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        {
+                            "from": 0,
+                            "to": 5,
+                            "key": "Up to $5"
+                        },
+                        {
+                            "from": 5,
+                            "to": 50,
+                            "key": "$5 to $50"
+                        },
+                        {
+                            "from": 50,
+                            "to": 200,
+                            "key": "$50 to $200"
+                        },
+                        {
+                            "from": 200,
+                            "to": 500,
+                            "key": "$200 to $500"
+                        },
+                        {
+                            "from": 500,
+                            "key": "$500 and above"
+                        }    
+                    ]
+                }
+            },
+            "image_missing": {
+                "missing": {"field": "image"}
+            }
         }
     }
     return query_obj

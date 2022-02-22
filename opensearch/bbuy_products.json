@@ -1,5 +1,80 @@
 {
   "settings": {
-    "index.refresh_interval": "5s"
+    "index": {
+      "refresh_interval": "5s",
+      "query": {
+          "default_field": "name"
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "accessories": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, 
+      "active": {"type": "boolean"}, 
+      "bestBuyItemId": {"type": "long"}, 
+      "bestSellingRank": {"type": "integer"}, 
+      "categoryLeaf": {"type": "keyword"}, 
+      "categoryPath": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, 
+      "categoryPathCount": {"type": "integer"}, 
+      "categoryPathIds": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, 
+      "class": {"type": "keyword"}, 
+      "classId": {"type": "integer"}, 
+      "color": {"type": "keyword"}, 
+      "condition": {"type": "keyword"}, 
+      "customerReviewAverage": {"type": "float"}, 
+      "customerReviewCount": {"type": "integer"}, 
+      "crossSell": {"type": "keyword"},
+      "department": {"type": "keyword"}, 
+      "departmentId": {"type": "integer"}, 
+      "depth": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, 
+      "description": {"type": "text", "analyzer": "english"},
+      "digital": {"type": "boolean"}, 
+      "features": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, 
+      "frequentlyPurchasedWith": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, 
+      "height": {"type": "keyword"}, 
+      "homeDelivery": {"type": "boolean"}, 
+      "image": {"type": "keyword"}, 
+      "inStoreAvailability": {"type": "boolean"}, 
+      "inStorePickup": {"type": "boolean"}, 
+      "longDescription": {"type": "text", "analyzer": "english"}, 
+      "longDescriptionHtml": {"type": "keyword"}, 
+      "manufacturer": {"type": "keyword"}, 
+      "modelNumber": {"type": "keyword"}, 
+      "name": {
+        "type": "text",
+        "fields": {
+          "english": {
+            "type": "text", 
+            "analyzer": "english"
+          }, 
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      }, 
+      "onSale": {"type": "boolean"}, 
+      "onlineAvailability": {"type": "boolean"}, 
+      "productId": {"type": "long"}, 
+      "quantityLimit": {"type": "integer"}, 
+      "regularPrice": {"type": "float"}, 
+      "relatedProducts": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, 
+      "releaseDate": {"type": "date"}, 
+      "salePrice": {"type": "float"}, 
+      "salesRankLongTerm": {"type": "long"}, 
+      "salesRankMediumTerm": {"type": "long"}, 
+      "salesRankShortTerm": {"type": "long"}, 
+      "shippingCost": {"type": "float"}, 
+      "shippingWeight": {"type": "float"}, 
+      "shortDescription": {"type": "text", "analyzer": "english"}, 
+      "shortDescriptionHtml": {"type": "text"}, 
+      "sku": {"type": "long"}, 
+      "startDate": {"type": "date"}, 
+      "subclass": {"type": "keyword"}, 
+      "subclassId": {"type": "integer"},  
+      "type": {"type": "keyword"}, 
+      "url": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, 
+      "weight": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, 
+      "width": {"type": "keyword"}
+    }
   }
 }

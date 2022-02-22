@@ -9,10 +9,22 @@ filter {
   csv {
     autodetect_column_names => true
     skip_header => true
-    convert => {
-      "click_time" => "date_time"
-      "query_time" => "date_time"
-    }
+  }
+  date {
+    match => ["click_time", "yyyy-MM-dd HH:mm:ss'.'SSS"]
+    target => "click_time"
+  }
+  date {
+    match => ["click_time", "yyyy-MM-dd HH:mm:ss"]
+    target => "click_time"
+  }
+  date {
+    match => ["query_time", "yyyy-MM-dd HH:mm:ss'.'SSS"]
+    target => "query_time"
+  }
+  date {
+    match => ["query_time", "yyyy-MM-dd HH:mm:ss"]
+    target => "query_time"
   }
   mutate {
     remove_field => ["message", "host", "path"] # clean up some stuff we don't need
