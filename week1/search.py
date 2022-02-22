@@ -21,17 +21,18 @@ def process_filters(filters_input):
     applied_filters = ""
     for filter in filters_input:
         type = request.args.get(filter + ".type")
+        key = request.args.get(filter + ".key")
         display_name = request.args.get(filter + ".displayName", filter)
+        display_filters += ["{}: {}".format(display_name, key)]
         #
         # We need to capture and return what filters are already applied so they can be automatically added to any existing links we display in aggregations.jinja2
-        applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}".format(filter, filter, type, filter,
-                                                                                 display_name)
-        #TODO: IMPLEMENT AND SET filters, display_filters and applied_filters.
+        applied_filters += "&filter.name={}&{}.type={}&{}.displayName={}&{}.key={}".format(filter, filter, type, filter, display_name, filter, key)
         # filters get used in create_query below.  display_filters gets used by display_filters.jinja2 and applied_filters gets used by aggregations.jinja2 (and any other links that would execute a search.)
         if type == "range":
-            pass
+            range = key.split('-')            
+            filters += [{"range":{filter:{"gte":None if range[0]=='*' else range[0], "lt":None if range[1]=='*' else range[1]}}}]
         elif type == "terms":
-            pass #TODO: IMPLEMENT
+            filters += [{"term":{filter+'.keyword':key}}]
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -74,7 +75,7 @@ def query():
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(body=query_obj, index='bbuy_products')
     # Postprocess results here if you so desire
 
     #print(response)
@@ -90,11 +91,35 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
     query_obj = {
         'size': 10,
-        "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
+        'track_total_hits': 'true',
+        'query': {
+            'bool': {
+                'filter': filters,
+                'must': {
+                    "match_all": {}
+                } if user_query == '*' else {
+                    'multi_match': {'query': user_query,'fields': ['name.stem^5','shortDescriptionHtml.stem', 'longDescription.stem']}
+                },
+                'should': [{
+                    "function_score": {
+                        "score_mode":"sum",
+                        "boost_mode":"sum",
+                        "functions": [{
+                            "field_value_factor": {
+                            "field":"salesRankLongTerm",
+                            "factor":1,
+                            "missing":0
+                            }
+                        }]
+                    }
+                }]
+            }
         },
+        'sort':[{sort:{'order':sortDir}}],
         "aggs": {
-            #TODO: FILL ME IN
-        }
+            'department': {'terms': {'field': 'department.keyword','size': 10}},
+            'regularPrice': {'range': {'field': 'regularPrice','ranges': [{'to': 5}, {'from': 5, 'to': 20},{'from': 20}]}},  
+            'missing_images': {'missing': {'field': 'image.keyword'}}
+            }
     }
     return query_obj
