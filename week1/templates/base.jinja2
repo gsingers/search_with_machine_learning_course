@@ -23,3 +23,26 @@
     </div>
   {% endblock %}
 </section>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.6/dist/css/autoComplete.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.6/dist/autoComplete.min.js"></script>
+<script>
+  const autoCompleteJS = new autoComplete({
+    selector: '#query',
+    submit: true,
+    resultsList: {
+      tabSelect: true
+    },
+    data: {
+      src: (query) => {
+        return fetch('/search/suggest?query='+query)
+          .then(x => x.json())
+      }
+    },
+  });
+
+  autoCompleteJS.input.addEventListener("selection", function (event) {
+    autoCompleteJS.input.value = event.detail.selection.value
+    autoCompleteJS.input.submit();
+  })
+</script>
