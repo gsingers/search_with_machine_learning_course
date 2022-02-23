@@ -41,6 +41,14 @@ echo ""
 echo "Writing logs to $LOGS_DIR"
 mkdir -p $LOGS_DIR
 
+## Thanks to Mo: https://search-anj4074.slack.com/archives/C02TB61LU77/p1645035710531289
+PIDTEMP=`ps ux | grep logstash | grep java | awk '{ print $2 }'`
+if [ "x$PIDTEMP" = "x" ]; then
+    echo "Logstash not found"
+else
+      echo "Killing logstash processes ..."
+      kill -9 $PIDTEMP
+fi
 
 echo "Indexing"
 echo " Product Logstash file: $PRODUCTS_LOGSTASH_FILE"
