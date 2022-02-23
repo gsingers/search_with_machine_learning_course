@@ -3,8 +3,8 @@ FROM gitpod/workspace-full:legacy-dazzle-v1
 RUN sudo apt-get install -y graphviz
 
 # Move where Pyenv is stored
-RUN sudo mv /home/gitpod/.pyenv /workspace/pyenv
-RUN sudo ln -s /workspace/pyenv /home/gitpod/.pyenv
+#RUN sudo mv /home/gitpod/.pyenv /workspace/pyenv
+#RUN sudo ln -s /workspace/pyenv /home/gitpod/.pyenv
 
 RUN wget -O /home/gitpod/requirements_week1.txt https://raw.githubusercontent.com/gsingers/search_with_machine_learning_course/main/requirements_week1.txt
 RUN wget -O /home/gitpod/requirements_week2.txt https://raw.githubusercontent.com/gsingers/search_with_machine_learning_course/main/requirements_week2.txt
