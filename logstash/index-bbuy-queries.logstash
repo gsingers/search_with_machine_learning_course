@@ -21,7 +21,7 @@ filter {
 
 output {
   opensearch {
-    hosts => ["https://host.docker.internal:9200"]
+    hosts => ["https://opensearch-node1:9200"]
     index => "bbuy_queries"
     user => "admin"
     password => "admin"

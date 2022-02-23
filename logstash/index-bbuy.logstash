@@ -86,7 +86,7 @@ input {
     }
 output {
   opensearch {
-    hosts => ["https://host.docker.internal:9200"]
+    hosts => ["https://opensearch-node1:9200"]
     index => "bbuy_products"
     user => "admin"
     password => "admin"
