@@ -5,7 +5,7 @@ from opensearchpy import OpenSearch
 def get_opensearch():
     if 'opensearch' not in g:
         # Load from config?
-        host = 'localhost'
+        host = 'opensearch-node1'
         port = 9200
         auth = ('admin', 'admin')  # For testing only. Don't store credentials in code.
 
