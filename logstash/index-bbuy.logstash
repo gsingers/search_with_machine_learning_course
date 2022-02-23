@@ -86,8 +86,8 @@ input {
     }
 output {
   opensearch {
-    hosts => ["https://localhost:9200"]
-    index => "bbuy_products"
+    hosts => ["https://opensearch-node1:9200"]
+    index => "bbuy_products2"
     user => "admin"
     password => "admin"
     document_id => "%{sku}"
