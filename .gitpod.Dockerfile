@@ -6,7 +6,10 @@ RUN sudo apt-get install -y graphviz
 RUN sudo mv /home/gitpod/.pyenv /workspace/pyenv
 RUN sudo ln -s /workspace/pyenv /home/gitpod/.pyenv
 
-COPY /workspace/search_with_machine_learning_course/requirements_week*.txt /home/gitpod/.
+RUN wget -O /home/gitpod/requirements_week1.txt https://raw.githubusercontent.com/gsingers/search_with_machine_learning_course/main/requirements_week1.txt
+RUN wget -O /home/gitpod/requirements_week2.txt https://raw.githubusercontent.com/gsingers/search_with_machine_learning_course/main/requirements_week2.txt
+RUN wget -O /home/gitpod/requirements_week3.txt https://raw.githubusercontent.com/gsingers/search_with_machine_learning_course/main/requirements_week3.txt
+RUN wget -O /home/gitpod/requirements_week4.txt https://raw.githubusercontent.com/gsingers/search_with_machine_learning_course/main/requirements_week4.txt
 
 RUN echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> /home/gitpod/.bashrc
 RUN echo 'eval "$(pyenv init -)"' >> /home/gitpod/.bashrc
@@ -32,13 +35,13 @@ RUN pip install opensearch-py
 
 RUN pyenv virtualenv 3.9.7 search_with_ml_opensearch
 RUN pyenv virtualenv 3.9.7 search_with_ml_week1
-RUN bash  -c "pyenv activate search_with_ml_week1 && pip install -r /home/gitpod/requirements_week1.txt"
+RUN bash  -i -c "pyenv activate search_with_ml_week1 && pip install -r /home/gitpod/requirements_week1.txt"
 RUN pyenv virtualenv 3.9.7 search_with_ml_week2
-RUN bash  -c "pyenv activate search_with_ml_week2 && pip install -r /home/gitpod/requirements_week2.txt"
+RUN bash  -i -c "pyenv activate search_with_ml_week2 && pip install -r /home/gitpod/requirements_week2.txt"
 RUN pyenv virtualenv 3.9.7 search_with_ml_week3
-RUN bash  -c "pyenv activate search_with_ml_week3 && pip install -r /home/gitpod/requirements_week3.txt"
+RUN bash  -i -c "pyenv activate search_with_ml_week3 && pip install -r /home/gitpod/requirements_week3.txt"
 RUN pyenv virtualenv 3.9.7 search_with_ml_week4
-RUN bash  -c "pyenv activate search_with_ml_week4 && pip install -r /home/gitpod/requirements_week4.txt"
+RUN bash  -i -c "pyenv activate search_with_ml_week4 && pip install -r /home/gitpod/requirements_week4.txt"
 
 
 
