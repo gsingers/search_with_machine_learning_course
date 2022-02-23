@@ -87,7 +87,7 @@ input {
 output {
   opensearch {
     hosts => ["https://opensearch-node1:9200"]
-    index => "bbuy_products2"
+    index => "bbuy_products"
     user => "admin"
     password => "admin"
     document_id => "%{sku}"
