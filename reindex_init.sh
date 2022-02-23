@@ -13,7 +13,7 @@ reindex_init () {
     echo "Removing indices ..."
     sh delete-indexes.sh
     echo "Indexing data ..."
-    sh index-data.sh
+    sh ./index-data.sh -p ./week2/conf/bbuy_products.json -q ./week2/conf/bbuy_queries.json
 
 }
 
