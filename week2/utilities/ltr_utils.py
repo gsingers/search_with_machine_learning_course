@@ -7,7 +7,23 @@ def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model
                              active_features=None, rescore_size=500, main_query_weight=1, rescore_query_weight=2):
     # Create the base query, use a much bigger window
     #add on the rescore
-    print("IMPLEMENT ME: create_rescore_ltr_query")
+    query_obj["rescore"] = {
+        "window_size": rescore_size,
+        "query": {
+            "rescore_query": {
+                "sltr": {
+                    "params": {
+                        "keywords": user_query
+                    },
+                    "model": ltr_model_name,
+                    "store": ltr_store_name
+                }
+            },
+            "query_weight": main_query_weight,
+            "rescore_query_weight": rescore_query_weight
+        }
+    }
+
     return query_obj
 
 # take an existing query and add in an SLTR so we can use it for explains to see how much SLTR contributes
@@ -50,8 +66,37 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
     return query_obj, len(query_obj["query"]["function_score"]["query"]["bool"]["should"])
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
-    print("IMPLEMENT ME: create_feature_log_query")
-    return None
+    # https://elasticsearch-learning-to-rank.readthedocs.io/en/latest/logging-features.html?highlight=logged_featureset#joining-feature-values-with-a-judgment-list
+    return {
+        'query': {
+            'bool': {
+                'filter': [
+                    {
+                        'terms': {
+                            terms_field: doc_ids
+                        }
+                    },
+                    {
+                        'sltr': {
+                            '_name': 'logged_featureset',
+                            'featureset': featureset_name,
+                            'store': ltr_store_name,
+                            'params': {
+                                "keywords": query
+                            }
+                        }}
+                ]
+            }
+        },
+        'ext': {
+            'ltr_log': {
+                'log_specs': {
+                    'name': 'log_entry',
+                    'named_query': 'logged_featureset'
+                }
+            }
+        }
+    }
 
 
 # Item is a Pandas namedtuple
