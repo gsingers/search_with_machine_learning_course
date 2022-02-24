@@ -20,24 +20,16 @@ Pre-requisites:
 ## (1) Initial Setup
 
 The setup process is similar to the gitpod setup.  However, note that it
-replaces these:
-
-* install-kaggle-token.sh
-* download-data.sh
-* gitpod-init.sh
-* gitpod-command.sh
-* .gitpod.Dockerfile
-* .gitpod.yml
-* pyenv virts (consolidated to one)
+replaces install-kaggle-token.sh, download-data.sh, gitpod*, .gitpod*, pyenv.
 
 
-##### initial manual steps required:
+### (1a) initial manual steps required:
 
 * Download and place kaggle.json into ~/.kaggle/ for access to the kaggle api
 * edit ./sml-config.sh: add your own desired workspace path (ex: ~/corise-sml/)
 * edit ./sml-config.sh: add the path to your sml repo
 
-##### one time setup, semi-automated:
+### (1b) one time setup, semi-automated:
 
 See script for details. This gets data, sets up workspace, docker data, etc.
 
