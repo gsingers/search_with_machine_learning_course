@@ -188,7 +188,6 @@ ltr_feature_set = {"featureset": {
         # factor in price, albeit naively for this purpose, in practice we should normalize it, which we will do in the project!
         {
             "name": ("%s" % price_func_feature_name),
-            "params": ["keywords"],
             "template_language": "mustache",
             "template": {
                 "function_score": {
