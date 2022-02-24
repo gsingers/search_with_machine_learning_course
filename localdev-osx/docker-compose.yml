@@ -1,0 +1,63 @@
+version: '3'
+
+networks:
+  opensearch-net:
+    name: opensearch-net
+
+services:
+
+  opensearch-node1:
+    image: gsingers/opensearch-learning-to-rank:1.2.3
+    container_name: opensearch-node1
+    environment:
+      - discovery.type=single-node
+      - http.max_content_length=1000mb
+      - "OPENSEARCH_JAVA_OPTS=-Xms4G -Xmx4G"
+    volumes:
+      # Pre-requisite:
+      # > mkdir -p ~/corise-sml/docker-data/opensearch/data/
+      - ~/corise-sml/docker-data/opensearch/data:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
+    networks:
+      - opensearch-net
+  
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-node1:9200"]'
+    depends_on:
+      - opensearch-node1
+    networks:
+      - opensearch-net
+
+
+  logstash-products:
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:latest
+    container_name: logstash-products
+    command: logstash --pipeline.workers 5 --path.data /workspace/logstash/products_data -f /workspace/logstash/index-bbuy.logstash
+    volumes:
+      - ~/corise-sml:/workspace
+    depends_on:
+      - opensearch-node1
+    networks:
+      - opensearch-net
+
+  logstash-queries:
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:latest
+    container_name: logstash-queries
+    command: logstash --pipeline.workers 1 --path.data /workspace/logstash/queries_data -f /workspace/logstash/index-bbuy-queries.logstash
+    volumes:
+      - ~/corise-sml:/workspace
+    depends_on:
+      - opensearch-node1
+    networks:
+      - opensearch-net
+
+

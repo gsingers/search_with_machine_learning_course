@@ -1,0 +1,16 @@
+fasttext
+flask
+graphviz
+ipython
+kaggle
+matplotlib
+nltk
+numba
+numexpr
+numpy
+opensearch-py
+pandas
+requests
+sklearn
+urljoin
+xgboost

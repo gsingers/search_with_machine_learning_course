@@ -1,0 +1,111 @@
+
+
+### Local SML development on OS X with docker
+
+This is a small collection of utilities to help support running the 
+search-with-ml (sml) environment locally on OS X. It is derived from the main
+repo utils and various references in slack. It attempts to mimic the gitpod
+workspace and other conventions as closely as possible to stay aligned with
+project instructions and logstash config files.
+
+
+Pre-requisites:
+* Generally assumes OS X but most of it is also linux compatible
+* Docker, including docker compose
+* python 3.9.7
+* homebrew (for fasttext. optional?)
+* Assumes some familiarity with docker, bash cli, etc
+
+
+### (1) Initial Setup
+
+The setup process is similar to the gitpod setup.  However, note that it
+replaces these:
+
+* install-kaggle-token.sh
+* download-data.sh
+* gitpod-init.sh
+* gitpod-command.sh
+* .gitpod.Dockerfile
+* .gitpod.yml
+* pyenv virts (consolidated to one)
+
+
+##### initial manual steps required:
+
+* Download and place kaggle.json into ~/.kaggle/ for access to the kaggle api
+* edit ./sml-config.sh: add your own desired workspace path (ex: ~/corise-sml/)
+* edit ./sml-config.sh: add the path to your sml repo
+
+##### one time setup, semi-automated:
+
+See script for details. This gets data, sets up workspace, docker data, etc.
+
+```
+> cd ${repo}/localdev-osx/
+> ./sml-init.sh
+```
+
+
+
+### (2) Running services, loading docs, and ongoing dev work
+
+This section illustrates how this can be used for sml dev work. Those skilled 
+in the art can of course detach containers and orchestrate work in various 
+other ways as desired.
+
+
+#### terminal 1 (opensearch):
+
+This starts up containers for opensearch and the opensearch dashboard.
+
+```
+> cd ${repo}/localdev-osx/
+> docker compose up opensearch-node1 opensearch-dashboards
+```
+
+
+#### terminal 2 (logstash):
+
+This starts up logstash in containers, and loads the documents
+
+```
+> cd ${repo}/localdev-osx/
+> docker compose up logstash-products logstash-queries
+```
+
+#### terminal 3 (flask):
+
+Run flask
+
+```
+> cd ${repo}/
+> source ./localdev-osx/.venv/bin/activate
+> cd week2/
+> export FLASK_ENV=development
+> export FLASK_APP=week2
+> flask run --port 3000
+```
+
+
+#### terminal 4 (dev):
+
+Do whatever
+
+```
+# head to the repo and activate the py virtual env
+> cd ${repo}/
+> source ./localdev-osx/.venv/bin/activate
+
+# run whatever commands
+> ./count-tracker.sh
+> ./delete-indexes.sh
+> vim week2/search.py
+> curl -k -s -X GET -u admin https://localhost:9200/bbuy_products/_count | jq .
+> etc...
+```
+
+
+
+
+
