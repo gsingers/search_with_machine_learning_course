@@ -6,8 +6,11 @@ requests==2.26.0
 ipython==7.27.0
 urljoin==1.0.0
 matplotlib==3.5.1
-# graphviz==0.19.1
 pandas==1.4.1
 numexpr==2.8.1
 flask==2.0.2
 opensearch-py
+numpy
+numba
+sklearn
+graphviz
