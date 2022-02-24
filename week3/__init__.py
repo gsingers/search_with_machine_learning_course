@@ -21,7 +21,7 @@ def create_app(test_config=None):
             app.config["priors_df"] = priors
             app.config["priors_gb"] = priors_gb
         else:
-            print("No prior clicks to load.  This may effect quality. Run ltr-end-to-end.sh per week 2")
+            print("No prior clicks to load.  This may effect quality. Run ltr-end-to-end.sh per week 2 if you want")
         #print(app.config)
         SYNS_MODEL_LOC = os.environ.get("SYNONYMS_MODEL_LOC", "/workspace/datasets/fasttext/syns_model.bin")
         print("SYNS_MODEL_LOC: %s" % SYNS_MODEL_LOC)
