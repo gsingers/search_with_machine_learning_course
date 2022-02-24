@@ -59,10 +59,11 @@ This starts up containers for opensearch and the opensearch dashboard.
 
 ### terminal 2 (logstash):
 
-This starts up logstash in containers, and loads the documents
+This adds schema, starts up logstash in containers, and loads the documents
 
 ```
 > cd ${repo}/localdev-osx/
+> ./sml-load-schema.sh
 > docker compose up logstash-products logstash-queries
 ```
 
