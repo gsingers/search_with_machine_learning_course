@@ -3,19 +3,12 @@ import os
 from flask import Flask
 from flask import render_template
 import pandas as pd
-import nltk
 import fasttext
 from pathlib import Path
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-
-    nltk.download('all')     # hmm, getting a weird error that this fixes related to 'NEChunkParserTagger' object has no attribute '_en_wordlist'
-    nltk.download('words')
-    nltk.download('maxent_ne_chunker')
-    nltk.download('punkt')
-    nltk.download('averaged_perceptron_tagger')
     
     if test_config is None:
         # load the instance config, if it exists, when not testing
