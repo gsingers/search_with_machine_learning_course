@@ -30,18 +30,12 @@ def create_app(test_config=None):
         else:
             print("No prior clicks to load.  This may effect quality. Run ltr-end-to-end.sh per week 2")
         #print(app.config)
-        CAT_MODEL_LOC = os.environ.get("CATEGORY_MODEL_LOC", "/workspace/datasets/fasttext/cat_model.bin")
-        print("CAT_MODEL_LOC: %s" % CAT_MODEL_LOC)
-        if CAT_MODEL_LOC and os.path.isfile(CAT_MODEL_LOC):
-            app.config["cat_model"] = fasttext.load_model(CAT_MODEL_LOC)
-        else:
-            print("No category model found.  Have you run fasttext?")
         SYNS_MODEL_LOC = os.environ.get("SYNONYMS_MODEL_LOC", "/workspace/datasets/fasttext/syns_model.bin")
         print("SYNS_MODEL_LOC: %s" % SYNS_MODEL_LOC)
         if SYNS_MODEL_LOC and os.path.isfile(SYNS_MODEL_LOC):
             app.config["syns_model"] = fasttext.load_model(SYNS_MODEL_LOC)
         else:
-            print("No category model found.  Have you run fasttext?")
+            print("No synonym model found.  Have you run fasttext?")
         app.config["index_name"] = os.environ.get("INDEX_NAME", "bbuy_products")
     else:
         # load the test config if passed in
