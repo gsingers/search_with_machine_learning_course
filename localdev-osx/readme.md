@@ -1,6 +1,6 @@
 
 
-### Local SML development on OS X with docker
+## Local SML development on OS X with docker
 
 This is a small collection of utilities to help support running the 
 search-with-ml (sml) environment locally on OS X. It is derived from the main
@@ -17,7 +17,7 @@ Pre-requisites:
 * Assumes some familiarity with docker, bash cli, etc
 
 
-### (1) Initial Setup
+## (1) Initial Setup
 
 The setup process is similar to the gitpod setup.  However, note that it
 replaces these:
@@ -48,14 +48,14 @@ See script for details. This gets data, sets up workspace, docker data, etc.
 
 
 
-### (2) Running services, loading docs, and ongoing dev work
+## (2) Running services, loading docs, and ongoing dev work
 
 This section illustrates how this can be used for sml dev work. Those skilled 
 in the art can of course detach containers and orchestrate work in various 
 other ways as desired.
 
 
-#### terminal 1 (opensearch):
+### terminal 1 (opensearch):
 
 This starts up containers for opensearch and the opensearch dashboard.
 
@@ -65,7 +65,7 @@ This starts up containers for opensearch and the opensearch dashboard.
 ```
 
 
-#### terminal 2 (logstash):
+### terminal 2 (logstash):
 
 This starts up logstash in containers, and loads the documents
 
@@ -74,7 +74,7 @@ This starts up logstash in containers, and loads the documents
 > docker compose up logstash-products logstash-queries
 ```
 
-#### terminal 3 (flask):
+### terminal 3 (flask):
 
 Run flask
 
@@ -88,7 +88,7 @@ Run flask
 ```
 
 
-#### terminal 4 (dev):
+### terminal 4 (dev):
 
 Do whatever
 
