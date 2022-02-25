@@ -24,6 +24,7 @@ rng = np.random.default_rng(123456)
 # This operates on the data frame and adds a "grade" column
 #
 def apply_click_model(data_frame, click_model_type="binary", downsample=True):
+    print(f"Length of dataframe before downsample when apply click model {len(data_frame)}")
     if click_model_type == "binary":
         print("Binary click model") # if we have at least one click, count it as relevant
         data_frame["grade"] = data_frame["clicks"].apply(lambda x: binary_func(x))
@@ -35,7 +36,9 @@ def apply_click_model(data_frame, click_model_type="binary", downsample=True):
             data_frame = down_sample_continuous(data_frame)
     elif click_model_type == "heuristic":
         data_frame["grade"] = (data_frame["clicks"]/data_frame["num_impressions"]).fillna(0).apply(lambda x: step(x))
-        print("IMPLEMENT ME: apply_click_model(): downsampling")
+        if downsample:
+            data_frame = down_sample_buckets(data_frame)
+            print(f"Length of dataframe after downsample when apply click model {len(data_frame)}")
     return data_frame
 
 # https://stackoverflow.com/questions/55119651/downsampling-for-more-than-2-classes
