@@ -234,11 +234,11 @@ class DataPrepper:
                                                 size=len(query_doc_ids), terms_field=terms_field)
         # IMPLEMENT_START --
         feature_results = {}
-        # feature_results["doc_id"] = []  # capture the doc id so we can join later
-        # feature_results["query_id"] = []  # ^^^
-        # feature_results["sku"] = []
+        feature_results["doc_id"] = []  # capture the doc id so we can join later
+        feature_results["query_id"] = []  # ^^^
+        feature_results["sku"] = []
         # feature_results["salePrice"] = []
-        # feature_results["name_match"] = []
+        feature_results.update({'name_match': [], 'name_phrase_match': [], 'name_hyphens_min_df': [], 'salePrice':[], 'regularPrice':[]})
         # rng = np.random.default_rng(12345)
 
         try: response = self.opensearch.search(body=log_query, index=self.index_name)
@@ -322,5 +322,4 @@ class DataPrepper:
 
     # Determine the number of clicks for this sku given a query (represented by the click group)
     def __num_clicks(self, all_skus_for_query, test_sku):
-        print("IMPLEMENT ME: __num_clicks(): Return how many clicks the given sku received in the set of skus passed ")
-        return 0
+        return (all_skus_for_query.sku == test_sku).sum()
