@@ -29,6 +29,7 @@ replaces install-kaggle-token.sh, download-data.sh, gitpod*, .gitpod*, pyenv.
 * edit ./sml-config.sh: add your own desired workspace path (ex: ~/corise-sml/)
 * edit ./sml-config.sh: add the path to your sml repo
 
+
 ### (1b) one time setup, semi-automated:
 
 See script for details. This gets data, sets up workspace, docker data, etc.
@@ -37,6 +38,19 @@ See script for details. This gets data, sets up workspace, docker data, etc.
 > cd ${repo}/localdev-osx/
 > ./sml-init.sh
 ```
+
+
+### (1c) mimic /workspace
+
+Many of the class files hard code the workspace directory (/workspace/...) in
+to various paths. However, this localdev system uses a workspace in your home
+directory, such as `~/corise-sml/`.
+
+One solution is to just edit those files as you come across them. Another solution
+is to symlink /workspace to your own workspace directory, but doing that is a
+little odd in modern OS X.  Here is a lead on how to do so:
+
+* https://stackoverflow.com/questions/58396821/what-is-the-proper-way-to-create-a-root-sym-link-in-catalina
 
 
 
