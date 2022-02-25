@@ -57,6 +57,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                     "sltr": {
                         "_name": "logged_featureset",
                         "featureset": "bbuy_main_featureset",
+                        "store": ltr_store_name,
                         "params": {
                             "keywords": query
                         }
@@ -66,6 +67,14 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                     "terms": {
                         "_id": doc_ids,
                     }
+                }
+            }
+        },
+        "ext": {
+            "ltr_log": {
+                "log_specs": {
+                    "name": "log_entry",
+                    "named_query": "logged_featureset"
                 }
             }
         }
