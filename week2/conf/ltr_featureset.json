@@ -14,8 +14,11 @@
         }
       },
       {
-        "name": "click_prior",
+        "name": "click_prior_query",
         "template_language": "mustache",
+        "params": [
+          "click_prior_query"
+        ],
         "template": {
           "query_string": {
             "query": "{{click_prior_query}}",
