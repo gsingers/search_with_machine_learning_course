@@ -38,7 +38,7 @@ perl -pi -e 's/localhost/opensearch-node1/g' ${workspace}/logstash/index-bbuy*lo
 echo "------------------------------------------------------------------------"
 echo ":: installing pre-reqs"
 echo "------------------------------------------------------------------------"
-brew install fasttext libomp
+brew install graphviz fasttext libomp
 
 
 echo "------------------------------------------------------------------------"
