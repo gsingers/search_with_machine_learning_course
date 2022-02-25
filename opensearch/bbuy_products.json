@@ -80,12 +80,8 @@
         "type" : "integer"
       },
       "department" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
+        "type" : "keyword",
+        "ignore_above" : 256
         }
       },
       "departmentId" : {
@@ -127,12 +123,8 @@
         "type" : "boolean"
       },
       "image" : {
-        "type" : "text",
-        "fields" : {
-          "keyword" : {
-            "type" : "keyword",
-            "ignore_above" : 256
-          }
+        "type" : "keyword",
+        "ignore_above": 256
         }
       },
       "inStoreAvailability" : {
