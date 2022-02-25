@@ -10,6 +10,9 @@ import os
 from getpass import getpass
 from urllib.parse import urljoin
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 import click_models as cm
 import data_prepper as dp
 import ltr_utils as ltr
@@ -17,9 +20,6 @@ import pandas as pd
 import search_utils as su
 import xgb_utils as xgbu
 from opensearchpy import OpenSearch
-
-
-
 
 if __name__ == "__main__":
     host = 'localhost'

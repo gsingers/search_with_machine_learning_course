@@ -26,19 +26,36 @@
         }
       },
       {
-        "name": "name_hyphens_min_df",
+        "name": "shortDescription_phrase_match",
         "params": [
           "keywords"
         ],
         "template_language": "mustache",
         "template": {
-          "match_explorer": {
-            "type": "min_raw_df",
-            "query": {
-              "match": {
-                "name.hyphens": "{{keywords}}"
-              }
-            }
+          "match_phrase": {
+            "shortDescription": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "longDescription_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "longDescription": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "click_prior",
+        "template_language": "mustache",
+        "template": {
+          "query_string": {
+            "query": "{{click_prior_query}}",
+            "fields": ["_id"]
           }
         }
       },
