@@ -9,7 +9,7 @@ reindex_init () {
     fi
 
     echo "Removing logstash data files ..."
-    rm /workspace/logstash/logstash-7.13.2/products_data/plugins/inputs/file/.sincedb_*
+    rm /usr/local/Cellar/logstash/7.15.2/products_data/plugins/inputs/file/.sincedb_*
     echo "Removing indices ..."
     sh delete-indexes.sh
     echo "Indexing data ..."

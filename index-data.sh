@@ -4,15 +4,18 @@ usage()
   exit 2
 }
 
-PRODUCTS_JSON_FILE="/workspace/search_with_machine_learning_course/opensearch/bbuy_products.json"
-QUERIES_JSON_FILE="/workspace/search_with_machine_learning_course/opensearch/bbuy_queries.json"
+WORKSPACE="/Users/andrewcheung/dev/corise"
 
-PRODUCTS_LOGSTASH_FILE="/workspace/search_with_machine_learning_course/logstash/index-bbuy.logstash"
-QUERIES_LOGSTASH_FILE="/workspace/search_with_machine_learning_course/logstash/index-bbuy-queries.logstash"
+PRODUCTS_JSON_FILE="$WORKSPACE/search_with_machine_learning_course/opensearch/bbuy_products.json"
+QUERIES_JSON_FILE="$WORKSPACE/search_with_machine_learning_course/opensearch/bbuy_queries.json"
 
-LOGSTASH_HOME="/workspace/logstash/logstash-7.13.2"
+PRODUCTS_LOGSTASH_FILE="$WORKSPACE/search_with_machine_learning_course/logstash/index-bbuy.logstash"
+QUERIES_LOGSTASH_FILE="$WORKSPACE/search_with_machine_learning_course/logstash/index-bbuy-queries.logstash"
 
-LOGS_DIR="/workspace/logs"
+LOGSTASH_HOME="$WORKSPACE/logstash/logstash-7.13.2"
+#LOGSTASH_HOME="/usr/local/Cellar/logstash/7.15.2"
+
+LOGS_DIR="$LOGSTASH_HOME/logs"
 
 while getopts ':p:q:b:e:g:l:h' c
 do

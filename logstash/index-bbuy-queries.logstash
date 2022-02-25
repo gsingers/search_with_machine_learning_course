@@ -1,6 +1,6 @@
 input {
   file {
-    path => ["/workspace/datasets/train.csv"]  #Put in the path to the train CSV query data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
+    path => ["/Users/andrewcheung/dev/datasets/train.csv"]  #Put in the path to the train CSV query data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
     start_position => "beginning"
   }
 }

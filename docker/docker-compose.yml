@@ -9,7 +9,7 @@ services:
       - "OPENSEARCH_JAVA_OPTS=-Xms4G -Xmx4G"
 
     volumes:
-      - opensearch-data1:/usr/share/opensearch/data  #todo: figure this out so we can have persistent storage
+      - opensearch-data1:/Users/andrewcheung/opensearch/data  #todo: figure this out so we can have persistent storage
     ports:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
