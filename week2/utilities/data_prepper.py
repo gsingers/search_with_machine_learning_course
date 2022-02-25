@@ -241,7 +241,7 @@ class DataPrepper:
         # feature_results["name_match"] = []
         # rng = np.random.default_rng(12345)
 
-        try: self.opensearch.search(body=log_query, index=self.index_name)
+        try: response = self.opensearch.search(body=log_query, index=self.index_name)
         except RequestError as re: print(re, log_query)
         else:
             if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -263,7 +263,14 @@ class DataPrepper:
                     feature_results.get('doc_id', []).append(hit['_id'])
                     feature_results.get('query_id', []).append(query_id)
                     feature_results.get('sku', []).append(hit['_source']['sku'][0])
-        
+            else:
+                    if response and (response['hits']['hits'] == None or len(response['hits']['hits']) == 0):
+                        print("No results for query: %s" % key)
+                        no_results.add(key)
+                    else:
+                        print(response)
+                        print("Invalid response for query %s" % log_query)
+                
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
 
