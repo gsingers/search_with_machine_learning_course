@@ -50,8 +50,40 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
     return query_obj, len(query_obj["query"]["function_score"]["query"]["bool"]["should"])
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
-    print("IMPLEMENT ME: create_feature_log_query")
-    return None
+    # refer here for Sltr Query https://elasticsearch-learning-to-rank.readthedocs.io/en/latest/logging-features.html
+    feature_log_query = {"size": size,
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "terms": {
+                terms_field: doc_ids
+              }
+            },
+            {
+              "sltr": {
+                "_name": "logged_featureset",
+                "featureset": featureset_name,
+                "store": ltr_store_name,
+                "params": {
+                  "keywords": query
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ext": {
+        "ltr_log": {
+          "log_specs": {
+            "name": "log_entry",
+            "named_query": "logged_featureset"
+          }
+        }
+      }
+    }
+
+    return feature_log_query
 
 
 # Item is a Pandas namedtuple
