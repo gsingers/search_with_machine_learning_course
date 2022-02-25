@@ -14,6 +14,16 @@
         }
       },
       {
+        "name": "click_prior",
+        "template_language": "mustache",
+        "template": {
+          "query_string": {
+            "query": "{{click_prior_query}}",
+            "fields": ["_id"]
+          }
+        }
+      },
+      {
         "name": "name_phrase_match",
         "params": [
           "keywords"
@@ -22,23 +32,6 @@
         "template": {
           "match_phrase": {
             "name": "{{keywords}}"
-          }
-        }
-      },
-      {
-        "name": "name_hyphens_min_df",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "match_explorer": {
-            "type": "min_raw_df",
-            "query": {
-              "match": {
-                "name.hyphens": "{{keywords}}"
-              }
-            }
           }
         }
       },
