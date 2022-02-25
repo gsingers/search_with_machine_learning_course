@@ -234,26 +234,25 @@ class DataPrepper:
                                                 size=len(query_doc_ids), terms_field=terms_field)
         # IMPLEMENT_START --
         response = self.opensearch.search(log_query, "bbuy_products")
-        
-        # print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
-        # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
-        # Your structure should look like the data frame below
-        
-        feature_results = []
         hits = response["hits"]["hits"]
-        
+         
+        if len(hits) == 0:
+            return None
+
+        feature_results = []
         for hit in hits:
-            feature_map = {
-                feature.get("name"): feature.get("value", 0)
-                for feature in hit["fields"]["_ltrlog"][0]["log_entry"]
-            }
+            feature_map = {}
+
+            for feature in hit["fields"]["_ltrlog"][0]["log_entry"]:
+                feature_map[feature.get("name")] = feature.get("value",0)
+
             feature_map["doc_id"] = hit["_id"]
             feature_map["sku"] = hit["_id"]
             feature_map["query_id"] = query_id
             feature_results.append(feature_map)
 
         frame = pd.DataFrame(feature_results)
-        print(frame.head())
+        
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
 
