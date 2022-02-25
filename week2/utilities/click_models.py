@@ -8,8 +8,15 @@ def binary_func(x):
     return 0
 
 def step(x):
-    print("IMPLEMENT ME: step(x) a step function with a simple heuristic that buckets grades")
-    return rng.choice([0,0.5, 1.0])
+    # Implement the method `step(x)` such that the function 
+    # returns zero (0) for any value of x less than 0.05, 
+    # returns 0.5 for any value between 0.05 and 0.10, 
+    # returns 0.75 for any value of x between 0.10 and 0.3, 
+    # and return 1 for everything else.
+    if x < 0.05: return 0
+    elif 0.05 < x < 0.1: return 0.5
+    elif 0.1 < x < 0.3: return 0.75
+    else: return 1
 
 
 rng = np.random.default_rng(123456)
