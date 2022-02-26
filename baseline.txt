@@ -1,0 +1,115 @@
+++ python week2/utilities/build_ltr.py --create_ltr_store
+Deleted old store response status: 200
+Create the new store at https://localhost:9200/_ltr/week2 response status: 200
+++ '[' 0 -ne 0 ']'
+++ python week2/utilities/build_ltr.py -f week2/conf/ltr_featureset.json --upload_featureset
+Installing week2/conf/ltr_featureset.json featureset at https://localhost:9200/_ltr/week2/_featureset/bbuy_main_featureset
+POSTing the featureset to https://localhost:9200/_ltr/week2/_featureset/bbuy_main_featureset
+Featureset Creation: <Response [201]>
+++ '[' 0 -ne 0 ']'
+++ echo 'Creating training and test data sets from impressions by splitting on dates'
+Creating training and test data sets from impressions by splitting on dates
+++ python week2/utilities/build_ltr.py --output_dir /workspace/ltr_output --split_input /workspace/datasets/train.csv --split_train_rows 1000000 --split_test_rows 1000000
+Splitting: /workspace/datasets/train.csv and writing train to: train.csv and test to: test.csv in /workspace/ltr_output
+Clicks pre filtering: 1865269
+Verify info: flag: validity.csv, path: /workspace/ltr_output/validity.csv, exists: True
+Clicks post filtering: 1703297
+++ '[' 0 -ne 0 ']'
+++ echo 'Creating impressions data set'
+Creating impressions data set
+++ python week2/utilities/build_ltr.py --generate_impressions --output_dir /workspace/ltr_output --train_file /workspace/ltr_output/train.csv --synthesize
+Writing impressions to file: /workspace/ltr_output/impressions.csv
+++ '[' 0 -ne 0 ']'
+++ python week2/utilities/build_ltr.py --ltr_terms_field sku --output_dir /workspace/ltr_output --create_xgb_training -f week2/conf/ltr_featureset.json --click_model heuristic
+Loading impressions from /workspace/ltr_output/impressions.csv
+Logging features
+Progress[0]: 1080p
+Progress[500]: First class
+Progress[1000]: Nikita
+Progress[1500]: Transformers: dark of the moon
+Progress[2000]: droid x
+Progress[2500]: marilyn manson
+Progress[3000]: the shield
+The following queries produced no results: {}
+Length of dataframe before downsample when apply click model 8761
+NAN counts: 14
+Writing XGB Training file with query                  8761
+sku                    8761
+clicks                 8761
+rank                   8761
+num_impressions        8761
+doc_id                 8761
+product_name           8761
+query_id               8761
+name_match             8761
+name_phrase_match      8761
+name_hyphens_min_df    8761
+salePrice              8761
+regularPrice           8761
+grade                  8761
+dtype: int64 rows to /workspace/ltr_output/training.xgb
+Writing feature map to /workspace/ltr_output/xgb-feat-map.txt
+++ '[' 0 -ne 0 ']'
+++ python week2/utilities/build_ltr.py --output_dir /workspace/ltr_output -x /workspace/ltr_output/training.xgb --xgb_conf week2/conf/xgb-conf.json
+Training XG Boost on /workspace/ltr_output/training.xgb for 5 rounds with params: {'objective': 'reg:logistic'}
+Dumping out model using feature map: xgb-feat-map.txt
+Saving XGB LTR-ready model to /workspace/ltr_output/xgb_model.model.ltr
+Saving XGB Binary model to /workspace/ltr_output/xgb_model.model
+++ '[' 0 -ne 0 ']'
+++ python week2/utilities/build_ltr.py --upload_ltr_model --xgb_model /workspace/ltr_output/xgb_model.model
+Deleting model from https://localhost:9200/_ltr/week2/_model/ltr_model
+	Delete Model Response: 404: {"_index":".ltrstore_week2","_type":"store","_id":"model-ltr_model","_version":1,"result":"not_found","_shards":{"total":1,"successful":1,"failed":0},"_seq_no":1,"_primary_term":1}
+Uploading model to https://localhost:9200/_ltr/week2/_featureset/bbuy_main_featureset/_createmodel
+	Upload Model Response: 201: {"_index":".ltrstore_week2","_type":"store","_id":"model-ltr_model","_version":2,"result":"created","forced_refresh":true,"_shards":{"total":1,"successful":1,"failed":0},"_seq_no":2,"_primary_term":1}
+++ '[' 0 -ne 0 ']'
+++ python week2/utilities/build_ltr.py --xgb_plot --output_dir /workspace/ltr_output
+Plotting model quality data
+Plotting trees: 4
+Plotting feature importance
+++ '[' 0 -ne 0 ']'
+++ python week2/utilities/build_ltr.py --xgb_test /workspace/ltr_output/test.csv --train_file /workspace/ltr_output/train.csv --output_dir /workspace/ltr_output --xgb_test_num_queries 200
+Running 200 test queries.
+Progress[0]: sonos
+Progress[50]: Mk320
+Progress[100]: Sony computer
+Progress[150]: pda
+We've executed 200 queries. Finishing.
+Writing results of test to /workspace/ltr_output/xgb_test_output.csv
+Meta:
+Model name: ltr_model, Store Name: week2, Index: bbuy_products, Precision: 10 
+
+Zero results queries: {'simple': [], 'ltr_simple': [], 'hand_tuned': [], 'ltr_hand_tuned': []}
+
+
+++ '[' 0 -ne 0 ']'
+++ python week2/utilities/build_ltr.py --analyze --output_dir /workspace/ltr_output
+Analyzing results from /workspace/ltr_output/xgb_test_output.csv
+Queries not seen during training: [180]
+             query
+0            sonos
+1        fast five
+2          Pioneer
+3             tivo
+4          lowepro
+..             ...
+175       Sony nex
+176  The lion king
+177        harmony
+178  harmon kardon
+179     harddrives
+
+[180 rows x 1 columns]
+
+
+Simple MRR is 0.334
+LTR Simple MRR is 0.334
+Hand tuned MRR is 0.441
+LTR Hand Tuned MRR is 0.428
+
+Simple p@10 is 0.125
+LTR simple p@10 is 0.124
+Hand tuned p@10 is 0.186
+LTR hand tuned p@10 is 0.176
+Simple better: 531	LTR_Simple Better: 419	Equal: 1732
+HT better: 1308	LTR_HT Better: 894	Equal: 688
+Saving Better/Equal analysis to /workspace/ltr_output/analysis
