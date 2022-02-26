@@ -130,3 +130,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+.idea
+
+Pipfile
+Pipfile.lock
+docker/**
+popular_skus.py
+product_data
+test.csv
+train.csv
