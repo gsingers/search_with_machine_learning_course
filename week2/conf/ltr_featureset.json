@@ -1,5 +1,6 @@
 {
   "featureset": {
+    "name": "product_features",
     "features": [
       {
         "name": "name_match",
