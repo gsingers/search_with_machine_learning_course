@@ -4,6 +4,9 @@
 #
 ###
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 import argparse
 import json
 import os
@@ -18,8 +21,6 @@ import search_utils as su
 import xgb_utils as xgbu
 from opensearchpy import OpenSearch
 
-import warnings
-warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 if __name__ == "__main__":
