@@ -18,6 +18,8 @@ import search_utils as su
 import xgb_utils as xgbu
 from opensearchpy import OpenSearch
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 
