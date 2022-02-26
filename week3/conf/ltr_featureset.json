@@ -1,0 +1,327 @@
+{
+  "featureset": {
+    "features": [
+      {
+        "name": "multi_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+            "multi_match": {
+                  "query": "{{keywords}}",
+                  "type": "phrase",
+                  "slop": "6",
+                  "minimum_should_match": "2<75%",
+                  "fields": ["name^10", "name.hyphens", "shortDescription",
+                             "longDescription", "department", "sku", "manufacturer", "features", "categoryPath"]
+             }
+
+        }
+      },
+      {
+        "name": "name_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "name": {
+              "query": "{{keywords}}",
+              "boost": 10
+            }
+          }
+        }
+      },
+      {
+        "name": "manufacturer_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "manufacturer": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "features_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "features": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "fuzzy_name_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "name": {
+              "query": "{{keywords}}",
+              "fuzziness": "1",
+              "boost": 0.01
+            }
+          }
+        }
+      },
+      {
+        "name": "name_hyphens_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "name.hyphens": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "name_hyphens_and_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "name.hyphens": {
+              "query": "{{keywords}}",
+              "operator": "OR",
+              "minimum_should_match": "2<75%"
+            }
+          }
+        }
+      },
+      {
+        "name": "name_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{keywords}}",
+              "slop": 1,
+              "boost": 50
+            }
+          }
+        }
+      },
+      {
+        "name": "name_slop_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{keywords}}",
+              "slop": 3
+            }
+
+          }
+        }
+      },
+      {
+        "name": "shortDescription_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "shortDescription": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "longDescription_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "longDescription": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "categoryPath_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "categoryPath": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "onSale",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "filter": {
+                  "range": {
+                    "regularPrice": {
+                      "gt": 0
+                    }
+                  }
+                },
+                "script_score": {
+                  "script": "(doc['regularPrice'][0] - doc['salePrice'][0])/doc['regularPrice'][0]"
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salesRankShortTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salesRankShortTerm",
+                  "missing": 1000000
+                }
+              }
+
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salesRankMediumTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salesRankMediumTerm",
+                  "missing": 1000000
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salesRankLongTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salesRankLongTerm",
+                  "missing": 1000000
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salePrice",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salePrice",
+                  "missing": 0
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "regularPrice",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "regularPrice",
+                  "missing": 0
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "isNotMusic",
+        "template_language": "mustache",
+        "template": {
+          "bool": {
+            "should": [
+              {
+                "script_score": {
+                  "query": {
+                    "match_all": {}
+                  },
+                  "script": {
+                    "source": "if (doc['type.keyword'][0] == 'Music'){return 0} else {if (doc['name.keyword'].size() > 0 && doc['name.keyword'][0].length() < 20){return 1.1} else{return 1.0}}"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "click_prior",
+        "template_language": "mustache",
+        "template": {
+          "query_string": {
+            "query": "{{click_prior_query}}",
+            "fields": ["_id"]
+          }
+        }
+      }
+
+    ]
+  }
+}
