@@ -50,7 +50,7 @@ cd "$LOGSTASH_HOME"
 echo "Launching Logstash indexing in the background via nohup.  See product_indexing.log and queries_indexing.log for log output"
 echo " Cleaning up any old indexing information by deleting products_data.  If this is the first time you are running this, you might see an error."
 rm -rf "$LOGSTASH_HOME/products_data"
-nohup bin/logstash --pipeline.workers 1 --path.data ./products_data -f "$PRODUCTS_LOGSTASH_FILE" > "$LOGS_DIR/product_indexing.log" &
+nohup bin/logstash --pipeline.workers 7 --path.data ./products_data -f "$PRODUCTS_LOGSTASH_FILE" > "$LOGS_DIR/product_indexing.log" &
 echo " Cleaning up any old indexing information by deleting query_data.  If this is the first time you are running this, you might see an error."
 rm -rf "$LOGSTASH_HOME/query_data"
 nohup bin/logstash --pipeline.workers 1 --path.data ./query_data -f "$QUERIES_LOGSTASH_FILE" > "$LOGS_DIR/queries_indexing.log" &
