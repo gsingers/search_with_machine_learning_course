@@ -50,7 +50,38 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
     return query_obj, len(query_obj["query"]["function_score"]["query"]["bool"]["should"])
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
-    print("IMPLEMENT ME: create_feature_log_query")
+    return {
+        "query": {
+            "bool": {
+                "filter": [
+                    {
+                        "terms": {
+                            "_id": doc_ids
+                        },
+                    }, {
+                        "sltr": {
+                            "_name": "logged_" + featureset_name,
+                            "featureset": featureset_name,
+                            "store": ltr_store_name,
+                            "params": {
+                                "keywords": query,
+                                "click_prior_query": click_prior_query
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "ext": {
+            "ltr_log": {
+                "log_specs": {
+                    "name": "logged_features",
+                    "named_query": "logged_" + featureset_name,
+                }
+            }
+        }
+    }
+
     return None
 
 
