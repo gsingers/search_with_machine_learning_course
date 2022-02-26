@@ -233,24 +233,35 @@ class DataPrepper:
                                                 self.ltr_store_name,
                                                 size=len(query_doc_ids), terms_field=terms_field)
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
-        # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
-        # Your structure should look like the data frame below
-        feature_results = {}
-        feature_results["doc_id"] = []  # capture the doc id so we can join later
-        feature_results["query_id"] = []  # ^^^
-        feature_results["sku"] = []
-        feature_results["salePrice"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
+        res = self.opensearch.search(index=self.index_name, body=log_query)
+
+        # Create _id -> hit mapping
+        if terms_field == "_id":
+            hits = {hit["_id"]: hit for hit in res["hits"]["hits"]}
+        else:
+            hits = {hit["_source"][terms_field][0]: hit for hit in res["hits"]["hits"]}
+
+        rows = []
         for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  # ^^^
-            feature_results["salePrice"].append(rng.random())
-            feature_results["name_match"].append(rng.random())
-        frame = pd.DataFrame(feature_results)
-        return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
+            row = {}
+            row["query_id"] = query_id
+            row["doc_id"] = doc_id
+
+            hit = hits.get(str(doc_id), None)
+            if hit is None:
+                no_results.setdefault(key, []).append(doc_id)
+                continue
+
+            row["sku"] = hit["_source"]["sku"][0]
+            features = hit["fields"]["_ltrlog"][0]["log_entry"]
+            # If value for a feature missing in query results, use 0.0
+            row.update({f["name"]: f.get("value", 0.0) for f in features})
+
+            rows.append(row)
+
+        if len(rows) == 0: return None
+        frame = pd.DataFrame(rows).astype({"doc_id": "int64", "query_id": "int64", "sku": "int64"})
+        return frame
         # IMPLEMENT_END
 
     # Can try out normalizing data, but for XGb, you really don't have to since it is just finding splits
