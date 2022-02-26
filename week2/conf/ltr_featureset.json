@@ -26,23 +26,6 @@
         }
       },
       {
-        "name": "name_hyphens_min_df",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "match_explorer": {
-            "type": "min_raw_df",
-            "query": {
-              "match": {
-                "name.hyphens": "{{keywords}}"
-              }
-            }
-          }
-        }
-      },
-      {
         "name": "salePrice",
         "template_language": "mustache",
         "template": {
@@ -77,6 +60,18 @@
             "query": {
               "match_all": {}
             }
+          }
+        }
+      },
+      {
+        "name": "longDescription_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "longDescription": "{{keywords}}"
           }
         }
       },

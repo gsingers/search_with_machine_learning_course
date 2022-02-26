@@ -19,7 +19,7 @@ import xgb_utils as xgbu
 from opensearchpy import OpenSearch
 
 import warnings
-warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 if __name__ == "__main__":

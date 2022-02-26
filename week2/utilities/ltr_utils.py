@@ -100,8 +100,8 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
         "ext": {
             "ltr_log": {
                 "log_specs": {
-                    "name": "log_entry1",
-                    "named_query": "logged_featureset"
+                    "name": "log_entry",
+                    "named_query": "feature_log_query"
                 }
             }
         }

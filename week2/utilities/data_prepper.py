@@ -234,21 +234,20 @@ class DataPrepper:
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
         try:
-            log_query_feature_response = self.opensearch.search(body=log_query, index=self.index_name)
+            response = self.opensearch.search(body=log_query, index=self.index_name)
         except RequestError as re:
-            print(re, log_query)
             raise re
-        hits = log_query_feature_response["hits"]["hits"]
+        hits = response["hits"]["hits"]
         feature_results = []
         for hit in hits:
-            feature = {
+            feature_map = {
                 feature.get("name"): feature.get("value", 0)
                 for feature in hit["fields"]["_ltrlog"][0]["log_entry"]
             }
-            feature["doc_id"] = hit["_id"]
-            feature["sku"] = hit["_id"]
-            feature["query_id"] = query_id
-            feature_results.append(feature)
+            feature_map["doc_id"] = hit["_id"]
+            feature_map["sku"] = hit["_id"]
+            feature_map["query_id"] = query_id
+            feature_results.append(feature_map)
         frame = pd.DataFrame(feature_results)
         return frame.astype({"doc_id": "int64", "query_id": "int64", "sku": "int64"})
 

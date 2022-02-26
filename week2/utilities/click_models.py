@@ -8,8 +8,10 @@ def binary_func(x):
     return 0
 
 def step(x):
-    if x < 0.05:
+    if x < 0.02:
         return 0
+    elif 0.02 <= x < 0.05:
+        return 0.25
     elif 0.05 <= x < 0.10:
         return 0.50
     elif 0.10 <= x < 0.30:
