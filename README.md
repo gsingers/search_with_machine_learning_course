@@ -77,4 +77,23 @@ At the command line, do the following steps to run the example.  For purposes of
     
 # Working locally (Not supported, but may work for you. YMMV)
 
-TBD -- we can re-use the Gitpod docker image for local setup.
+To run locally, you will need a few things:
+
+1. [Pyenv](https://github.com/pyenv/pyenv) and [Pyenv-Virtualenv](https://github.com/pyenv/pyenv-virtualenv) with Python 3.9.7 installed
+1. [Docker](https://docker.com/)
+1. A [Git](https://git-scm.com/) client
+
+Note: these have only been tested on a Mac running OS 12.2.1.  YMMV.  Much of what you will need to do will be similar to what's in `.gitpod.Dockerfile`
+
+1.  Install [GraphViz](https://www.graphviz.org/)
+1. `pyenv install 3.9.7`
+1. `pip install` all of the libraries you see in `.gitpod.Dockerfile`
+1. Setup your weekly python environments per the "Weekly Project" above.
+1. Install [Logstash with the OpenSearch Plugin](https://opensearch.org/docs/latest/clients/logstash/index/)
+1. Install [Fasttext](https://fasttext.cc/)  
+1. Run OpenSearch: 
+    1. `cd docker`
+    1. `docker-compose up`
+1. Note: most of the scripts and projects assume the data is in `/workspace/datasets`, but have overrides to specify your own directories. You will need to download and plan accordingly.  
+1. Do your work per the Weekly Project     
+    
