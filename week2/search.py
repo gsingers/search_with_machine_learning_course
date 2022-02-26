@@ -4,7 +4,7 @@
 from flask import (
     Blueprint, redirect, render_template, request, url_for, current_app
 )
-
+import json
 from week2.opensearch import get_opensearch
 
 import week2.utilities.query_utils as qu
@@ -89,6 +89,7 @@ def query():
             explain = True
         model = request.form.get("model", "simple")
         click_prior = get_click_prior(user_query)
+        print("selected model is {}".format(model))
 
         if model == "simple_LTR":
             query_obj = qu.create_simple_baseline(user_query, click_prior, [], sort, sortDir, size=500)  # We moved create_query to a utility class so we could use it elsewhere.
@@ -117,7 +118,7 @@ def query():
             explain = True
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
-        model = request.args.get("model", "simiple")
+        model = request.args.get("model", "simple")
         if model == "simple_LTR":
             query_obj = qu.create_simple_baseline(user_query, click_prior, filters, sort, sortDir, size=500)
             query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name, rescore_size=500)
@@ -131,7 +132,7 @@ def query():
     else:
         query_obj = qu.create_query("*", "", [], sort, sortDir, size=100)
 
-    #print("query obj: {}".format(query_obj))
+    #print(json.dumps(query_obj, indent=4))
     response = opensearch.search(body=query_obj, index="bbuy_products", explain=explain)
     # Postprocess results here if you so desire
 
@@ -146,7 +147,7 @@ def query():
 
 def get_click_prior(user_query):
     click_prior = ""
-    if "priors_gb" in current_app.config:
+    if current_app.config.get("priors_gb"):
         try:
             prior_doc_ids = None
             prior_doc_id_weights = None
