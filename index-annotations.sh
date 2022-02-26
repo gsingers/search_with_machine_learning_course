@@ -28,7 +28,7 @@ done
 shift $((OPTIND -1))
 
 cd data/phone_products
-gunzip -k data/phone_products/phone_products.xml.gz
+gunzip -k phone_products.xml.gz
 cd ../../
 set -x 
 echo "Creating index settings and mappings"
