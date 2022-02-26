@@ -21,7 +21,7 @@ def create_app(test_config=None):
             app.config["priors_df"] = priors
             app.config["priors_gb"] = priors_gb
         else:
-            print("No prior clicks to load.  This may effect quality. Run ltr-end-to-end.sh per week 2")
+            print("No prior clicks to load.  This may effect quality. Run ltr-end-to-end.sh per week 2 if you want")
         #print(app.config)
         SYNS_MODEL_LOC = os.environ.get("SYNONYMS_MODEL_LOC", "/workspace/datasets/fasttext/syns_model.bin")
         print("SYNS_MODEL_LOC: %s" % SYNS_MODEL_LOC)
@@ -29,7 +29,7 @@ def create_app(test_config=None):
             app.config["syns_model"] = fasttext.load_model(SYNS_MODEL_LOC)
         else:
             print("No synonym model found.  Have you run fasttext?")
-        app.config["index_name"] = os.environ.get("INDEX_NAME", "bbuy_products")
+        app.config["index_name"] = os.environ.get("INDEX_NAME", "bbuy_annotations")
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
