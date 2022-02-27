@@ -6,14 +6,38 @@ import requests
 def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name,
                              active_features=None, rescore_size=500, main_query_weight=1, rescore_query_weight=2):
     # Create the base query, use a much bigger window
-    #add on the rescore
-    print("IMPLEMENT ME: create_rescore_ltr_query")
+    # add on the rescore
+    #print("IMPLEMENT ME: create_rescore_ltr_query")
+    sltr = {
+        "params": {
+            "keywords": user_query,
+            "click_prior_query": click_prior_query
+        },
+        "model": ltr_model_name,
+        "store": ltr_store_name
+    }
+
+    if active_features is not None and len(active_features) > 0:
+        sltr["active_features"] = active_features
+
+    query_obj["rescore"] = {
+        "window_size": rescore_size,
+        "query": {
+            "rescore_query": {
+                "sltr": sltr
+            },
+            "query_weight": main_query_weight,
+            "rescore_query_weight": rescore_query_weight
+        }
+    }
     return query_obj
 
+
 # take an existing query and add in an SLTR so we can use it for explains to see how much SLTR contributes
-def create_sltr_simple_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name, active_features=None):
+def create_sltr_simple_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name,
+                             active_features=None):
     # Create the base query, use a much bigger window
-    #add on the rescore
+    # add on the rescore
     sltr = {
         "sltr": {
             "params": {
@@ -26,13 +50,15 @@ def create_sltr_simple_query(user_query, query_obj, click_prior_query, ltr_model
         }
     }
     if active_features is not None and len(active_features) > 0:
-        sltr["active_features"] =  active_features
+        sltr["active_features"] = active_features
     query_obj["query"]["bool"]["should"].append(sltr)
     return query_obj, len(query_obj["query"]["bool"]["should"])
 
-def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name, active_features=None):
+
+def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name,
+                                 active_features=None):
     # Create the base query, use a much bigger window
-    #add on the rescore
+    # add on the rescore
     sltr = {
         "sltr": {
             "params": {
@@ -45,13 +71,50 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
         }
     }
     if active_features is not None and len(active_features) > 0:
-        sltr["active_features"] =  active_features
+        sltr["active_features"] = active_features
     query_obj["query"]["function_score"]["query"]["bool"]["should"].append(sltr)
     return query_obj, len(query_obj["query"]["function_score"]["query"]["bool"]["should"])
 
-def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
-    print("IMPLEMENT ME: create_feature_log_query")
-    return None
+
+def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200,
+                             terms_field="_id"):
+    #print("IMPLEMENT ME: create_feature_log_query")
+
+    query_obj = {
+        "size": size,
+        "query": {
+            "bool": {
+                "filter": [
+                    {
+                        "terms": {
+                            terms_field: doc_ids
+                        }
+                    },
+                    {
+                        "sltr": {
+                            "_name": "logged_featureset",
+                            "featureset": featureset_name,
+                            "store": ltr_store_name,
+                            "params": {
+                                "keywords": query,
+                                "click_prior_query": click_prior_query,
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "ext": {
+            "ltr_log": {
+                "log_specs": {
+                    "name": "log_entry",
+                    "named_query": "logged_featureset"
+                }
+            }
+        }
+    }
+
+    return query_obj
 
 
 # Item is a Pandas namedtuple
@@ -69,13 +132,14 @@ def get_features(item, exclusions, col_names):
                 features[col_name.replace('_norm', '')] = f
     return features
 
+
 def to_xgb_format(qid, doc_id, rank, query_str, product_name, grade, features):
     if features is not None:
         featuresAsStrs = ["%s:%.4f" % (idx + 1, feature) for idx, feature in enumerate(features.values())]
     else:
         featuresAsStrs = ""
     comment = "# %s\t%s\t%s\t%s" % (doc_id, rank, query_str, product_name)
-    return "%.4f\tqid:%s\t%s %s" % (grade, qid, "\t".join(featuresAsStrs), comment.replace('\n',''))
+    return "%.4f\tqid:%s\t%s %s" % (grade, qid, "\t".join(featuresAsStrs), comment.replace('\n', ''))
 
 
 def write_training_file(train_data, output_file, feat_map):
@@ -84,13 +148,13 @@ def write_training_file(train_data, output_file, feat_map):
     # We don't want to write everything out, some items we've been tracking are reserved or not needed for the model
     exclusions = {"query_id", "doc_id", "rank", "query", "sku", "product_name", "grade", "clicks", "num_impressions"}
     with open(output_file, 'bw') as output:
-        for item in train_data.itertuples(index=False): # skip the first 'index' element from the DF
+        for item in train_data.itertuples(index=False):  # skip the first 'index' element from the DF
             # Pull out the specific items from the Pandas named tuple.  The rest goes in the features map.
             # if there is a norm version, take that
             #
             features = get_features(item, exclusions, col_names)
             xgb_format = to_xgb_format(item.query_id, item.doc_id, item.rank, item.query,
-                                           item.product_name, item.grade, features)
+                                       item.product_name, item.grade, features)
             output.write(bytes(xgb_format + "\n", 'utf-8'))
     # We need to write out the feature map, probably more needed here
     if feat_map:
@@ -100,33 +164,30 @@ def write_training_file(train_data, output_file, feat_map):
             features = get_features(item, exclusions, col_names)
             feat_map_file.write("0\tna\tq\n")
             for idx, feat in enumerate(features.keys()):
-                #https://docs.rs/xgboost/0.1.4/xgboost/struct.FeatureMap.html are the only docs I can find on the format
+                # https://docs.rs/xgboost/0.1.4/xgboost/struct.FeatureMap.html are the only docs I can find on the format
                 if feat != "onSale":
-                    feat_map_file.write('{}\t{}\tq\n'.format(idx+1,feat))#idx+2 b/c we are one-based for this
-                else: #Kludgy way of handling onSale being at some point.  For now, write it out as 'q'
+                    feat_map_file.write('{}\t{}\tq\n'.format(idx + 1, feat))  # idx+2 b/c we are one-based for this
+                else:  # Kludgy way of handling onSale being at some point.  For now, write it out as 'q'
                     # Bug in LTR prevents 'indicator'/boolean features, so model as q for now by
                     # encoding onSale as a percentage discount
-                    feat_map_file.write('{}\t{}\tq\n'.format(idx+1,feat)) #make the q an i
-
-
+                    feat_map_file.write('{}\t{}\tq\n'.format(idx + 1, feat))  # make the q an i
 
 
 def write_opensearch_ltr_model(model_name, model, model_file, objective="rank:pairwise"):
     model_str = '[' + ','.join(list(model)) + ']'
-    #print(model_str)
+    # print(model_str)
     os_model = {
+        "model": {
+            "name": model_name,
             "model": {
-                "name": model_name,
-                "model": {
-                    "type": "model/xgboost+json",
-                    "definition": '{"objective":"%s", "splits": %s}' % (objective, model_str)
-                }
+                "type": "model/xgboost+json",
+                "definition": '{"objective":"%s", "splits": %s}' % (objective, model_str)
             }
         }
+    }
     print("Saving XGB LTR-ready model to %s.ltr" % model_file)
     with open("%s.ltr" % model_file, 'w') as ltr_model:
         ltr_model.write(json.dumps(os_model))
-
 
 
 def create_ltr_store(ltr_model_path, auth, delete_old=True):
@@ -150,6 +211,7 @@ def delete_model(model_path, auth):
     response = requests.delete(model_path, auth=auth, verify=False)
     print("\tDelete Model Response: %s: %s" % (response.status_code, response.text))
     return response
+
 
 def upload_model(model_path, os_model, auth):
     print("Uploading model to %s" % model_path)

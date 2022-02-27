@@ -7,6 +7,7 @@
 import argparse
 import json
 import os
+import warnings
 from getpass import getpass
 from urllib.parse import urljoin
 
@@ -19,7 +20,7 @@ import xgb_utils as xgbu
 from opensearchpy import OpenSearch
 
 
-
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 if __name__ == "__main__":
     host = 'localhost'
