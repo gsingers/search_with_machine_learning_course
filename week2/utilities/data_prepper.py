@@ -233,24 +233,38 @@ class DataPrepper:
                                                 self.ltr_store_name,
                                                 size=len(query_doc_ids), terms_field=terms_field)
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+        print("IMPLEMENTED: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
-        feature_results = {}
-        feature_results["doc_id"] = []  # capture the doc id so we can join later
-        feature_results["query_id"] = []  # ^^^
-        feature_results["sku"] = []
-        feature_results["salePrice"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  # ^^^
-            feature_results["salePrice"].append(rng.random())
-            feature_results["name_match"].append(rng.random())
-        frame = pd.DataFrame(feature_results)
-        return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
+        response = None
+        try:
+            response = self.opensearch.search(body=log_query, index=self.index_name)
+        except RequestError as re:
+            print("feature log exception", log_query)
+        hits = response["hits"]["hits"]
+        if response and hits and len(hits) > 0: 
+            print(" Hits found :",len(hits)) 
+            feature_results = {"doc_id": [], "query_id": [], "sku": []}
+            docs_with_features_list = []
+            returned_doc_ids = []
+            for hit in hits:
+                doc_id = hit['_id']
+                returned_doc_ids.append(doc_id)
+                features = hit["fields"]["_ltrlog"][0]["log_entry"]
+                row_dict = {
+                'doc_id': doc_id,
+                'query_id': query_id.iloc[0],
+                'sku': hit['_source']['sku'][0]
+                }
+                for feature in features:
+                    row_dict[feature.get('name')] = feature.get('value', 0)
+                docs_with_features_list.append(row_dict)
+
+            frame = pd.DataFrame(feature_results)
+            return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
+        else:
+            print(" No Hits found :") 
+            return None
         # IMPLEMENT_END
 
     # Can try out normalizing data, but for XGb, you really don't have to since it is just finding splits
@@ -301,5 +315,9 @@ class DataPrepper:
 
     # Determine the number of clicks for this sku given a query (represented by the click group)
     def __num_clicks(self, all_skus_for_query, test_sku):
-        print("IMPLEMENT ME: __num_clicks(): Return how many clicks the given sku received in the set of skus passed ")
-        return 0
+        print("IMPLEMENTED: __num_clicks(): Return how many clicks the given sku received in the set of skus passed ")
+        count = 0
+        for sku in all_skus_for_query:
+            if sku == test_sku:
+                count+=1
+        return count

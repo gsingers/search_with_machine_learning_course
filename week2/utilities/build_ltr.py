@@ -3,7 +3,8 @@
 #  Our main class for creating an LTR model via XG Boost and uploading it to OpenSearch
 #
 ###
-
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 import argparse
 import json
 import os
