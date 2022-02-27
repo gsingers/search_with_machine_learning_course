@@ -246,20 +246,43 @@ class DataPrepper:
         feature_results["name_match"] = []
         rng = np.random.default_rng(12345)
 
+        no_results["doc_id"] = []
+        no_results["query_id"] = []
+
         hits = response['hits']['hits']
+        print(f"hits={hits}")
 
         for doc_id in query_doc_ids:
+            print(f"doc_id={doc_id}")
 
             # search for this doc_id in hits
-            found = list(filter(lambda hit: hit['_id'] == doc_id, hits))
+            found = list(filter(lambda hit: int(hit['_id']) == doc_id, hits))
             if found is not None and len(found) == 1:
                 hit = found[0]
+                print(f"found a hit: {hit}")
+                print(f"query_id={query_id}, type={type(query_id)}")
                 feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
                 feature_results["query_id"].append(query_id)
                 feature_results["sku"].append(doc_id)  # ^^^
-                feature_results["salePrice"].append(hit["salePrice"])
-                feature_results["name_match"].append(rng.random())
+                feature_results["salePrice"].append(hit["_source"]["salePrice"])
 
+                logged_features = hit['fields']['_ltrlog'][0]['log_entry']
+                print(f"logged_features={logged_features}")
+
+                name_match_feature = list(filter(lambda feature: feature['name'] == "name_match", logged_features))
+                if name_match_feature is not None and len(name_match_feature) > 0:
+                    feature_results["name_match"].append(name_match_feature[0]["value"])
+                # TODO: add name_phrase_match, name_hyphens_min_df, salePrice, regularPrice
+                #
+                print(logged_features)
+            #else:
+            if logged_features is None or len(logged_features) == 0:
+                # this id is not present in hits => capture in no_results
+                no_results["doc_id"].append(doc_id)
+                no_results["query_id"].append(query_id)
+                # print(no_results)
+
+        print(f"feature_results={feature_results}")
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
