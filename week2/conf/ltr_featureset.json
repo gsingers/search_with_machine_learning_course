@@ -64,6 +64,18 @@
         }
       },
       {
+        "name": "shortDescription_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "shortDescription": "{{keywords}}"
+          }
+        }
+      },
+      {
         "name": "longDescription_phrase_match",
         "params": [
           "keywords"
@@ -82,6 +94,230 @@
           "query_string": {
             "query": "{{click_prior_query}}",
             "fields": ["_id"]
+          }
+        }
+      },
+      {
+        "name": "customerReviewCount",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "customerReviewCount",
+                  "missing": 0
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "discount_percentage",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "script_score": {
+              "script": "double discount = (doc['regularPrice'].value - doc['salePrice'].value)/doc['regularPrice'].value; if (discount.isNaN()){return 0;} return discount;"
+            }
+          }
+        }
+      },
+      {
+        "name": "in_store_availability",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "score_mode": "first",
+            "functions": [
+              {
+                "filter": {
+                  "term": {
+                    "inStoreAvailability": true
+                  }
+                },
+                "weight": 1
+              },
+              {
+                "filter": {
+                  "match_all": {}
+                },
+                "weight": 0.9
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "home_delivery",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "score_mode": "first",
+            "functions": [
+              {
+                "filter": {
+                  "term": {
+                    "homeDelivery": true
+                  }
+                },
+                "weight": 1
+              },
+              {
+                "filter": {
+                  "match_all": {}
+                },
+                "weight": 0.9
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "has_image",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "score_mode": "first",
+            "functions": [
+              {
+                "filter": {
+                  "exists": {
+                    "field": "image"
+                  }
+                },
+                "weight": 1
+              },
+              {
+                "filter": {
+                  "match_all": {}
+                },
+                "weight": 0.9
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "is_media",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "filter": {
+                  "terms": {
+                    "type.keyword": [
+                      "Movie",
+                      "Music"
+                    ]
+                  }
+                },
+                "weight": 0.9
+              },
+              {
+                "filter": {
+                  "match_all": {}
+                }, 
+                "weight": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "cheap_shipping",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "score_mode": "first",
+            "functions": [
+              {
+                "filter": {
+                  "exists": {
+                    "field": "shippingCost"
+                  }
+                },
+                "gauss": {
+                  "shippingCost": {
+                    "origin": 0.0,
+                    "scale": 1,
+                    "offset": 10.0,
+                    "decay": 0.5
+                  }
+                }
+              },
+              {
+                "weight": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "salesRankShortTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "gauss": {
+                  "salesRankShortTerm": {
+                      "origin": "1.0",
+                      "scale": "100"
+                  }
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salesRankMediumTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "gauss": {
+                  "salesRankMediumTerm": {
+                      "origin": "1.0",
+                      "scale": "1000"
+                  }
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salesRankLongTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "gauss": {
+                  "salesRankLongTerm": {
+                      "origin": "1.0",
+                      "scale": "1000"
+                  }
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
           }
         }
       }
