@@ -9,6 +9,7 @@ from week2.opensearch import get_opensearch
 
 import week2.utilities.query_utils as qu
 import week2.utilities.ltr_utils as lu
+import json
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
@@ -131,7 +132,7 @@ def query():
     else:
         query_obj = qu.create_query("*", "", [], sort, sortDir, size=100)
 
-    #print("query obj: {}".format(query_obj))
+    print("query obj: {}".format(json.dumps(query_obj)))
     response = opensearch.search(body=query_obj, index="bbuy_products", explain=explain)
     # Postprocess results here if you so desire
 
