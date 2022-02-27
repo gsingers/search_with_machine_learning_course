@@ -5,7 +5,7 @@ reindex_init () {
         echo "Logstash not found"
     else
          echo "Killing logstash processes ..."
-         kill -9 $PIDTEMP
+         kill $PIDTEMP
     fi
 
     echo "Removing logstash data files ..."
@@ -13,7 +13,7 @@ reindex_init () {
     echo "Removing indices ..."
     sh delete-indexes.sh
     echo "Indexing data ..."
-    sh index-data.sh
+    sh index-data.sh -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json -q /workspace/search_with_machine_learning_course/week2/conf/bbuy_queries.json
 
 }
 
