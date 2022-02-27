@@ -8,7 +8,7 @@ def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model
                              active_features=None, rescore_size=500, main_query_weight=1, rescore_query_weight=2):
     # Create the base query, use a much bigger window
     #add on the rescore
-        query_obj["rescore"] = {
+    query_obj["rescore"] = {
         "window_size": rescore_size,
         "query": {
             "rescore_query": {
@@ -70,40 +70,40 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
     return query_obj, len(query_obj["query"]["function_score"]["query"]["bool"]["should"])
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
-        query_obj = {
-            'query': {
-                'bool': {
-                    "filter": [  # use a filter so that we don't actually score anything
-                        {
-                            "terms": {
-                                terms_field : doc_ids
-                            }
-                        },
-                        {  # use the LTR query bring in the LTR feature set
-                            "sltr": {
-                                "_name": "logged_featureset",
-                                "featureset": featureset_name,
-                  "store": ltr_store_name,
-                                "params": {
-                                    "keywords": query,
-                                    "click_prior_query": click_prior_query,
-                                }
+    query_obj = {
+        'query': {
+            'bool': {
+                "filter": [  # use a filter so that we don't actually score anything
+                    {
+                        "terms": {
+                            terms_field : doc_ids
+                        }
+                    },
+                    {  # use the LTR query bring in the LTR feature set
+                        "sltr": {
+                            "_name": "logged_featureset",
+                            "featureset": featureset_name,
+                "store": ltr_store_name,
+                            "params": {
+                                "keywords": query,
+                                "click_prior_query": click_prior_query,
                             }
                         }
-                    ]
-                }
-            },
-            # Turn on feature logging so that we get weights back for our features
-            "ext": {
-                "ltr_log": {
-                    "log_specs": {
-                        "name": "log_entry",
-                        "named_query": "logged_featureset"
                     }
+                ]
+            }
+        },
+        # Turn on feature logging so that we get weights back for our features
+        "ext": {
+            "ltr_log": {
+                "log_specs": {
+                    "name": "log_entry",
+                    "named_query": "logged_featureset"
                 }
-            },
-            "size": size
-        }
+            }
+        },
+        "size": size
+    }
     return query_obj
 
 
