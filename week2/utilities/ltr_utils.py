@@ -10,6 +10,7 @@ def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model
     query_obj["rescore"] = {
         "window_size": rescore_size,
         "query": {
+            "score_mode": "total",
             "query_weight": main_query_weight,
             "rescore_query_weight": rescore_query_weight,
             "rescore_query": {
