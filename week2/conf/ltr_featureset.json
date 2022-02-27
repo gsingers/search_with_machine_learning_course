@@ -87,7 +87,7 @@
               "function_score": {
                   "functions": [
                     {
-                     "field_value_factor": {"field": "salesRankShortTerm", "missing": 1000000} 
+                     "field_value_factor": {"field": "salesRankShortTerm", "modifier": "reciprocal", "missing": 1000000}
                     }
                   ],
                   "query": {
@@ -103,7 +103,7 @@
               "function_score": {
                   "functions": [
                     {
-                     "field_value_factor": {"field": "salesRankMediumTerm", "missing": 1000000} 
+                     "field_value_factor": {"field": "salesRankMediumTerm", "modifier": "reciprocal", "missing": 1000000}
                     }
                   ],
                   "query": {
@@ -119,7 +119,7 @@
               "function_score": {
                   "functions": [
                     {
-                     "field_value_factor": {"field": "salesRankLongTerm", "missing": 1000000} 
+                     "field_value_factor": {"field": "salesRankLongTerm", "modifier": "reciprocal", "missing": 1000000}
                     }
                   ],
                   "query": {
@@ -127,6 +127,16 @@
                   }
               }
           }
+      },
+      {
+        "name": "click_prior",
+        "template_language": "mustache",
+        "template": {
+          "query_string": {
+            "query": "{{click_prior_query}}",
+            "fields": ["_id"]
+          }
+        }
       }
     ]
   }
