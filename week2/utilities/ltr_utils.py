@@ -80,38 +80,36 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
     click_prior_query: popularity
     '''
     query_obj = {
-        "query": {
-            "bool": {
-                "filter": [  # use a filter so that we don't actually score anything
-                    {
-                        "terms": {
-                            "_id": doc_ids
+            "query": {
+                "bool": {
+                    "filter": [{
+                            "terms": {
+                                "_id": [str(i) for i in doc_ids]
                             }
                         },
-                    {  # use the LTR query bring in the LTR feature set
-                        "sltr": {
-                            "_name": "logged_featureset",
-                            "featureset": featureset_name,
-                            "store": ltr_store_name,
-                            "params": {
-                                "keywords": query,
-                                "click_prior_query": click_prior_query,
-                            },
+                        {
+                            "sltr": {
+                                "_name": "logged_featureset",
+                                "featureset": featureset_name,
+                                "store": ltr_store_name,
+                                "params": {
+                                    "keywords": query,
+                                    "click_prior_query": click_prior_query
+                                }
+                            }
                         }
-                    },
-                ]
-            }
-        },
-        # Turn on feature logging so that we get weights back for our features
-        "ext": {
-            "ltr_log": {
-                "log_specs": {
-                    "name": "log_entry", 
-                    "named_query": "logged_featureset"
+                    ]
+                }
+            },
+            "ext": {
+                "ltr_log": {
+                    "log_specs": {
+                        "name": "log_entry",
+                        "named_query": "logged_featureset"
+                    }
                 }
             }
-        },
-    }
+        }
     return query_obj
 
 # Item is a Pandas namedtuple

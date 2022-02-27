@@ -78,12 +78,50 @@ def evaluate_test_set(test_data, prior_clicks_df, opensearch, xgb_model_name, lt
         __judge_hits(test_skus_for_query, index, key, no_hand_tuned, opensearch, hand_tuned_query_obj, "hand_tuned", results, seen)
         # NOTE: very important, we cannot look at the test set for click weights, but we can look at the train set.
 
-        ltr_simple_query_obj = lu.create_rescore_ltr_query(key, simple_query_obj, click_prior_query, xgb_model_name, ltr_store, rescore_size=rescore_size,
-                                                           main_query_weight=main_query_weight, rescore_query_weight=rescore_query_weight)
-        __judge_hits(test_skus_for_query, index, key, no_ltr_simple, opensearch, ltr_simple_query_obj, "ltr_simple", results, seen)
-        ltr_hand_query_obj = lu.create_rescore_ltr_query(key, hand_tuned_query_obj, click_prior_query, xgb_model_name, ltr_store,
-                                                         rescore_size=rescore_size, main_query_weight=main_query_weight, rescore_query_weight=rescore_query_weight)
-        __judge_hits(test_skus_for_query, index, key, no_ltr_hand_tuned, opensearch, ltr_hand_query_obj, "ltr_hand_tuned", results, seen)
+        ltr_simple_query_obj = lu.create_rescore_ltr_query(
+            key
+            , simple_query_obj
+            , click_prior_query
+            , xgb_model_name
+            , ltr_store
+            , rescore_size=rescore_size
+            , main_query_weight=main_query_weight
+            , rescore_query_weight=rescore_query_weight
+        )
+        
+        __judge_hits(
+            test_skus_for_query
+            , index
+            , key
+            , no_ltr_simple
+            , opensearch
+            , ltr_simple_query_obj
+            , "ltr_simple"
+            , results
+            , seen
+        )
+        ltr_hand_query_obj = lu.create_rescore_ltr_query(
+            key
+            , hand_tuned_query_obj
+            , click_prior_query
+            , xgb_model_name
+            , ltr_store
+            , rescore_size=rescore_size
+            , main_query_weight=main_query_weight
+            , rescore_query_weight=rescore_query_weight
+        )
+        
+        __judge_hits(
+            test_skus_for_query
+            , index
+            , key
+            , no_ltr_hand_tuned
+            , opensearch
+            , ltr_hand_query_obj
+            , "ltr_hand_tuned"
+            , results
+            , seen
+        )
 
     return pd.DataFrame(results), no_results
 
