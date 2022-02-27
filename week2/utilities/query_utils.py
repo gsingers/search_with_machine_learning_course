@@ -12,13 +12,20 @@ def create_stats_query(aggs, extended=True):
     return agg_obj
 
 # expects clicks and impressions to be in the row
+# Fixing the incorrect assumption
+# Let’s illustrate by comparing a popular query with a much less popular query. 
+# For a popular head query, you might have the same query millions of times per day compared to a long tail query that executes just a hundred times. 
+# If the top document on the long tail query gets clicked 99 out of 100 times, that seems like a way stronger signal of relevance than a head query that gets clicked 1000 times out of million, 
+# and yet, if we just pass in clicks alone our model is only going to learn that unadjusted bigger numbers are better.
+# Fix: In  \`create_prior_queries_from_group\`, change to \`click_prior_query += "%s^%.3f  " % (item.doc_id, item.clicks/item.num_impressions)\`
+
 def create_prior_queries_from_group(click_group): # total impressions isn't currently used, but it mayb worthwhile at some point
     click_prior_query = ""
     # Create a string that looks like:  "query": "1065813^100 OR 8371111^89", where the left side is the doc id and the right side is the weight.  In our case, the number of clicks a document received in the training set
     if click_group is not None:
         for item in click_group.itertuples():
             try:
-                click_prior_query += "%s^%.3f  " % (item.doc_id, item.clicks)
+                click_prior_query += "%s^%.3f  " % (item.doc_id, item.clicks/item.num_impressions)
 
             except KeyError as ke:
                 pass # nothing to do in this case, it just means we can't find priors for this doc
@@ -26,6 +33,7 @@ def create_prior_queries_from_group(click_group): # total impressions isn't curr
 
 
 # expects clicks from the raw click logs, so value_counts() are being passed in
+# see create_prior_query_from_group on why change to \`click_prior_query += "%s^%.3f  " % (doc, wgt/query_times_seen)\`
 def create_prior_queries(doc_ids, doc_id_weights, query_times_seen): # total impressions isn't currently used, but it mayb worthwhile at some point
     click_prior_query = ""
     # Create a string that looks like:  "query": "1065813^100 OR 8371111^89", where the left side is the doc id and the right side is the weight.  In our case, the number of clicks a document received in the training set
@@ -33,7 +41,7 @@ def create_prior_queries(doc_ids, doc_id_weights, query_times_seen): # total imp
         for idx, doc in enumerate(doc_ids):
             try:
                 wgt = doc_id_weights[doc]  # This should be the number of clicks or whatever
-                click_prior_query += "%s^%.3f  " % (doc, wgt)
+                click_prior_query += "%s^%.3f  " % (doc, wgt/query_times_seen)
             except KeyError as ke:
                 pass # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query

@@ -90,4 +90,6 @@ if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Analyze the results
-python $WEEK/utilities/build_ltr.py --analyze --output_dir "$OUTPUT_DIR" 
+# Given the output of --xgb_test, output some useful info about things like MRR and Precision.  Also creates a number of interesting join data frames that can be used to compare results.
+# With analyze_explains - Compare simple vs LTR explains and also compare hand tuned vs LTR explains
+python $WEEK/utilities/build_ltr.py --analyze --output_dir "$OUTPUT_DIR"

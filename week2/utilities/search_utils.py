@@ -80,6 +80,7 @@ def evaluate_test_set(test_data, prior_clicks_df, opensearch, xgb_model_name, lt
 
         ltr_simple_query_obj = lu.create_rescore_ltr_query(key, simple_query_obj, click_prior_query, xgb_model_name, ltr_store, rescore_size=rescore_size,
                                                            main_query_weight=main_query_weight, rescore_query_weight=rescore_query_weight)
+        #print(json.dumps(ltr_simple_query_obj))
         __judge_hits(test_skus_for_query, index, key, no_ltr_simple, opensearch, ltr_simple_query_obj, "ltr_simple", results, seen)
         ltr_hand_query_obj = lu.create_rescore_ltr_query(key, hand_tuned_query_obj, click_prior_query, xgb_model_name, ltr_store,
                                                          rescore_size=rescore_size, main_query_weight=main_query_weight, rescore_query_weight=rescore_query_weight)

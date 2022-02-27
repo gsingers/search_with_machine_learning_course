@@ -238,7 +238,8 @@ class DataPrepper:
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
         # feature_results["salePrice"] = []
-        feature_results.update({'name_match': [], 'name_phrase_match': [], 'name_hyphens_min_df': [], 'salePrice':[], 'regularPrice':[]})
+        feature_results.update({'name_match': [], 'name_phrase_match': [], 'name_hyphens_min_df': [], 'salePrice':[], 'regularPrice':[], 'salesRankShortTerm': [], 
+            'salesRankMediumTerm': [], 'salesRankLongTerm': [], 'click_prior': []})
         # rng = np.random.default_rng(12345)
 
         try: response = self.opensearch.search(body=log_query, index=self.index_name)
@@ -259,6 +260,12 @@ class DataPrepper:
                     feature_results.get('name_hyphens_min_df', []).append(d['name_hyphens_min_df'])
                     feature_results.get('salePrice', []).append(d['salePrice'])
                     feature_results.get('regularPrice', []).append(d['regularPrice'])
+                    
+                    feature_results.get('salesRankShortTerm', []).append(d['salesRankShortTerm'])
+                    feature_results.get('salesRankMediumTerm', []).append(d['salesRankMediumTerm'])
+                    feature_results.get('salesRankLongTerm', []).append(d['salesRankLongTerm'])
+
+                    feature_results.get('click_prior', []).append(d['click_prior'])
                     
                     feature_results.get('doc_id', []).append(hit['_id'])
                     feature_results.get('query_id', []).append(query_id)
