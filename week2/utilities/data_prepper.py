@@ -14,6 +14,7 @@ class DataPrepper:
     index_name = "bbuy_products"
     ltr_store_name = "week2"
     feature_names = []
+    verbose = False
 
     def __init__(self, opensearch_client, featureset_name="bbuy_product_featureset", index_name="bbuy_products",
                  ltr_store_name="week2", feature_names=None) -> None:
@@ -232,7 +233,8 @@ class DataPrepper:
         log_query = lu.create_feature_log_query(key, query_doc_ids, click_prior_query, self.featureset_name,
                                                 self.ltr_store_name,
                                                 size=len(query_doc_ids), terms_field=terms_field)
-        print(f"log_query={log_query}")
+        if self.verbose:
+            print(f"log_query={log_query}")
         # IMPLEMENT_START --
         #print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         response = self.opensearch.search(body=log_query, index=self.index_name)
@@ -250,30 +252,39 @@ class DataPrepper:
         no_results["query_id"] = []
 
         hits = response['hits']['hits']
-        print(f"hits={hits}")
+        if self.verbose:
+            print(f"hits={hits}")
 
         for doc_id in query_doc_ids:
-            print(f"doc_id={doc_id}")
+            if self.verbose:
+                print(f"doc_id={doc_id}")
 
             # search for this doc_id in hits
             found = list(filter(lambda hit: int(hit['_id']) == doc_id, hits))
             if found is not None and len(found) == 1:
                 hit = found[0]
-                print(f"found a hit: {hit}")
+                if self.verbose:
+                    print(f"found a hit: {hit}")
                 feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
                 feature_results["query_id"].append(query_id.iloc[0])
                 feature_results["sku"].append(doc_id)  # ^^^
-                feature_results["salePrice"].append(hit["_source"]["salePrice"])
 
                 logged_features = hit['fields']['_ltrlog'][0]['log_entry']
-                print(f"logged_features={logged_features}")
+                if self.verbose:
+                    print(f"logged_features={logged_features}")
 
-                name_match_feature = list(filter(lambda feature: feature['name'] == "name_match", logged_features))
-                if name_match_feature is not None and len(name_match_feature) > 0:
-                    feature_results["name_match"].append(name_match_feature[0].get("value", 0.0))
-                # TODO: add name_phrase_match, name_hyphens_min_df, salePrice, regularPrice
-                #
-                print(logged_features)
+                #name_match_feature = list(filter(lambda feature: feature['name'] == "name_match", logged_features))
+                #if name_match_feature is not None and len(name_match_feature) > 0:
+                #    feature_results["name_match"].append(name_match_feature[0].get("value", 0.0))
+
+                for feature in logged_features:
+                    if feature["name"] not in feature_results:
+                        feature_results[feature["name"]] = []
+                    
+                    feature_results[feature["name"]].append(feature.get("value", 0.0))
+                
+                if self.verbose:                
+                    print(logged_features)
             #else:
             if logged_features is None or len(logged_features) == 0:
                 # this id is not present in hits => capture in no_results
@@ -281,7 +292,8 @@ class DataPrepper:
                 no_results["query_id"].append(query_id)
                 # print(no_results)
 
-        print(f"feature_results={feature_results}")
+        if self.verbose:
+            print(f"feature_results={feature_results}")
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
