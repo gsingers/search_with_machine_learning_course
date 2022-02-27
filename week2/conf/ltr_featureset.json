@@ -2,6 +2,16 @@
   "featureset": {
     "features": [
       {
+        "name": "click_prior",
+        "template_language": "mustache",
+        "template": {
+          "query_string": {
+            "query": "{{click_prior_query}}",
+            "fields": ["_id"]
+          }
+        }
+      },
+      {
         "name": "name_match",
         "params": [
           "keywords"

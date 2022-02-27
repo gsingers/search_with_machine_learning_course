@@ -21,6 +21,7 @@ def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model
                     "active_features":  active_features if active_features != None else []
                 }
             },
+            "score_mode": "total",
             "query_weight": main_query_weight,
             "rescore_query_weight": rescore_query_weight
         }
