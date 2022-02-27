@@ -260,9 +260,8 @@ class DataPrepper:
             if found is not None and len(found) == 1:
                 hit = found[0]
                 print(f"found a hit: {hit}")
-                print(f"query_id={query_id}, type={type(query_id)}")
                 feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-                feature_results["query_id"].append(query_id)
+                feature_results["query_id"].append(query_id.iloc[0])
                 feature_results["sku"].append(doc_id)  # ^^^
                 feature_results["salePrice"].append(hit["_source"]["salePrice"])
 
@@ -271,7 +270,7 @@ class DataPrepper:
 
                 name_match_feature = list(filter(lambda feature: feature['name'] == "name_match", logged_features))
                 if name_match_feature is not None and len(name_match_feature) > 0:
-                    feature_results["name_match"].append(name_match_feature[0]["value"])
+                    feature_results["name_match"].append(name_match_feature[0].get("value", 0.0))
                 # TODO: add name_phrase_match, name_hyphens_min_df, salePrice, regularPrice
                 #
                 print(logged_features)
