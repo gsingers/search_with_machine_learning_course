@@ -98,6 +98,44 @@
             }
           }
         }
+      },
+      {
+        "name": "salesRankMediumTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salesRankMediumTerm",
+                  "missing": 0
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salesRankLongTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salesRankLongTerm",
+                  "missing": 0
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
       }
     ]
   }
