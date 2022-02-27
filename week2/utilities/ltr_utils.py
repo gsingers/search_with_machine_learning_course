@@ -7,7 +7,22 @@ def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model
                              active_features=None, rescore_size=500, main_query_weight=1, rescore_query_weight=2):
     # Create the base query, use a much bigger window
     #add on the rescore
-    print("IMPLEMENT ME: create_rescore_ltr_query")
+    # print("IMPLEMENT ME: create_rescore_ltr_query")
+    query_obj["rescore"] = {
+      "window_size" : rescore_size,
+      "query" : {
+         "rescore_query" : {
+            "match_phrase" : {
+               "message" : {
+                  "query" :user_query,
+                  "slop" : 2
+               }
+            }
+         },
+         "query_weight" : main_query_weight,
+         "rescore_query_weight" : rescore_query_weight
+      }
+   }
     return query_obj
 
 # take an existing query and add in an SLTR so we can use it for explains to see how much SLTR contributes
