@@ -6,8 +6,30 @@ import requests
 def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name,
                              active_features=None, rescore_size=500, main_query_weight=1, rescore_query_weight=2):
     # Create the base query, use a much bigger window
-    #add on the rescore
-    print("IMPLEMENT ME: create_rescore_ltr_query")
+    # add on the rescore
+    # print("IMPLEMENT ME: create_rescore_ltr_query")
+    query_obj['rescore']= {
+        "window_size": rescore_size,
+        "query": {
+            "rescore_query": {
+                "sltr": {
+                    "params":{
+                        "keywords": user_query,
+                        "click_prior_query": click_prior_query
+                    },
+                    "model": ltr_model_name,
+                    "store": ltr_store_name
+                }
+            },
+            "score_mode": "total",
+            "query_weight": main_query_weight,
+            "rescore_query_weight": rescore_query_weight
+        }
+    }
+
+    if active_features is not None and len(active_features)>0:
+        query_obj['rescore']['query']['rescore_query']['sltr']['active_features']=active_features
+    
     return query_obj
 
 # take an existing query and add in an SLTR so we can use it for explains to see how much SLTR contributes
