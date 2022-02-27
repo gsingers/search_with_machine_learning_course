@@ -233,22 +233,27 @@ class DataPrepper:
                                                 self.ltr_store_name,
                                                 size=len(query_doc_ids), terms_field=terms_field)
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+        # print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+        response = self.opensearch.search(
+            body = log_query,
+            index = self.index_name 
+        )
+
+        hits_field = 'hits'
+        feature_results = []
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
-        feature_results = {}
-        feature_results["doc_id"] = []  # capture the doc id so we can join later
-        feature_results["query_id"] = []  # ^^^
-        feature_results["sku"] = []
-        feature_results["salePrice"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  # ^^^
-            feature_results["salePrice"].append(rng.random())
-            feature_results["name_match"].append(rng.random())
+        if response and len(response[hits_field]) > 0:
+            hits = response[hits_field][hits_field]
+            for hit in hits:
+                one_hit_feature = {
+                    feature['name']: feature.get('value', 0.0) for feature in hit['fields']['_ltrlog'][0]['log_entry']
+                }
+                one_hit_feature['doc_id'] = hit['_id']
+                one_hit_feature['query_id'] = query_id
+                one_hit_feature['sku'] = hit['_id'] #hit.get["sku"]
+                feature_results.append(one_hit_feature)
+        
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
