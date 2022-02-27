@@ -1,0 +1,36 @@
+GET bbuy_products/_search
+{
+   "size":1,
+   "query":{
+      "bool":{
+         "filter":[
+            {
+               "terms":{
+                  "sku":[
+                     1004722
+                  ]
+               }
+            },
+            {
+               "sltr":{
+                  "_name":"logged_featureset",
+                  "featureset":"bbuy_main_featureset",
+                  "store":"week2",
+                  "params":{
+                     "keywords":"1080p"
+                  }
+               }
+            }
+         ]
+      }
+   },
+   "ext":{
+      "ltr_log":{
+         "log_specs":{
+            "name":"log_entry",
+            "named_query":"logged_featureset"
+         }
+      }
+   }
+}
+
