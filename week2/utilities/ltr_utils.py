@@ -5,6 +5,11 @@ import requests
 
 def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name,
                              active_features=None, rescore_size=500, main_query_weight=1, rescore_query_weight=2):
+    '''
+    `rescore` query combines the results of the original score and the rescore via the `score_mode` attribute on the query,
+    defaulting to using a weighted sum of the two values together, with the weights deriving from the `query_weight` and the `rescore_query_weight
+    main_q_wgt * orig.score + rescore_q_wgt * rescore
+    '''
     # Create the base query, use a much bigger window
     #add on the rescore
     sltr = {
@@ -19,7 +24,9 @@ def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model
     query_obj['rescore'] = {'window_size': rescore_size}
     query_obj['rescore']['query'] = {
         'rescore_query': sltr,
-        'rescore_query_weight': rescore_query_weight
+        'rescore_query_weight': rescore_query_weight,
+        'score_mode': 'total',
+        'query_weight': main_query_weight
     }
     return query_obj
 
@@ -70,7 +77,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
           "filter": [
             {
               "terms": {
-                terms_field: doc_ids
+                "_id": doc_ids
               }
             },
             {
