@@ -136,7 +136,18 @@
             }
           }
         }
-      }
+      },
+      {
+        "name": "reviews",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "script_score": {
+              "script": "if (doc['customerReviewAverage'].size()!=0 && doc['customerReviewCount'].size()!=0) { doc['customerReviewAverage'].value * doc['customerReviewCount'].value } else {0.0}"
+            }
+          }
+        }
+     }
     ]
   }
 }

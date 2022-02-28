@@ -39,6 +39,9 @@ def apply_click_model(data_frame, click_model_type="binary", downsample=True):
         data_frame["grade"] = (data_frame["clicks"]/data_frame["num_impressions"]).fillna(0).apply(lambda x: step(x))
         #print("IMPLEMENT ME: apply_click_model(): downsampling")
         data_frame = down_sample_buckets(data_frame)
+    elif click_model_type == "heuristic":
+        data_frame["grade"] = (data_frame["clicks"]/data_frame["num_impressions"]).fillna(0).apply(lambda x: step(x))
+
     return data_frame
 
 # https://stackoverflow.com/questions/55119651/downsampling-for-more-than-2-classes

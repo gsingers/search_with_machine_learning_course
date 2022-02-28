@@ -19,13 +19,16 @@ def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model
                     "model": ltr_model_name,
                     # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
                     "store": ltr_store_name,
-                    "active_features": active_features
                 }
             },
+            "score_mode": "total",
             "query_weight" : main_query_weight,
             "rescore_query_weight": rescore_query_weight # Magic number, but let's say LTR matches are 2x baseline matches
         }
     }
+    if active_features is not None and len(active_features) > 0:
+        print(f"Got active_features={active_features}. Appending to the rescore query")
+        query_obj["rescore"]["query"]["rescore_query"]["sltr"]["active_features"] = active_features
     return query_obj
 
 # take an existing query and add in an SLTR so we can use it for explains to see how much SLTR contributes

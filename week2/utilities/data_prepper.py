@@ -273,6 +273,12 @@ class DataPrepper:
                 if self.verbose:
                     print(f"logged_features={logged_features}")
 
+                if logged_features is None or len(logged_features) == 0:
+                    # this id is not present in hits => capture in no_results
+                    no_results["doc_id"].append(doc_id)
+                    no_results["query_id"].append(query_id)
+                    # print(no_results)
+
                 #name_match_feature = list(filter(lambda feature: feature['name'] == "name_match", logged_features))
                 #if name_match_feature is not None and len(name_match_feature) > 0:
                 #    feature_results["name_match"].append(name_match_feature[0].get("value", 0.0))
@@ -285,12 +291,11 @@ class DataPrepper:
                 
                 if self.verbose:                
                     print(logged_features)
-            #else:
-            if logged_features is None or len(logged_features) == 0:
-                # this id is not present in hits => capture in no_results
+            else:
+                # this docid wasn't found => capture in no_results
                 no_results["doc_id"].append(doc_id)
                 no_results["query_id"].append(query_id)
-                # print(no_results)
+            
 
         if self.verbose:
             print(f"feature_results={feature_results}")
