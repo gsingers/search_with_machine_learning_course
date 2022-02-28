@@ -9,7 +9,7 @@ def transform_name(product_name):
     return product_name
 
 # Directory for product data
-directory = r'/workspace/search_with_machine_learning_course/week3/pruned_products/'
+directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 general = parser.add_argument_group("general")
