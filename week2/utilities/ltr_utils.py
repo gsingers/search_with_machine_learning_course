@@ -68,28 +68,45 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
     return query_obj, len(query_obj["query"]["function_score"]["query"]["bool"]["should"])
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
-    print("IMPLEMENT ME: create_feature_log_query")
-
-    sltr = {
-        "sltr": {
-            "_name": ltr_store_name,
-            "featureset": featureset_name,
-            "params": {
-                "keywords": query
-            },
-
-            "ext": {
-                "ltr_log": {
-                    "log_specs": {
-                        "name": "log_entry",
-                        "named_query": ltr_store_name
+    print("Debugging: create_feature_log_query")
+    features_logging_query = {
+        "size": size,
+        "_source": [ "name", "sku" ],
+        "query": {
+            "bool": {
+                "filter": [
+                    {
+                        # Doc ids to retrieve LTR features for
+                        "terms": {
+                            terms_field: doc_ids
+                        }
+                    },
+                    {
+                    "sltr": {
+                        "_name": "logged_featureset",
+                        "featureset": featureset_name,
+                        "store": ltr_store_name,
+                        "params": {
+                            # The params for the query-dependent features
+                            "keywords": query,
+                            "click_prior_query": click_prior_query
+                        }
                     }
+                    }
+                ]
+                }
+        },
+        # Return the LTR features
+        "ext": {
+            "ltr_log": {
+                "log_specs": {
+                    "name": "log_entry",
+                    "named_query": "logged_featureset"
                 }
             }
         }
     }
-
-    return sltr
+    return features_logging_query
 
 
 # Item is a Pandas namedtuple
