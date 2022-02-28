@@ -84,7 +84,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                 "bool": {
                     "filter": [{
                             "terms": {
-                                "_id": [str(i) for i in doc_ids]
+                                "_id": doc_ids
                             }
                         },
                         {

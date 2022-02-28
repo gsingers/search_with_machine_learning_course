@@ -204,8 +204,14 @@ class DataPrepper:
             if isinstance(doc_ids, np.ndarray):
                 doc_ids = doc_ids.tolist()
             click_prior_query = qu.create_prior_queries_from_group(group)
-            ltr_feats_df = self.__log_ltr_query_features(group[:1]["query_id"], key, doc_ids, click_prior_query, no_results,
-                                                         terms_field=terms_field)
+            ltr_feats_df = self.__log_ltr_query_features(
+                group[:1]["query_id"]
+                , key
+                , doc_ids
+                , click_prior_query
+                , no_results
+                , terms_field=terms_field
+            )
             if ltr_feats_df is not None:
                 feature_frames.append(ltr_feats_df)
 
@@ -227,11 +233,25 @@ class DataPrepper:
     #         {'name': 'sale_price_function', 'value': 949.99},
     #         {'name': 'price_function', 'value': 0.0}]}]
     # For each query, make a request to OpenSearch with SLTR logging on and extract the features
-    def __log_ltr_query_features(self, query_id, key, query_doc_ids, click_prior_query, no_results, terms_field="_id"):
+    def __log_ltr_query_features(
+        self
+        , query_id
+        , key
+        , query_doc_ids
+        , click_prior_query
+        , no_results
+        , terms_field="_id"):
 
-        log_query = lu.create_feature_log_query(key, query_doc_ids, click_prior_query, self.featureset_name,
-                                                self.ltr_store_name,
-                                                size=len(query_doc_ids), terms_field=terms_field)
+        log_query = lu.create_feature_log_query(
+            key
+            , query_doc_ids
+            , click_prior_query
+            , self.featureset_name
+            , self.ltr_store_name
+            , size=len(query_doc_ids)
+            , terms_field=terms_field)
+
+        print(log_query)
         # IMPLEMENT_START
         try:
             response = self.opensearch.search(body=log_query, index=self.index_name)
