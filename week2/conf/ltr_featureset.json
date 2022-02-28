@@ -8,9 +8,14 @@
         ],
         "template_language": "mustache",
         "template": {
-          "match": {
-            "name": "{{keywords}}"
-          }
+          "multi_match": {
+                "query": "{{keywords}}",
+                "type": "phrase",
+                "slop": "6",
+                "minimum_should_match": "2<75%",
+                "fields": ["name^10", "shortDescription",
+                           "longDescription", "department", "sku", "manufacturer", "features", "categoryPath"]
+           }
         }
       },
       {
@@ -38,6 +43,31 @@
               "match": {
                 "name.hyphens": "{{keywords}}"
               }
+            }
+          }
+        }
+      },
+      {
+        "name": "onSale",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "filter": {
+                  "range": {
+                    "regularPrice": {
+                      "gt": 0
+                    }
+                  }
+                },
+                "script_score": {
+                  "script": "(doc['regularPrice'][0] - doc['salePrice'][0])/doc['regularPrice'][0]"
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
             }
           }
         }
@@ -77,6 +107,74 @@
             "query": {
               "match_all": {}
             }
+          }
+        }
+      },
+      {
+        "name": "salesRankShortTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salesRankShortTerm",
+                  "missing": 1000000
+                }
+              }
+
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salesRankMediumTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salesRankMediumTerm",
+                  "missing": 1000000
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salesRankLongTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "salesRankLongTerm",
+                  "missing": 1000000
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "click_prior",
+        "template_language": "mustache",
+        "template": {
+          "query_string": {
+            "query": "{{click_prior_query}}",
+            "fields": ["_id"]
           }
         }
       }
