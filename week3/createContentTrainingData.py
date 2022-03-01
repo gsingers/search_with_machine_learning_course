@@ -1,4 +1,5 @@
 import argparse
+import fileinput
 import os
 import random
 import xml.etree.ElementTree as ET
@@ -30,29 +31,28 @@ if os.path.isdir(output_dir) == False:
         os.mkdir(output_dir)
 
 if args.input:
-    directory = args.input
+    directory = Path(args.input)
 # IMPLEMENT:  Track the number of items in each category and only output if above the min
 min_products = args.min_products
 sample_rate = args.sample_rate
 
 print("Writing results to %s" % output_file)
 with open(output_file, 'w') as output:
-    for filename in os.listdir(directory):
-        if filename.endswith(".xml"):
-            print("Processing %s" % filename)
-            f = os.path.join(directory, filename)
-            tree = ET.parse(f)
-            root = tree.getroot()
-            for child in root:
-                if random.random() > sample_rate:
-                    continue
-                # Check to make sure category name is valid
-                if (child.find('name') is not None and child.find('name').text is not None and
-                    child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
-                    child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None):
-                      # Choose last element in categoryPath as the leaf categoryId
-                      cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
-                      # Replace newline chars with spaces so fastText doesn't complain
-                      name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
+    for filepath in directory.glob("*.xml*"):
+        print("Processing %s" % filepath)
+        f = fileinput.hook_compressed(filepath, "rb")
+        tree = ET.parse(f)
+        root = tree.getroot()
+        for child in root:
+            if random.random() > sample_rate:
+                continue
+            # Check to make sure category name is valid
+            if (child.find('name') is not None and child.find('name').text is not None and
+                child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
+                child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None):
+                    # Choose last element in categoryPath as the leaf categoryId
+                    cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
+                    # Replace newline chars with spaces so fastText doesn't complain
+                    name = child.find('name').text.replace('\n', ' ')
+                    output.write("__label__%s %s\n" % (cat, transform_name(name)))
 
