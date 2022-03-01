@@ -26,7 +26,8 @@
         }
       },
       "click_time": {
-        "type": "date"
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ssZ||yyyy-MM-dd||epoch_millis||strict_date_optional_time"
       },
       "query": {
         "type": "text",
@@ -35,14 +36,15 @@
             "type": "keyword",
             "ignore_above": 256
           },
-          "english": {
+          "stemmed": {
             "type": "text",
             "analyzer": "english"
           }
         }
       },
       "query_time": {
-        "type": "date"
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd HH:mm:ss.SSSZ||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ssZ||yyyy-MM-dd||epoch_millis||strict_date_optional_time"
       },
       "sku": {
         "type": "text",
