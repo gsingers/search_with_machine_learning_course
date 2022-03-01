@@ -136,3 +136,6 @@ dmypy.json
 /test.csv
 /train.csv
 /product_data/
+fastText-0.9.2/
+/week3/computer_products/computer_products.xml
+/week3/phone_products/phone_products.xml
