@@ -56,4 +56,5 @@ df['label'] = '__label__' + df['category']
 
 # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
 df = df[df['category'].isin(categories)]
-df[['label', 'query']].to_csv(output_file_name, header=False, sep=' ', index=False)
+df['output'] = df['label'] + ' ' + df['query']
+df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
