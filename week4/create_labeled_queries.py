@@ -2,6 +2,11 @@ import os
 import argparse
 import xml.etree.ElementTree as ET
 import pandas as pd
+import numpy as np
+
+# Useful if you want to perform stemming.
+import nltk
+stemmer = nltk.stem.PorterStemmer()
 
 categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 
@@ -17,7 +22,7 @@ args = parser.parse_args()
 output_file_name = args.output
 
 if args.min_queries:
-    directory = args.min_queries
+    min_queries = int(args.min_queries)
 
 # The root category, named Best Buy with id cat00000, doesn't have a parent.
 root_category_id = 'cat00000'
@@ -25,28 +30,30 @@ root_category_id = 'cat00000'
 tree = ET.parse(categories_file_name)
 root = tree.getroot()
 
-# Map of queries to parents.
-parents = {}
-
-# Parse the category XML file to map each category id to its parent category id.
+# Parse the category XML file to map each category id to its parent category id in a dataframe.
+categories = []
+parents = []
 for child in root:
     id = child.find('id').text
     cat_path = child.find('path')
     cat_path_ids = [cat.find('id').text for cat in cat_path]
     leaf_id = cat_path_ids[-1]
     if leaf_id != root_category_id:
-        parents[leaf_id] = cat_path_ids[-2]
+        categories.append(leaf_id)
+        parents.append(cat_path_ids[-2])
+parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 'parent'])
 
-# Read the training data into pandas.
+# Read the training data into pandas, only keeping queries with non-root categories in our category tree.
 df = pd.read_csv(queries_file_name)[['category', 'query']]
+df = df[df['category'].isin(categories)]
+
+# IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+
+# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']
 
-# IMPLEMENT ME: Trim the queries (some a`qre quoted strings), convert them to lowercase, and optionally
-# implement other normalization, like using the nltk stemmer.
-
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
-
-# Output labeled query data as a space-separated file.
+# Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
+df = df[df['category'].isin(categories)]
 df[['label', 'query']].to_csv(output_file_name, header=False, sep=' ', index=False)
