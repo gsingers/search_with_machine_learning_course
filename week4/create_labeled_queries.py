@@ -3,6 +3,7 @@ import argparse
 import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
+import csv
 
 # Useful if you want to perform stemming.
 import nltk
