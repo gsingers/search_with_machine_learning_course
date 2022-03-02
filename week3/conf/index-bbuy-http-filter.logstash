@@ -1,14 +1,18 @@
 input {
   file {
-    path => ["/workspace/search_with_machine_learning_course/data/phone_products/phone_products.xml"]  #Put in the path to the ungzipped/untarred product data.  To start smaller, simply select a smaller number of files or copy a few files to a different directory.
+    path => ["/workspace/search_with_machine_learning_course/data/phone_products/phone_products.xml"]
     start_position => "beginning"
     codec => multiline {
             pattern => "<product>"
             negate => "true"
             what => "previous"
         }
-    #mode => "read"
-    #exit_after_read => "true"
+    mode => "read"
+    exit_after_read => true
+    file_completed_action => "log"
+    file_completed_log_path => "/dev/null"
+    file_chunk_size => 100000000
+    sincedb_path => "/dev/null"
   }
 }
   filter {

@@ -1,5 +1,6 @@
 {
   "settings": {
+    "index.refresh_interval": "1m",
     "analysis": {
       "analyzer": {
         "smarter_hyphens": {
@@ -262,7 +263,20 @@
           "suggest": {
             "type": "completion"
           }
-
+        }
+      },
+      "name_synonyms": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 2048
+          },
+          "hyphens": {
+            "type": "text",
+            "analyzer": "smarter_hyphens"
+          }
         }
       },
       "onSale": {

@@ -1,8 +1,19 @@
 import os
 import random
+import \
+    re
 import xml.etree.ElementTree as ET
 import argparse
 from pathlib import Path
+
+from nltk import \
+    word_tokenize, \
+    SnowballStemmer
+from nltk.corpus import \
+    stopwords
+
+stemmer = SnowballStemmer("english")
+stop_words = set(stopwords.words('english'))
 
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products'
 parser = argparse.ArgumentParser(description='Process some integers.')
@@ -26,10 +37,12 @@ if args.input:
 sample_rate = args.sample_rate
 
 def transform_training_data(name):
-    # IMPLEMENT
-    return name.replace('\n', ' ')
-
-# Directory for product data
+    name = name.replace('\n', ' ').lower()
+    tokens = word_tokenize(name)
+    tokens = ["".join(c for c in token if c.isalnum()) for token in tokens]
+    tokens = [stemmer.stem(token) for token in tokens]
+    tokens = [token for token in tokens if not token in stop_words]
+    return " ".join(tokens)
 
 print("Writing results to %s" % output_file)
 with open(output_file, 'w') as output:
