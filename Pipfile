@@ -20,6 +20,8 @@ matplotlib = "*"
 fasttext = "*"
 nltk = "*"
 pytest = "*"
+jupyter = "*"
+svgling = "*"
 
 [dev-packages]
 
