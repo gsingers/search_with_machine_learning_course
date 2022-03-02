@@ -3,10 +3,24 @@ import os
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from nltk import word_tokenize
+from nltk.stem import SnowballStemmer
+from nltk.corpus import stopwords
+import re
+import pandas as pd
+
+stemmer = SnowballStemmer("english")
+stop_words = set(stopwords.words('english'))
+
 
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+    tokens = word_tokenize(product_name.lower())
+    tokens = [stemmer.stem(token) for token in tokens]
+    tokens = [token for token in tokens if not token in stop_words]
+    tokens = [token for token in tokens if re.search("\w", token) is not None]
+    return " ".join(tokens)
+    # return product_name
+
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
@@ -54,5 +68,13 @@ with open(output_file, 'w') as output:
                       cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
                       # Replace newline chars with spaces so fastText doesn't complain
                       name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
+                      output.write("__label__%s\t%s\n" % (cat, transform_name(name)))
 
+# Only write categories having more than `min_products` products
+if min_products > 0:
+    print("Only writing categories having more than %d products" % min_products)
+    df = pd.read_csv(output_file, names=["category", "product_name"], sep="\t", engine="python")
+    categories = df.groupby("category").filter(lambda x: len(x) >= min_products)
+    filtered_file = output_file + "_" + str(min_products)
+    print("Writing filtered results to %s" % filtered_file)
+    categories.to_csv(filtered_file, sep="\t", index=None, header=None)
