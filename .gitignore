@@ -130,3 +130,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Unzipped data
+data/computer_products/*.xml
+data/pruned_products/*.xml
+week3/computer_products/*.xml
+week3/phone_products/*.xml
+
