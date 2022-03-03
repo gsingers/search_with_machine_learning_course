@@ -4,9 +4,35 @@ import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import re
+from nltk.stem import SnowballStemmer
+
+stemmer = SnowballStemmer(language='english')
+_re_spec = re.compile(r'([/#\\-\\.:])')
+
+def spec_add_spaces(t):
+    "Add spaces around . : - / \ and #"
+    return _re_spec.sub(r' \1 ', t)
+
+# Causes the resulting RE to match from m to n repetitions of the preceding RE, attempting to match as many repetitions as possible.
+_re_space = re.compile(' {2,}')
+
+def rm_useless_spaces(t):
+    "Remove multiple spaces"
+    return _re_space.sub(' ', t)
+
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+    "Transform product name by replacing punctuations, removing multiple spaces, stemming, lower casing"
+    name = product_name
+
+    # replace_punct
+    name = spec_add_spaces(name)
+    # replace multiple spaces
+    name = rm_useless_spaces(name)
+
+    # add stemmer
+    name = stemmer.stem(name)
+    return name.lower()
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
