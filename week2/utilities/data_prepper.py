@@ -188,6 +188,7 @@ class DataPrepper:
         return impressions_df, query_ids_map
 
     def log_features(self, train_data_df, terms_field="_id"):
+        #import ipdb; ipdb.set_trace()
         feature_frames = []
         query_gb = train_data_df.groupby("query")
         no_results = {}
@@ -260,17 +261,6 @@ class DataPrepper:
                         feature_results[feature_name] = [feature_value]
         else:
             print("No response from query")
-
-        '''
-        feature_results["salePrice"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["sku"].append(doc_id)  # ^^^
-            feature_results["salePrice"].append(rng.random())
-            feature_results["name_match"].append(rng.random())
-        '''
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
