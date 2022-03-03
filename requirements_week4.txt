@@ -5,7 +5,6 @@ ipython
 urljoin
 xgboost
 pandas
-numpy
 numba
 numexpr
 sklearn
