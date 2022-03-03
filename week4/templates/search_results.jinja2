@@ -6,9 +6,7 @@
 
 {% block content %}
   <div id="did-you-mean">DYM goes here</div>
-  {% if display_filters%}
-    <div id="applied-filters">{% include 'display_filters.jinja2' %}</div>
-  {% endif %}
+  <div id="applied-filters">{% include 'display_filters.jinja2' %}</div>
   {% if search_response and search_response.hits%}
     <div id="all-results">
       <div id="search-meta-container">Your query of {{ query }} returned {{ "{:,d}".format(search_response.hits.total.value) }} hits in {{ search_response.took }} ms.</div>
