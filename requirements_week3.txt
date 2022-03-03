@@ -13,3 +13,5 @@ graphviz
 matplotlib
 fasttext
 nltk
+jupyter
+jupyterlab
