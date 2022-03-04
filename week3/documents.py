@@ -25,6 +25,10 @@ def annotate():
             if the_text is not None and the_text.find("%{") == -1:
                 if item == "name":
                     if syns_model is not None:
-                        print("IMPLEMENT ME: call nearest_neighbors on your syn model and return it as `name_synonyms`")
+                        response = syns_model.predict(the_text)
+
+                        print(response)
+                        # print("IMPLEMENT ME: call nearest_neighbors on your syn model and return it as `name_synonyms`")
+                        
         return jsonify(response)
     abort(415)
