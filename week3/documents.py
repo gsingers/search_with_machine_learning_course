@@ -7,9 +7,13 @@ from flask import (
 )
 import fasttext
 import json
+import nltk
+
 
 bp = Blueprint('documents', __name__, url_prefix='/documents')
 
+nltk.download('punkt')
+    
 # Take in a JSON document and return a JSON document
 @bp.route('/annotate', methods=['POST'])
 def annotate():
@@ -21,10 +25,18 @@ def annotate():
         # We have a map of fields to annotate.  Do POS, NER on each of them
         sku = the_doc["sku"]
         for item in the_doc:
-            the_text = the_doc[item]
-            if the_text is not None and the_text.find("%{") == -1:
-                if item == "name":
-                    if syns_model is not None:
-                        print("IMPLEMENT ME: call nearest_neighbors on your syn model and return it as `name_synonyms`")
+            if item != "sku":
+                the_text = the_doc[item]
+
+                if syns_model and (item == 'name'):
+                    name_synonyms = []
+                    tokens = nltk.word_tokenize(the_text)
+                    for token in tokens:
+                        syns = syns_model.get_nearest_neighbors(token.strip().lower())
+                        name_synonyms += [ syn for score, syn in syns if score > 0.9 ]
+                    response['name_synonyms'] = list(set(name_synonyms))
+
+        print(json.dumps(response, indent=2))
+
         return jsonify(response)
     abort(415)
