@@ -1,11 +1,14 @@
 import argparse
 import os
 import random
+import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
+import pandas as pd
 
 def transform_name(product_name):
-    # IMPLEMENT
+    product_name = product_name.lower()
+    re.sub(r'[^\w]', ' ', product_name)
     return product_name
 
 # Directory for product data
@@ -34,6 +37,7 @@ if args.input:
 # IMPLEMENT:  Track the number of items in each category and only output if above the min
 min_products = args.min_products
 sample_rate = args.sample_rate
+pairs = []
 
 print("Writing results to %s" % output_file)
 with open(output_file, 'w') as output:
