@@ -14,7 +14,8 @@ def create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model
             "rescore_query": {
                 "sltr": {
                     "params": {
-                        "keywords": user_query
+                        "keywords": user_query,
+                        "click_prior_query": click_prior_query
                     },
                     "model": ltr_model_name,
                     # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
