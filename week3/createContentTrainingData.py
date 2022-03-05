@@ -3,10 +3,22 @@ import os
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
+import nltk
+nltk.download('punkt')
+
+ps = PorterStemmer()
 
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+ 
+    words = word_tokenize(product_name)
+    words = [ps.stem(w) for w in words]
+    
+    product_name_transformed = ' '.join(words) 
+
+    #print(f'{product_name} wurde zu {product_name_transformed}')   
+    return product_name_transformed
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
