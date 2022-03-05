@@ -130,3 +130,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+model_products.bin
+model_products.vec
+
+fil9.bin
+fil9.vec
+tar
+wget
+products.test
+products.train

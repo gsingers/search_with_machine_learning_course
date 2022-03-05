@@ -26,8 +26,10 @@ if args.input:
 sample_rate = args.sample_rate
 
 def transform_training_data(name):
-    # IMPLEMENT
-    return name.replace('\n', ' ')
+    product_name = product_name.lower()
+    re.sub(r'[^\w]', ' ', product_name)
+
+    return product_name.replace('\n', ' ')
 
 # Directory for product data
 
