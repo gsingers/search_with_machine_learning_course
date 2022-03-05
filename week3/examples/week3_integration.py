@@ -1,5 +1,11 @@
 # This file is meant to capture the commands we submitted in the iPython REPL, therefore it is not "organized" and structured like a proper Python file.
 
+#######################
+#
+# Setup work.  See below for main content.
+#
+#######################
+
 
 import json
 
@@ -131,6 +137,13 @@ docs = [
         "category": "childrens"}
 
 ]
+
+#######################
+#
+# Start Here: Main Class Content
+#
+#######################
+
 
 
 def get_entities(named_entities, entity_types):
