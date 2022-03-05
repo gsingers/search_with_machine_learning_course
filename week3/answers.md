@@ -17,6 +17,8 @@ R@1     0.656
 
 ` -lr 1.0  -epoch 25 -wordNgrams 2 -maxn 0 -minn 0`
 
+There was virtually no difference between 2 and 3 wordNgrams but setting wordNgrams to 1 reduced P@1 to 0.571
+
 ### c. How did you transform the product names?
 
 First, I removed the duplicate product names (there were over 20000 of them) using `sort | uniq | shuf > output.fasttext`.
@@ -44,6 +46,30 @@ Nintendo
 KitchenAid
 Toshiba
 
+#### products
+
+headboard
+keyboard
+macbook
+ipod
+monitor
+harmonica
+laptop
+amplifier
+
+#### attributes
+
+warm
+cold
+pink
+white
+blue
+black
+indoor 
+outdoor
+aluminium
+stealth
+invisible
 
 ### b. What fastText parameters did you use?
 
