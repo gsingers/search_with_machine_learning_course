@@ -37,7 +37,7 @@ def transform_training_data(name):
     n = n.replace('\n', ' ')
     n = n.lower()
     n = ''.join([c if c not in string.punctuation else ' ' for c in n])
-    n = ' '.join([stemmer.stem(w) for w in n.split()])
+    # n = ' '.join([stemmer.stem(w) for w in n.split()])
     return n
 
 
