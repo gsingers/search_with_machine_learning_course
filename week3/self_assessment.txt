@@ -1,0 +1,98 @@
+Week 3 self-assessment questions
+
+For classifying product names to categories:
+
+What precision (P@1) were you able to achieve?
+- I decided to end at [('P@1','0.742'), ('R@1','0.742')]
+
+What fastText parameters did you use?
+- [('epoch','50'), ('wordNgrams','2'), ('lr',2)]
+- I also tried autotuning the parameters and using one-vs-all loss, but to no avail
+
+How did you transform the product names?
+- Lowercase, remove punctuation and snowball stemming for English
+
+How did you prune infrequent category labels, and how did that affect your precision?
+- I set the min_products cutoff to 20
+- I pruned already at the file parsing stage, believing I would have more products per category that way, rather than using the fasttext parameter (minCountLabel)
+- This enabled me to reach above 0.7 in p@1 results
+
+How did you prune the category tree, and how did that affect your precision?
+- Assuming the order of categories, also indicates their levels, I added a parameter for level depth in the parsing
+- Setting level depth to 4 resulted in [(P@1, 0.631), (R@1, 0.631)]
+
+For deriving synonyms from content:
+
+What 20 tokens did you use for evaluation?
+['headphones','camera','charger','blender','laptop'] 
+brands (e.g., sony), 5 ['gopro','nikon', 'canon','hp','dell']
+models: ['inspiron','playstation','eos','pavilion','titan']
+attributes ['wireless','keyless','portable','pink','blue']
+
+What fastText parameters did you use?
+-minn 2 -maxn 5 -dim 50 -epoch 10 -minCount 25  -lr 0.1 -ws 7
+
+How did you transform the product names?
+- lowercasing, remove punctuation, remove (™,®), remove tab, remove line break
+
+What threshold score did you use?
+- I opted for 0.8
+
+What synonyms did you obtain for those tokens?
+{
+	"headphones": [
+		[0.944609522819519, "earbud"],
+		[0.9213335514068604, "overtheear"],
+		[0.8746722936630249, "headphone"]
+	],
+	"blender": [
+		[0.8923149704933167, "2speed"]
+	],
+	"gopro": [
+		[0.9235775470733643, "hero2"]
+	],
+	"nikon": [
+		[0.85035240650177, "coolpix"]
+	],
+	"canon": [
+		[0.8042299151420593, "eos"]
+	],
+	"hp": [
+		[0.8470460772514343, "pavilion"],
+		[0.8177759051322937, "hewlettpackard"]
+	],
+	"dellinspiron": [
+		[0.9574099779129028, "inspiron"],
+		[0.9387945532798767, "dell"],
+		[0.8602419495582581, "xps"]
+	],
+	"playstation": [
+		[0.9324628114700317, "xbox"],
+		[0.91485995054245, "360"],
+		[0.8790461421012878, "psp"],
+		[0.8454568386077881, "3"],
+		[0.8131011128425598, "guide"],
+		[0.8055028915405273, "ps2"]
+	],
+	"eos": [
+		[0.9394966959953308, "rebel"],
+		[0.8946411609649658, "55250mm"],
+		[0.8891108632087708, "xsi"],
+		[0.8661021590232849, "75300mm"],
+		[0.8643405437469482, "t1i"],
+		[0.8625037670135498, "t2i"],
+		[0.8549677133560181, "t3i"],
+		[0.8442001938819885, "151mp"],
+		[0.8378078937530518, "180mp"],
+		[0.8309788703918457, "50d"]
+	],
+	"pavilion": [
+		[0.8470460772514343, "hp"]
+	],
+	"pink": [
+		[0.8059180974960327, "purple"]
+	],
+	"blue": [
+		[0.805598258972168, "red"]
+	]
+}
