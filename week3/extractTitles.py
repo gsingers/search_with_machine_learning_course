@@ -2,6 +2,8 @@ import os
 import random
 import xml.etree.ElementTree as ET
 import argparse
+import re
+
 from pathlib import Path
 
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products'
@@ -26,10 +28,10 @@ if args.input:
 sample_rate = args.sample_rate
 
 def transform_training_data(name):
-    product_name = product_name.lower()
-    re.sub(r'[^\w]', ' ', product_name)
+    name = name.lower()
+    re.sub(r'[^\w]', ' ', name)
 
-    return product_name.replace('\n', ' ')
+    return name.replace('\n', ' ')
 
 # Directory for product data
 
