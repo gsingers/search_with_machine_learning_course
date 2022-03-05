@@ -13,3 +13,4 @@ graphviz
 matplotlib
 fasttext
 nltk
+black
