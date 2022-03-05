@@ -1,3 +1,9 @@
+data/phone_products/phone_products.xml.gz
+data/pruned_products/pruned_products_*.xml.gz
+
+data/computer_products/computer_products.xml
+data/pruned_products/pruned_products_*.xml
+
 data/phone_products/phone_products.xml
 output/
 logstash-*
