@@ -46,5 +46,5 @@ def annotate():
                             if item[0] > 0.80:
                                 response.append(item[1])
                         
-        return jsonify({"name_synonyms": response})
+        return jsonify({"name_synonyms": " ".join(response)})
     abort(415)

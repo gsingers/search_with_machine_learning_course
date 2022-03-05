@@ -77,7 +77,7 @@ input {
       }
 
       http{
-        url => "http://localhost:5000/documents/annotate"
+        url => "http://localhost:3000/documents/annotate"
         body => {
             "name" => "%{name}"
             "shortDescription" => "%{shortDescription}"
