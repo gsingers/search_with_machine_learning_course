@@ -2,11 +2,20 @@ import argparse
 import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
+import string
+import random
+from nltk.stem import SnowballStemmer
+from collections import defaultdict
 # Directory for product data
 
+translator = str.maketrans(string.punctuation, ' '*len(string.punctuation)) #map punctuation to space
+stemmer = SnowballStemmer("english")
+
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+    cleaned = product_name.lower()
+    cleaned = cleaned.translate(translator)
+    cleaned = stemmer.stem(cleaned)
+    return cleaned
 
 directory = r'/workspace/datasets/product_data/products/'
 parser = argparse.ArgumentParser(description='Process some integers.')
@@ -39,8 +48,11 @@ if args.input:
 min_product_names = args.min_product_names
 max_product_names = args.max_product_names
 sample_rate = args.sample_rate
+max_input = args.max_input
 
 total_input = 0
+cat_freqs = defaultdict(int)
+out_dict = defaultdict(list)
 print("Writing results to %s" % output_file)
 with open(output_file, 'w') as output:
     for filename in os.listdir(directory):
@@ -63,8 +75,15 @@ with open(output_file, 'w') as output:
                       cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
                       # Replace newline chars with spaces so fastText doesn't complain
                       name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
+                      #output.write("__label__%s %s\n" % (cat, transform_name(name)))
+                      out_dict[cat].append(transform_name(name))
+                      cat_freqs[cat] += 1
                 total_input = total_input + 1
                 # Terminate early if max_input is specified and reached.
                 if total_input == max_input:
                     break
+    
+    for cat, items in out_dict.items():
+        if cat_freqs[cat] >= min_product_names and cat_freqs[cat] <= max_product_names:
+            for name in items:
+                output.write("__label__%s %s\n" % (cat, name))
