@@ -233,6 +233,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
             }
         })
 
+
     query_obj = {
         'size': 10,
         "sort": {

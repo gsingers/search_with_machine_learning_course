@@ -1,3 +1,4 @@
+
 image:
   file: .gitpod.Dockerfile
 tasks:
@@ -24,3 +25,6 @@ ports:
     onOpen: ignore
   - port: 9602
     onOpen: ignore
+vscode:
+  extensions:
+    - k--kato.intellij-idea-keybindings
