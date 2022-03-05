@@ -14,16 +14,14 @@ class DataPrepper:
     opensearch = None
     index_name = "bbuy_products"
     ltr_store_name = "week2"
-    feature_names = []
+
 
     def __init__(self, opensearch_client, featureset_name="bbuy_product_featureset", index_name="bbuy_products",
-                 ltr_store_name="week2", feature_names=None) -> None:
+                 ltr_store_name="week2") -> None:
         self.opensearch = opensearch_client
         self.featureset_name = featureset_name
         self.index_name = index_name
         self.ltr_store_name = ltr_store_name
-        if feature_names is not None:
-            self.feature_names = feature_names
 
     def __get_query_id(self, query, query_ids_map, query_counter):
         qid = query_ids_map.get(query, None)
