@@ -22,10 +22,10 @@ R@1     0.656
 First, I removed the duplicate product names (there were over 20000 of them) using `sort | uniq | shuf > output.fasttext`.
 Then I tokenized and stemmed them (the stemmer also lowercased), using NLTK and the Porter Stemmer:
 
-```    words = word_tokenize(product_name)
+       words = word_tokenize(product_name)
        words = [ps.stem(w) for w in words]
     
-       product_name_transformed = ' '.join(words) ```
+       product_name_transformed = ' '.join(words) 
 
 Also, I used 20000 product names instead of 10000 in the training set. 
 
