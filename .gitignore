@@ -140,3 +140,4 @@ tar
 wget
 products.test
 products.train
+model_titles.bin
