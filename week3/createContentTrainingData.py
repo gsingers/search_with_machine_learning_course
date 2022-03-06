@@ -75,4 +75,11 @@ with open(output_file, 'w') as output:
                       df = pd.concat([df, dfi], ignore_index=True, axis=0)
                       #output.write("__label__%s %s\n" % (cat, transform_name(name)))
 
-print(df)
+# filter out
+print(f"Filtering out by category frequency and min_products={min_products}")
+filtered = df.groupby("category").filter(lambda x: len(x) > min_products)
+print(f"Saving to output file {output_file}")
+for i, row in filtered.iterrows():
+    cat = row["category"]
+    name = row["product"]
+    output.write("__label__%s %s\n" % (cat, transform_name(name)))
