@@ -6,15 +6,20 @@ from pathlib import Path
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 import nltk
-nltk.download('punkt')
+import re
 
-ps = PorterStemmer()
+
+#nltk.download('punkt')
+#ps = PorterStemmer()
+
 
 def transform_name(product_name):
- 
-    words = word_tokenize(product_name)
-    words = [ps.stem(w) for w in words]
     
+    product_name_transformed = product_name.lower()
+    product_name_transformed =  re.sub("[^a-zA-Z]+", " ", product_name_transformed)
+    
+    words = product_name_transformed.split()
+    words = [w[0:-1] if w.endswith('s') else w for w in words]
     product_name_transformed = ' '.join(words) 
 
     #print(f'{product_name} wurde zu {product_name_transformed}')   

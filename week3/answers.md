@@ -17,7 +17,7 @@ R@1     0.656
 
 ` -lr 1.0  -epoch 25 -wordNgrams 2 -maxn 0 -minn 0`
 
-There was virtually no difference between 2 and 3 wordNgrams but setting wordNgrams to 1 reduced P@1 to 0.571
+There was virtually no difference between 1, 2 and 3 wordNgrams.
 
 ### c. How did you transform the product names?
 
@@ -29,6 +29,9 @@ Then I tokenized and stemmed them (the stemmer also lowercased), using NLTK and 
     
        product_name_transformed = ' '.join(words) 
 
+In a second try, I did not stem, just lower case, remove numbers and punctuation and any trailing s.
+I got 0.66 P1 in this try, so the Porter Stemmer either is not very good or stemming does not help much with this task. 
+
 Also, I used 20000 product names instead of 10000 in the training set. 
 
 
@@ -38,38 +41,58 @@ Also, I used 20000 product names instead of 10000 in the training set.
 
 ### a. What 20 tokens did you use for evaluation?
 
-#### brands
-
-Windows
-Pioneer
-Nintendo
-KitchenAid
-Toshiba
-
 #### products
 
 headboard
+
+camera
+
+player
+
 keyboard
+
 macbook
+
 ipod
+
 monitor
+
 harmonica
+
 laptop
+
 amplifier
 
 #### attributes
 
 warm
+
 cold
+
 pink
-white
-blue
-black
+
 indoor 
+
 outdoor
+
 aluminium
-stealth
+
 invisible
+
+extreme 
+
+#### brands
+
+Microsoft 
+
+Pioneer
+
+KitchenAid
+
+Toshiba
+
+Sennheiser 
+
 
 ### b. What fastText parameters did you use?
 
