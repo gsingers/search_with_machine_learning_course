@@ -56,6 +56,10 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
+def get_query_category(user_query, query_class_model):
+    print("IMPLEMENT ME: get_query_category")
+    return None
+
 
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
@@ -131,6 +135,10 @@ def query():
     else:
         query_obj = qu.create_query("*", "", [], sort, sortDir, size=100)
 
+    query_class_model = current_app.config["query_model"]
+    query_category = get_query_category(user_query, query_class_model)
+    if query_category is not None:
+        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
     #print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
@@ -139,7 +147,7 @@ def query():
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
-                               sort=sort, sortDir=sortDir, model=model, explain=explain)
+                               sort=sort, sortDir=sortDir, model=model, explain=explain, query_category=query_category)
     else:
         redirect(url_for("index"))
 

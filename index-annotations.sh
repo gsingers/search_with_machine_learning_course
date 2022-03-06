@@ -47,5 +47,5 @@ echo "Running Logstash found in $LOGSTASH_HOME"
 cd "$LOGSTASH_HOME"
 echo "Launching Logstash indexing in the background via nohup.  See product_annotations_indexing.log for log output"
 echo " Cleaning up any old indexing information by deleting products_data.  If this is the first time you are running this, you might see an error."
-rm -rf "$LOGSTASH_HOME/products_annotations"
+rm -rf "$LOGSTASH_HOME/products_annotations_data"
 nohup bin/logstash --pipeline.workers 7 --path.data ./products_annotations_data -f "$PRODUCTS_LOGSTASH_FILE" > "$LOGS_DIR/product_annotations_indexing.log" &
