@@ -3,10 +3,8 @@ import os
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
-
-def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+import pandas as pd
+from nltk.stem.snowball import EnglishStemmer
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
@@ -19,8 +17,9 @@ general.add_argument("--output", default="/workspace/datasets/fasttext/output.fa
 # Consuming all of the product data will take over an hour! But we still want to be able to obtain a representative sample.
 general.add_argument("--sample_rate", default=1.0, type=float, help="The rate at which to sample input (default is 1.0)")
 
-# IMPLEMENT: Setting min_products removes infrequent categories and makes the classifier's task easier.
 general.add_argument("--min_products", default=0, type=int, help="The minimum number of products per category (default is 0).")
+
+general.add_argument("--max_category_depth", default=0, type=int, help="Categories will be taken at most this distance from the root (default is 0 which means no limit).")
 
 args = parser.parse_args()
 output_file = args.output
@@ -31,28 +30,64 @@ if os.path.isdir(output_dir) == False:
 
 if args.input:
     directory = args.input
-# IMPLEMENT:  Track the number of items in each category and only output if above the min
+
 min_products = args.min_products
+max_cat_depth = args.max_category_depth
 sample_rate = args.sample_rate
 
-print("Writing results to %s" % output_file)
-with open(output_file, 'w') as output:
-    for filename in os.listdir(directory):
-        if filename.endswith(".xml"):
-            print("Processing %s" % filename)
-            f = os.path.join(directory, filename)
-            tree = ET.parse(f)
-            root = tree.getroot()
-            for child in root:
-                if random.random() > sample_rate:
-                    continue
-                # Check to make sure category name is valid
-                if (child.find('name') is not None and child.find('name').text is not None and
-                    child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
-                    child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None):
-                      # Choose last element in categoryPath as the leaf categoryId
-                      cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
-                      # Replace newline chars with spaces so fastText doesn't complain
-                      name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
+stemmer = EnglishStemmer()
 
+print("Writing results to %s" % output_file)
+
+def transform_name(product_name):
+    product_name = stemmer.stem(product_name)
+    return product_name
+
+def parse_child(child):
+    name = child.find('name')
+    if name is not None and name.text is not None:
+        name = name.text.replace('\n', ' ')
+    else:
+        return
+
+    cat_path = child.find('categoryPath')
+    if cat_path is None:
+        return
+
+    cat_path_length = len(cat_path)
+    if max_cat_depth > 0:
+        cat_path_length = min(cat_path_length, max_cat_depth)
+
+    if cat_path_length > 0 and cat_path[cat_path_length - 1][0].text is not None:
+        cat = cat_path[cat_path_length - 1][0].text
+    else:
+        return
+    
+    return cat, transform_name(name)
+
+def parse_file(filename):
+    print("Processing %s" % filename)
+    f = os.path.join(directory, filename)
+    tree = ET.parse(f)
+    root = tree.getroot()
+    return [parse_child(child) for child in root if random.random() <= sample_rate]
+
+def parse_all_files():
+    rows = sum([parse_file(filename) for filename in os.listdir(directory) if filename.endswith(".xml")], [])
+    return pd.DataFrame(rows, columns=['category', 'name']).sample(frac=1).reset_index(drop=True)
+
+def remove_small_categories(df):
+    cat_counts = df.groupby('category')['name'].count()
+    significant_cats = cat_counts[cat_counts >= min_products].index
+    return df[df['category'].isin(significant_cats)]
+
+def write_to_output(df):
+    with open(output_file, 'w') as output:
+        for category, name in zip(df['category'], df['name']):
+            output.write(f"__label__{category} {name}\n")
+
+df = parse_all_files()
+df = remove_small_categories(df)
+df.to_csv('df.csv', index=False)
+
+write_to_output(df)
