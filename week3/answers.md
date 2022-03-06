@@ -34,71 +34,308 @@ I got 0.66 P1 in this try, so the Porter Stemmer either is not very good or stem
 
 Also, I used 20000 product names instead of 10000 in the training set. 
 
-
 ### d. How did you prune infrequent category labels, and how did that affect your precision?
 
 ## 2. For deriving synonyms from content:
 
 ### a. What 20 tokens did you use for evaluation?
 
-#### products
-
-headboard
-
-camera
-
-player
-
-keyboard
-
-macbook
-
-ipod
-
-monitor
-
-harmonica
-
-laptop
-
-amplifier
-
-#### attributes
-
-warm
-
-cold
-
-pink
-
-indoor 
-
-outdoor
-
-aluminium
-
-invisible
-
-extreme 
-
-#### brands
-
-Microsoft 
-
-Pioneer
-
-KitchenAid
-
-Toshiba
-
-Sennheiser 
-
+See Evaluation.
 
 ### b. What fastText parameters did you use?
 
+lr=0.2, epoch=40, minCount=50, verbose=2, minn=0, maxn=0, wordNgrams=2, dim=200, ws=3, loss='ns
+The sample rate was 0.2.
+
 ### c. How did you transform the product names?
+
+Similar to the first task - lower case, remove numbers and punctuation- but without removing trailing s. 
 
 ### d. What threshold score did you use?
 
+0.25
+
 ### e. What synonyms did you obtain for those tokens?
 
+#### camera
+ 
+megapixel
+cameras
+zoom
+nikon
+lens
+slr
+digital
+rebel
+dslr
+eos
+
+
+#### player
+ 
+receiver
+dvd
+deck
+recorder
+ray
+blu
+definition
+hdtv
+radio
+disc
+
+
+#### printer
+ 
+copier
+brother
+inkjet
+scanner
+cartridge
+epson
+photo
+gateway
+desktop
+color
+
+
+#### mouse
+ 
+optical
+savings
+notebook
+backpack
+targus
+texas
+laptop
+netbook
+sleeve
+call
+
+
+#### dvd
+ 
+disc
+ray
+player
+blu
+recorder
+deck
+insignia
+definition
+widescreen
+video
+
+
+#### camcorder
+ 
+tripod
+definition
+powershot
+jvc
+camera
+easyshare
+slr
+kodak
+rebel
+extra
+
+
+#### macbook
+ 
+air
+targus
+htc
+ipad
+laptop
+iphone
+generation
+toshiba
+acer
+laptops
+
+
+#### ipod
+ 
+apple
+radio
+nano
+generation
+earbuds
+iphone
+ipad
+players
+griffin
+earbud
+
+
+#### screen
+ 
+protector
+touch
+zagg
+widescreen
+invisibleshield
+player
+earbuds
+ipod
+griffin
+lcd
+
+
+#### memory
+ 
+drive
+amd
+intel
+megapixel
+hard
+camcorder
+laptop
+duo
+card
+processor
+
+
+#### laptop
+ 
+notebook
+netbook
+core
+processor
+savings
+desktop
+amd
+intel
+computer
+atom
+
+
+#### amplifier
+ 
+kicker
+hdtv
+mosfet
+radio
+class
+bass
+watt
+pedal
+scosche
+signature
+
+
+#### speaker
+ 
+speakers
+pair
+audio
+radio
+each
+sound
+shelf
+subwoofer
+dock
+yamaha
+
+
+#### headphone
+ 
+
+
+#### green
+ 
+red
+blue
+pink
+purple
+orange
+silver
+audioquest
+san
+skullcandy
+generation
+
+
+#### blue
+ 
+red
+pink
+silver
+green
+orange
+purple
+gray
+case
+brown
+white
+
+
+#### pink
+ 
+blue
+purple
+green
+red
+skin
+case
+jacket
+silver
+generation
+gray
+
+
+#### nintendo
+ 
+wii
+xbox
+playstation
+gamecube
+psp
+wars
+advance
+boy
+bundle
+game
+
+
+#### pioneer
+ 
+kenwood
+mosfet
+kicker
+jvc
+audio
+radio
+receiver
+ready
+deck
+marine
+
+
+#### oven
+ 
+convection
+cooktop
+freestanding
+self
+range
+microwave
+cleaning
+slide
+stainless
+steel
+
+
+#### toshiba
+ 
+acer
+compaq
+inspiron
+dell
+pavilion
+samsung
+lenovo
+asus
+gateway
+sony

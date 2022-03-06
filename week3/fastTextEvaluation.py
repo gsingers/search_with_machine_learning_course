@@ -29,7 +29,7 @@ threshold = 0.25
 
 for token in test_tokens:
     neighbours = model.get_nearest_neighbors(token)
-    print(f'### {token}')
+    print(f'#### {token}')
     print(' ')
     for n in neighbours:
         if n[0] > threshold:
