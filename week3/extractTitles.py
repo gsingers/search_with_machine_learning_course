@@ -3,6 +3,9 @@ import random
 import xml.etree.ElementTree as ET
 import argparse
 from pathlib import Path
+from nltk.stem import SnowballStemmer
+from nltk import sent_tokenize, word_tokenize
+import re
 
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products'
 parser = argparse.ArgumentParser(description='Process some integers.')
@@ -25,9 +28,17 @@ if args.input:
 
 sample_rate = args.sample_rate
 
+snowball = SnowballStemmer("english") 
+
 def transform_training_data(name):
-    # IMPLEMENT
-    return name.replace('\n', ' ')
+    # Following http://agailloty.rbind.io/project/nlp_clean-text/
+    tokens = word_tokenize(name)
+    tokens = [re.sub(r'[^a-zA-Z0-9]', '', word) for word in tokens]
+    tokens = [word.lower() for word in tokens]
+    # stemming creates a lot of garbage related words
+    # tokens = [snowball.stem(word) for word in tokens]
+    transformed_product_name = " ".join(tokens)
+    return transformed_product_name
 
 # Directory for product data
 

@@ -3,10 +3,19 @@ import os
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from nltk.stem import SnowballStemmer
+from nltk import sent_tokenize, word_tokenize
+
+snowball = SnowballStemmer("english") 
 
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+    # Following http://agailloty.rbind.io/project/nlp_clean-text/
+    tokens = word_tokenize(product_name)
+    tokens = [word for word in tokens if word.isalpha()]
+    tokens = [word.lower() for word in tokens]
+    tokens = [snowball.stem(word) for word in tokens]
+    transformed_product_name = " ".join(tokens)
+    return transformed_product_name
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
@@ -31,7 +40,9 @@ if os.path.isdir(output_dir) == False:
 
 if args.input:
     directory = args.input
-# IMPLEMENT:  Track the number of items in each category and only output if above the min
+# Track the number of items in each category and only output if above the min
+registry = {}
+categories_in_output = 0
 min_products = args.min_products
 sample_rate = args.sample_rate
 
@@ -54,5 +65,19 @@ with open(output_file, 'w') as output:
                       cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
                       # Replace newline chars with spaces so fastText doesn't complain
                       name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
 
+                      # Calculate the counts
+                      count_by_category = registry.get(cat)
+                      if count_by_category is None:
+                          registry[cat] = 1
+                      else:
+                          registry[cat] = count_by_category + 1
+                          if count_by_category == min_products:
+                              categories_in_output += 1
+
+                      # Don't output records that have less or equal than min_products 
+                      if registry[cat] > min_products:
+                          output.write("__label__%s %s\n" % (cat, transform_name(name)))
+
+print("Count of categories: ", len(registry.keys()))
+print("Count of categories in output: ", categories_in_output)

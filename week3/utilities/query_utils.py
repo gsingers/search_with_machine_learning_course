@@ -1,3 +1,11 @@
+from flask import (
+    Blueprint, request, abort, current_app, jsonify
+)
+import fasttext
+import nltk
+import re
+
+
 import math
 # some helpful tools for dealing with queries
 def create_stats_query(aggs, extended=True):
@@ -39,10 +47,23 @@ def create_prior_queries(doc_ids, doc_id_weights, query_times_seen): # total imp
                 pass # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query
 
+THRESHOLD = 0.95
 
+def expand_user_query_with_synonyms(user_query):
+    syns_model = current_app.config.get("syns_model", None)
+    syns = set()
+    tokens = nltk.word_tokenize(user_query)
+    for token in tokens:
+        # Do not stem here, as stemmed tokens would fetch various words
+        cleaned_token = re.sub(r'[^a-zA-Z0-9]', '', token.strip().lower())
+        syns.update([syn for score, syn in syns_model.get_nearest_neighbors(cleaned_token) if score > THRESHOLD])
+    final_syns = list(syns)
+    synonyms_query = " ".join(final_syns)
+    # print(">>>>>>>>>>", user_query, synonyms_query)
+    return synonyms_query
 
 def create_simple_baseline(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, include_aggs=True, highlight=True, source=None):
-
+    synonyms = expand_user_query_with_synonyms(user_query)
     query_obj = {
         'size': size,
         "sort":[
@@ -55,6 +76,16 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
 
                 ],
                 "should":[ #
+                    { # lets see what we can get with synonyms
+                      "match": {
+                            "name_synonyms": {
+                                "query": synonyms,
+                                "fuzziness": "0",
+                                "prefix_length": 2, 
+                                "boost": 0.0001
+                            }
+                       }
+                    },
                     {
                       "match": {
                             "name": {
@@ -81,7 +112,7 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                             "slop": "6",
                             "minimum_should_match": "2<75%",
                             "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
-                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath", "name_analogies"]
+                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath", "name_synonyms"]
                        }
                     },
                     {
@@ -100,7 +131,6 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                        }
                     }
                 ],
-                "minimum_should_match": 1,
                 "filter": filters  #
             }
 
@@ -117,10 +147,9 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
     if user_query == "*" or user_query == "#":
         #replace the bool
         try:
-            query_obj["query"].pop("bool")
             query_obj["query"] = {"match_all": {}}
         except:
-            pass
+            print("Couldn't replace query for *")
     if highlight:
         query_obj["highlight"] = {
             "fields": {
@@ -177,7 +206,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                     "slop": "6",
                                     "minimum_should_match": "2<75%",
                                     "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
-                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath", "name_analogies"]
+                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath", "name_synonyms"]
                                }
                             },
                             {
@@ -196,7 +225,6 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                }
                             }
                         ],
-                        "minimum_should_match": 1,
                         "filter": filters  #
                     }
                 },
