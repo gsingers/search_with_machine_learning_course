@@ -4,10 +4,28 @@ import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import pandas as pandas
+from nltk import word_tokenize
+from nltk.downloader import Downloader
+from nltk.stem import SnowballStemmer
+
+
+STEMMER_DEPENDENCY = "punkt"
+if not Downloader().is_installed(STEMMER_DEPENDENCY):
+    Downloader().download(STEMMER_DEPENDENCY)
+    assert Downloader().is_installed(STEMMER_DEPENDENCY)
+
+stemmer = SnowballStemmer("english")
+
 
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+    # DONE: IMPLEMENT
+    # return product_name
+    # Remove punctuation, numbers, etc., lowercase, and stem tokens
+    tokens = word_tokenize(product_name)
+    tokens = (stemmer.stem(word.lower()) for word in tokens if word.isalpha())
+    product_name_normalized = " ".join(tokens)
+    return product_name_normalized
 
 
 # Directory for product data
