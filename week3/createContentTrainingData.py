@@ -4,13 +4,23 @@ import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
 import re
+from nltk.stem import SnowballStemmer
+import pandas as pd
+
+stemmer = SnowballStemmer("english")
 
 def transform_name(product_name):
     # replace punctuation with spaces
     # credit: https://stackoverflow.com/a/34922745/158328
-    clean = re.sub(r"[(),.;@#?!&$]+\ *", " ", product_name)
+    clean = re.sub(r"[(),:.;@#?!&$/\"-]+\ *", " ", product_name)
+    clean = re.sub(r"[ ]+", " ", clean)
+    clean_lc = clean.lower()
+    stemmed = " ".join([stemmer.stem(word) for word in clean_lc.split()])
+    if stemmed == "":
+        print("Empty stemmed sequence detected")
+        exit(1)
     # lowercase
-    return clean.lower()
+    return stemmed
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
@@ -39,6 +49,8 @@ if args.input:
 min_products = args.min_products
 sample_rate = args.sample_rate
 
+df = pd.DataFrame(columns=['category', 'product'])
+
 print("Writing results to %s" % output_file)
 with open(output_file, 'w') as output:
     for filename in os.listdir(directory):
@@ -58,5 +70,9 @@ with open(output_file, 'w') as output:
                       cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
                       # Replace newline chars with spaces so fastText doesn't complain
                       name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
+                      #df = df.append({'category': cat, 'product': name}, ignore_index=True)
+                      dfi = pd.DataFrame({'category': [cat], 'product': [name]})
+                      df = pd.concat([df, dfi], ignore_index=True, axis=0)
+                      #output.write("__label__%s %s\n" % (cat, transform_name(name)))
 
+print(df)
