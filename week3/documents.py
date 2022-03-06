@@ -9,18 +9,24 @@ import fasttext
 import json
 
 bp = Blueprint('documents', __name__, url_prefix='/documents')
+
+def get_synonyms(name):
+    response = []
+    syns_model = current_app.config.get("syns_model", None) # see if we have a synonyms/analogies model
+
+    for token in name.lower().split(' '):
+        predictions = syns_model.get_nearest_neighbors(token)
+        for item in predictions:
+            if item[0] > 0.85:
+                response.append(item[1])
+    
+    return {"name_synonyms": response}
+
 @bp.route('/annotate_test', methods=['GET'])
 def annotate_get():
     args = request.args
-    syns_model = current_app.config.get("syns_model", None) # see if we have a synonyms/analogies model
-    predictions = syns_model.get_nearest_neighbors(args.get("name"))
-    response = []
 
-    for item in predictions:
-        if item[0] > 0.80:
-            response.append(item[1])
-                            
-    return jsonify({"named_predictions": response})
+    return jsonify(get_synonyms(args.get("name")))
 
 
 # Take in a JSON document and return a JSON document
@@ -39,11 +45,11 @@ def annotate():
             if the_text is not None and the_text.find("%{") == -1:
                 if item == "name":
                     if syns_model is not None:
-                        predictions = syns_model.get_nearest_neighbors(the_text)
+                        predictions = syns_model.get_nearest_neighbors(the_text.lower())
                         response = []
 
                         for item in predictions:
-                            if item[0] > 0.80:
+                            if item[0] > 0.85:
                                 response.append(item[1])
                         
         return jsonify({"name_synonyms": " ".join(response)})
