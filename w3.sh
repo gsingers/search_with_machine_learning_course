@@ -1,3 +1,4 @@
+# Level 1
 # Create the data files
 python week3/createContentTrainingData.py --output /workspace/datasets/categories/output.fasttext --min_products=5
 
@@ -36,4 +37,41 @@ tail -n -10000 /workspace/datasets/categories/output.fasttext > week3.test
 # after applying min_products 5 the product count is 106784
 
 
+## Level 2
+
+python week3/extractTitles.py
+
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/title_model
+
+# 20 tokens for evaluation
+## product types
+headphones
+laptops
+keyboards
+mouses
+monitors
+## brands
+apple
+sony
+samsung
+kindle
+lg
+## Models
+thinkpad
+alpha
+macbook
+zenbook
+ipad
+## attributes
+black
+powerfull
+easy
+convenient
+leather
+
+
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/title_model -minCount 20 -lr 1.0 -epoch 1 -wordNgrams 2
+
+
+# Level 3
 
