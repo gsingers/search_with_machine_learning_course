@@ -16,7 +16,6 @@ test_tokens = [
 'laptop',
 'amplifier',
 'speaker',
-'headphone',
 'green',
 'blue',
 'pink',
@@ -33,5 +32,6 @@ for token in test_tokens:
     print(' ')
     for n in neighbours:
         if n[0] > threshold:
-            print(n[1])
+            print(n[1] + '\n')
+            
     print('\n')
