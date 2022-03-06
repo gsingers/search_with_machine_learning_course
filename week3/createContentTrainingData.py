@@ -4,8 +4,24 @@ import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-def transform_name(product_name):
+import time
+import numpy as np
+import pandas as pd
+import string
+from nltk.stem import SnowballStemmer
+stemmer = SnowballStemmer("english")
+
+def transform_name(product_name, lowercase=False, stem=False, remove_punctuation=False):
     # IMPLEMENT
+    if lowercase:
+        product_name=product_name.lower()
+    
+    if remove_punctuation:
+        product_name=product_name.translate(str.maketrans('', '', string.punctuation))
+    
+    if stem:
+        product_name=" ".join((stemmer.stem(w) for w in product_name.split()))
+    
     return product_name
 
 # Directory for product data
@@ -35,8 +51,12 @@ if args.input:
 min_products = args.min_products
 sample_rate = args.sample_rate
 
+start_time = time.time()
+
+tempfile="temp_output_file"
+
 print("Writing results to %s" % output_file)
-with open(output_file, 'w') as output:
+with open(tempfile, 'w') as temp_output:
     for filename in os.listdir(directory):
         if filename.endswith(".xml"):
             print("Processing %s" % filename)
@@ -54,5 +74,23 @@ with open(output_file, 'w') as output:
                       cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
                       # Replace newline chars with spaces so fastText doesn't complain
                       name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
+                      temp_output.write("__label__%s @# %s\n" % (cat, transform_name(name, True, True, True)))
 
+if min_products > 0:
+    #read from csv to pandas df
+    df=pd.read_csv("temp_output_file", delimiter="@#", names=('category', 'product'))
+    print("Removing categories with less than "+str(min_products) +"products")
+    df_g = df.groupby('category')
+    df_filtered = df_g.filter(lambda x: x['product'].count() > min_products)
+    print("{} products removed".format(len(df)-len(df_filtered)))
+    df = df_filtered
+
+    numpy_array=df.to_numpy()
+    np.savetxt(output_file, numpy_array,  fmt='%s')
+    
+    os.remove("temp_output_file")
+else:
+    os.rename("temp_output_file", output_file)
+
+print("--- %s seconds ---" % (time.time() - start_time)) 
+    
