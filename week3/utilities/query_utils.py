@@ -39,10 +39,12 @@ def create_prior_queries(doc_ids, doc_id_weights, query_times_seen): # total imp
                 pass # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query
 
-
+def expand_user_query_with_synonyms(user_query):
+    # TODO: IMPLEMENT ME
+    return user_query
 
 def create_simple_baseline(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, include_aggs=True, highlight=True, source=None):
-
+    user_query = expand_user_query_with_synonyms(user_query)
     query_obj = {
         'size': size,
         "sort":[

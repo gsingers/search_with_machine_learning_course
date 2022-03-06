@@ -75,3 +75,16 @@ leather
 
 # Level 3
 
+python week3/extractTitles.py --input /workspace/search_with_machine_learning_course/data/phone_products --sample_rate 1.0
+
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/phone_model -epoch 25 -minCount 1
+
+# play with vectors
+~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/phone_model.bin
+
+## Start flask app
+export SYNONYMS_MODEL_LOC=/workspace/datasets/fasttext/phone_model.bin
+flask run --port 3000
+
+## Delete logstash offsets
+rm /workspace/logstash/logstash-7.13.2/products_annotations_data/plugins/inputs/file/.sincedb_*
