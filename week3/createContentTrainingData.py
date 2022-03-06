@@ -3,10 +3,18 @@ import os
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
+import nltk
+import re
+import string
 
 def transform_name(product_name):
     # IMPLEMENT
-    return product_name
+    product_name = product_name.translate ({ord(c): " " for c in "®™!@#$%^&*()[]{};:,./<>?\|`~-=_+"})
+    tokens = nltk.word_tokenize(product_name)
+    new_words = [w.lower() for w in tokens if w.isalnum()]
+    print (new_words)
+    normalized = ' '.join([token.lower() for token in new_words])
+    return normalized
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
@@ -51,7 +59,7 @@ with open(output_file, 'w') as output:
                     child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
                     child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None):
                       # Choose last element in categoryPath as the leaf categoryId
-                      cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
+                      cat = child.find('categoryPath')[len(child.find('categoryPath')) - 3][0].text
                       # Replace newline chars with spaces so fastText doesn't complain
                       name = child.find('name').text.replace('\n', ' ')
                       output.write("__label__%s %s\n" % (cat, transform_name(name)))

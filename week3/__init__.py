@@ -23,7 +23,7 @@ def create_app(test_config=None):
         else:
             print("No prior clicks to load.  This may effect quality. Run ltr-end-to-end.sh per week 2 if you want")
         #print(app.config)
-        SYNS_MODEL_LOC = os.environ.get("SYNONYMS_MODEL_LOC", "/workspace/datasets/fasttext/syns_model.bin")
+        SYNS_MODEL_LOC = os.environ.get("SYNONYMS_MODEL_LOC", "/workspace/datasets/fasttext/phone_model.bin")
         print("SYNS_MODEL_LOC: %s" % SYNS_MODEL_LOC)
         if SYNS_MODEL_LOC and os.path.isfile(SYNS_MODEL_LOC):
             app.config["syns_model"] = fasttext.load_model(SYNS_MODEL_LOC)
