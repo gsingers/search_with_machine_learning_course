@@ -1,4 +1,5 @@
-# Level 1
+# Level 1 Classification
+
 # Create the data files
 python week3/createContentTrainingData.py --output /workspace/datasets/categories/output.fasttext --min_products=5
 
@@ -7,7 +8,7 @@ tail -n -10000 /workspace/datasets/categories/output.fasttext > week3.test
 
 # TODO: normalize the text similarly to the reading material
 
-~/fastText-0.9.2/fasttext supervised -input week3.train -output your_model -lr 1.0 -epoch 1 -wordNgrams 2 -thread 32
+~/fastText-0.9.2/fasttext supervised -input week3.train -output your_model -lr 1.0 -epoch 2 -wordNgrams 2 -thread 32
 # This one is slow, but we'll use it later
 # ~/fastText-0.9.2/fasttext supervised -input week3.train -output your_model -lr 1.0 -epoch 25 -wordNgrams 2 -thread 32
 
