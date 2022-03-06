@@ -201,7 +201,30 @@ P@10    0.128
 R@10    0.974
 
 
-## max products - categories balance
+
+python week3/createContentTrainingData.py --min_products=50 --cat_depth=4
+
+> categories ignored = 34
+> categories written = 92
+
+fasttext supervised -input /workspace/datasets/fasttext/output.fasttext.train -output prod_cat -loss hs -lr 1 -epoch 20 -wordNgrams 2
+fasttext test prod_cat.bin /workspace/datasets/fasttext/output.fasttext.test
+
+N       10000
+P@1     0.872
+R@1     0.872
+
+N       10000
+P@5     0.228
+R@5     0.977
+
+N       10000
+P@10    0.159
+R@10    0.985
+
+fasttext supervised -input /workspace/datasets/fasttext/output.fasttext.train -output prod_cat -loss hs -lr 0.1 -epoch 50 -wordNgrams 2
+
+## max products - categories balanced
 
 python week3/createContentTrainingData.py --min_products=50 --max_products=50 
 
@@ -427,3 +450,159 @@ attribute
  mp3 playback                    ~> mp3             (75.06%)    player          (67.47%)        play            (65.30%) 
  24                              ~> tall            (84.54%)    tub             (82.35%)        dishwasher      (81.05%)
 ```
+
+
+## Full sample
+
+python week3/extractTitles.py --sample_rate=1
+
+python week3/synonyms.py --epoch=25 --minCount=50 --model=skipgram
+
+```
+brands 
+ appl                            ~> apple           (84.95%)    iphone          (70.51%)        ipod            (70.39%) 
+ soni                            ~> sonic           (83.59%)    toothbrush      (51.59%)        sonax           (50.86%) 
+ ubisoft                         ~> soft            (64.71%)    microsoft       (63.01%)        mitsubishi      (58.60%) 
+ whirlpool                       ~> maytag          (74.48%)    biscuitonbiscuit (71.35%)       frigidaire      (66.48%) 
+ dell                            ~> inspiron        (88.33%)    xps             (74.03%)        acer            (69.08%) 
+product types 
+ tablet                          ~> tablets         (67.64%)    archos          (55.24%)        tab             (53.35%) 
+ hard driv                       ~> hard            (78.97%)    drive           (76.43%)        drives          (69.95%) 
+ notebook                        ~> laptop          (68.83%)    briefcase       (51.12%)        targus          (49.60%) 
+ smartphon                       ~> phon            (71.47%)    smart           (69.71%)        240hz           (60.02%) 
+ gaming keyboard                 ~> keyboard        (82.97%)    gaming          (70.27%)        keyboards       (62.95%) 
+ iphon                           ~> iphone          (74.97%)    apple           (68.60%)        ipod            (58.97%) 
+models 
+ vaio                            ~> dell            (63.73%)    inspiron        (61.55%)        155             (60.87%) 
+ game boy adv                    ~> game            (83.21%)    boy             (81.05%)        adv             (80.88%) 
+ nikkor                          ~> 30110mm         (73.97%)    10mm            (72.62%)        j1              (71.56%) 
+attribute 
+ 4gb                             ~> 8gb             (81.76%)    memory          (76.94%)        2gb             (75.41%) 
+ black                           ~> silv            (67.97%)    whit            (67.96%)        blacksilv       (64.29%) 
+ window                          ~> macwindow       (81.00%)    edition         (61.36%)        adv             (60.86%) 
+ mp3 playback                    ~> playback        (99.03%)    facepl          (70.02%)        cd              (67.87%) 
+ 24                              ~> tub             (67.07%)    tall            (65.18%)        dishwasher      (60.81%)
+```
+
+python week3/synonyms.py --epoch=50 --minCount=50 --model=skipgram
+
+```
+brands 
+ appl                            ~> apple           (83.29%)    ipod            (72.48%)        iphone          (71.38%) 
+ soni                            ~> sonic           (83.10%)    songbook        (46.48%)        toothbrush      (46.40%) 
+ ubisoft                         ~> mitsubishi      (61.41%)    microsoft       (60.03%)        soft            (59.97%) 
+ whirlpool                       ~> maytag          (76.80%)    biscuitonbiscuit (69.45%)       frigidaire      (67.75%) 
+ dell                            ~> inspiron        (86.20%)    acer            (70.20%)        xps             (67.49%) 
+product types 
+ tablet                          ~> tablets         (60.31%)    archos          (56.62%)        101             (52.20%) 
+ hard driv                       ~> hard            (75.03%)    drives          (69.67%)        drive           (69.45%) 
+ notebook                        ~> laptop          (67.45%)    briefcase       (50.39%)        targus          (47.97%) 
+ smartphon                       ~> phon            (68.91%)    smart           (63.91%)        phones          (55.88%) 
+ gaming keyboard                 ~> keyboard        (81.24%)    gaming          (71.50%)        steelseries     (59.27%) 
+ iphon                           ~> iphone          (72.28%)    apple           (60.13%)        ipod            (55.28%) 
+models 
+ vaio                            ~> dell            (64.68%)    155             (58.03%)        inspiron        (55.28%) 
+ game boy adv                    ~> boy             (81.88%)    game            (81.60%)        adv             (80.87%) 
+ nikkor                          ~> 30110mm         (68.35%)    f28             (67.40%)        10mm            (66.77%) 
+attribute 
+ 4gb                             ~> 8gb             (82.87%)    memory          (80.02%)        2gb             (75.28%) 
+ black                           ~> whit            (70.05%)    silv            (67.27%)        blu             (66.44%) 
+ window                          ~> macwindow       (83.12%)    d               (61.39%)        adv             (61.25%) 
+ mp3 playback                    ~> playback        (99.01%)    changer         (67.82%)        facepl          (65.01%) 
+ 24                              ~> tall            (65.31%)    tub             (64.20%)        dishwasher      (58.11%)
+```
+
+
+# Self-assesment
+
+To assess your project work, you should be able to answer the following questions:
+
+- For classifying product names to categories:
+    - What precision (P@1) were you able to achieve?
+      ```
+      0.883
+      ```
+
+    - What fastText parameters did you use?
+      ```
+      -output prod_cat -loss hs -lr 1 -epoch 20 -wordNgrams 2
+      ```
+
+    - How did you transform the product names?
+      ```
+      Use english stemer
+      Remove punctuations
+      ```
+    
+    - How did you prune infrequent category labels, and how did that affect your precision?
+      ```
+      min_products = 200 show biggest difference for P@1 & R@1
+      > categories ignored = 1839
+      > categories written = 113
+      > P@1     0.903
+      > R@1     0.903
+      > P@10    0.144
+      > R@10    0.993
+      
+      Introucing max_products=200 to create balance categories show
+      min_products = 200 show decrese on P@1 & R@1
+      Which makes me belive high metrics previouse were subject to class inbalance
+
+      > categories ignored = 1839
+      > categories written = 113
+      > P@1     0.883
+      > R@1     0.883
+      > P@10    0.12
+      > R@10    0.99
+      ```
+
+    - How did you prune the category tree, and how did that affect your precision?
+      ```
+      Didn't change a lot. 
+      
+      Of cource for root category it was 
+      P@1     1
+      R@1     1
+
+      but of cource it was only one category to predict.
+      ```
+     
+
+- For deriving synonyms from content:
+    - What 20 tokens did you use for evaluation?
+      ```
+      Are few lines above
+      ```
+
+    - What fastText parameters did you use?
+      ```
+      --epoch=50 --minCount=50 --model=skipgram
+      --epoch=50 --minCount=50 --model=cbow
+      ```
+
+    - How did you transform the product names?
+    ```
+    Steam
+    Remove punctuation
+    ```
+
+    - What threshold score did you use? 
+    ```
+    None, listed k=3 
+    ```
+
+    - What synonyms did you obtain for those tokens?
+    ```
+    Are few lines above are examples
+    ```
+
+For integrating synonyms with search: (Skipped)
+    - How did you transform the product names (if different than previously)?
+    - What threshold score did you use?
+    - Were you able to find the additional results by matching synonyms?
+
+For classifying reviews: (Skipped)
+    - What precision (P@1) were you able to achieve?
+    - What fastText parameters did you use?
+    -  How did you transform the review content?
+    -  What else did you try and learn?
