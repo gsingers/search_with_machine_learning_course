@@ -7,6 +7,8 @@ from pathlib import Path
 import re
 from nltk.stem import SnowballStemmer
 
+import pandas as pd
+
 stemmer = SnowballStemmer(language='english')
 _re_spec = re.compile(r'([/#\\-\\.:])')
 
@@ -57,28 +59,49 @@ if os.path.isdir(output_dir) == False:
 
 if args.input:
     directory = args.input
-# IMPLEMENT:  Track the number of items in each category and only output if above the min
 min_products = args.min_products
 sample_rate = args.sample_rate
 
-print("Writing results to %s" % output_file)
-with open(output_file, 'w') as output:
-    for filename in os.listdir(directory):
-        if filename.endswith(".xml"):
-            print("Processing %s" % filename)
-            f = os.path.join(directory, filename)
-            tree = ET.parse(f)
-            root = tree.getroot()
-            for child in root:
-                if random.random() > sample_rate:
-                    continue
-                # Check to make sure category name is valid
-                if (child.find('name') is not None and child.find('name').text is not None and
-                    child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
-                    child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None):
-                      # Choose last element in categoryPath as the leaf categoryId
-                      cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
-                      # Replace newline chars with spaces so fastText doesn't complain
-                      name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
+items = []
 
+## Reads from the xml and adds cat, name as `tuple` to the items `list`
+for filename in os.listdir(directory):
+    if filename.endswith(".xml"):
+        print("Processing %s" % filename)
+        f = os.path.join(directory, filename)
+        tree = ET.parse(f)
+        root = tree.getroot()
+        for child in root:
+            if random.random() > sample_rate:
+                continue
+            # Check to make sure category name is valid
+            if (child.find('name') is not None and child.find('name').text is not None and
+                child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
+                child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None):
+                # Choose last element in categoryPath as the leaf categoryId
+                cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
+                # Replace newline chars with spaces so fastText doesn't complain
+                name = child.find('name').text.replace('\n', ' ')
+
+                items.append((cat, transform_name(name))
+                #output.write("__label__%s %s\n" % (cat, transform_name(name)))
+
+# IMPLEMENT:  Track the number of items in each category and only output if above the min
+
+# Load the items into a dataframe.
+df = pd.DataFrame(items, columns=['cat', 'name'])
+                             
+def filter_by_min_products(df, minimum=50):
+    "Filter the dataframe to categories of threshold set with minimum"
+    tmp = pd.DataFrame(df.cat.value_counts())
+    min_filter = tmp[tmp['cat'] > minimum]
+    return df[df.cat.isin(min_filter.index)]
+                             
+def write_output(df, output_file = r'/workspace/datasets/fasttext/output.fasttext', minimum=50):
+    filtered_df = filter_by_min_products(df, minimum)
+    with open(output_file, 'w') as output:
+        for _, item in filtered_df.iterrows():
+            output.write("__label__%s %s\n" % (item['cat'], item['name']))
+                             
+print("Writing results to %s" % output_file)
+write_output(df, output_file, minimum=min_products)
