@@ -84,7 +84,7 @@ python week3/extractTitles.py --input /workspace/search_with_machine_learning_co
 
 ## Start flask app
 export SYNONYMS_MODEL_LOC=/workspace/datasets/fasttext/phone_model.bin
-flask run --port 3000
+flask run --port 5000
 
 ## Delete logstash offsets
 rm /workspace/logstash/logstash-7.13.2/products_annotations_data/plugins/inputs/file/.sincedb_*
