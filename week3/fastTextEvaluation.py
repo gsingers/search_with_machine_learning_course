@@ -9,7 +9,6 @@ test_tokens = [
 'mouse',
 'dvd',
 'camcorder',
-'card',
 'macbook',
 'ipod',
 'screen',
