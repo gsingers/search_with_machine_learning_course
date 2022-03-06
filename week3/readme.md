@@ -609,13 +609,13 @@ To assess your project work, you should be able to answer the following question
 
     - How did you transform the product names?
     ```
-    Steam
+    Lowercase
     Remove punctuation
     ```
 
     - What threshold score did you use? 
     ```
-    None, listed k=3 
+    75%, listed k=3 
     ```
 
     - What synonyms did you obtain for those tokens?
