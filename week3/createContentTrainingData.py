@@ -3,10 +3,14 @@ import os
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
+import re
 
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+    # replace punctuation with spaces
+    # credit: https://stackoverflow.com/a/34922745/158328
+    clean = re.sub(r"[(),.;@#?!&$]+\ *", " ", product_name)
+    # lowercase
+    return clean.lower()
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
@@ -14,7 +18,7 @@ directory = r'/workspace/search_with_machine_learning_course/data/pruned_product
 parser = argparse.ArgumentParser(description='Process some integers.')
 general = parser.add_argument_group("general")
 general.add_argument("--input", default=directory,  help="The directory containing product data")
-general.add_argument("--output", default="/workspace/datasets/fasttext/output.fasttext", help="the file to output to")
+general.add_argument("--output", default="/workspace/datasets/fasttext/output_punct_to_space_lc.fasttext", help="the file to output to")
 
 # Consuming all of the product data will take over an hour! But we still want to be able to obtain a representative sample.
 general.add_argument("--sample_rate", default=1.0, type=float, help="The rate at which to sample input (default is 1.0)")
