@@ -513,6 +513,33 @@ attribute
 ```
 
 
+python week3/synonyms.py --epoch=50 --minCount=50 --treshold=0.75
+```
+brands 
+ apple                           ~> ipod            (79.66%)    iphone          (76.11%) 
+ sony                            ~> 
+ ubisoft                         ~> 
+ whirlpool                       ~> 
+ dell                            ~> 
+product types 
+ tablet                          ~> 
+ hard drive                      ~> drive           (88.70%)    hard            (81.60%) 
+ notebook                        ~> notebooks       (76.84%) 
+ smartphone                      ~> smartphones     (91.16%) 
+ gaming keyboard                 ~> keyboard        (79.16%) 
+ iphone                          ~> apple           (76.11%) 
+models 
+ vaio                            ~> 
+ game boy advance                ~> advance         (88.45%)    boy             (81.52%) 
+ nikkor                          ~> 
+attribute 
+ 4gb                             ~> 8gb             (87.39%)    2gb             (84.08%)        3gb             (81.13%) 
+ black                           ~> blackwhite      (80.20%)    blackgray       (78.58%)        blacksilver     (78.45%) 
+ windows                         ~> macwindows      (86.89%) 
+ mp3 playback                    ~> playback        (94.99%) 
+ 24                              ~> 
+```
+
 # Self-assesment
 
 To assess your project work, you should be able to answer the following questions:

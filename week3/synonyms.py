@@ -18,19 +18,35 @@ general.add_argument("--epoch",
                      type=int,
                      default=5,
                      help="number of epochs [5]")
-
+general.add_argument("--minn",
+                     type=int,
+                     default=2,
+                     help="min length of char ngram [2] ")
+general.add_argument("--treshold",
+                     type=float,
+                     default=0.5,
+                     help="treshold 0.5 ")
+general.add_argument("--limit",
+                     type=int,
+                     default=3,
+                     help="Limit no of samples 3 ")
 
 args = parser.parse_args()
 titles_file = args.input
 model_name = args.model
 minCount = args.minCount
 epoch = args.epoch
+minn = args.minn
+treshold = args.treshold
+limit = args.limit
+
 
 
 model = fasttext.train_unsupervised(input=titles_file,
                                     model=model_name,
                                     minCount=minCount,
-                                    epoch=epoch
+                                    epoch=epoch,
+                                    minn=minn,
                                     )
 
 
@@ -56,9 +72,18 @@ def main():
         for name in examples:
             name = transform_training_data(name)
             print(" {} \t ~> ".format(name.ljust(25)), end='')
-            for (prob, synonym) in model.get_nearest_neighbors(name, k=3):
-                print("{} ({:.2f}%) \t".format(
-                    synonym.ljust(15), prob*100), end='')
+            
+            i = 0
+            for (prob, synonym) in model.get_nearest_neighbors(name, k=100):
+                i = i + 1
+                if i > limit:
+                    break
+
+                if prob > treshold:
+                    print("{} ({:.2f}%) \t".format(
+                        synonym.ljust(15), prob*100), end='')
+                
+
             print("\n", end='')
 
 

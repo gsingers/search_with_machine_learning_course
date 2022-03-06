@@ -14,7 +14,8 @@ tokenizer = RegexpTokenizer(r'\w+')
 stemmer = SnowballStemmer("english", ignore_stopwords=False)
 
 def transform_training_data(product_name):
-    product_name = stemmer.stem(product_name)
+    # product_name = stemmer.stem(product_name)
+    product_name = product_name.lower()
     product_name = product_name.translate(str.maketrans("", "", string.punctuation))
     product_name = ' '.join(tokenizer.tokenize(product_name))
     return product_name
