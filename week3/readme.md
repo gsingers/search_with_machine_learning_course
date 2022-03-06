@@ -1,7 +1,7 @@
 ## Setup environment
 pyenv activate search_with_ml_week3
 alias fasttext=~/fastText-0.9.2/fasttext
-pip install nltk
+pip install nltk fasttext
 // pip install ipython pandas lxml
 // pip install elementpath
 
@@ -270,3 +270,160 @@ R@5     0.978
 N       10000
 P@10    0.12
 R@10    0.99
+
+
+# Level 2 - synonyms
+
+
+## First run
+python week3/extractTitles.py
+python week3/synonyms.py
+
+```
+brands 
+ apple                           ~> iSimple         (99.97%)    Maple           (99.96%)        Watchband       (99.96%) 
+ Sony                            ~> Cassette        (99.97%)    8GB*            (99.96%)        Basix           (99.95%) 
+ Ubisoft                         ~> Santa           (99.96%)    Netgear         (99.96%)        Technology      (99.96%) 
+ Whirlpool                       ~> Free            (99.97%)    White/Blue      (99.96%)        Over-the-Range  (99.96%) 
+ Dell                            ~> Turion™         (99.96%)    Init™           (99.96%)        Inspire         (99.96%) 
+product types 
+ Tablet                          ~> Tablets         (100.00%)   Keystone        (99.98%)        Bluetooth-Enabled (99.98%) 
+ Hard Drive                      ~> Drive           (99.96%)    32GB            (99.95%)        1TB             (99.94%) 
+ Notebook                        ~> Notebooks       (99.99%)    Songbook        (99.99%)        Essentials      (99.98%) 
+ Smartphone                      ~> Smartphones     (99.99%)    Saxophone       (99.98%)        Jawbone         (99.97%) 
+ Gaming Keyboard                 ~> Houston         (99.99%)    Adventures      (99.98%)        Minnesota       (99.98%) 
+models 
+ VAIO                            ~> Asus            (99.96%)    15W             (99.95%)        4G              (99.94%) 
+ Game Boy Advance                ~> Advanced        (99.97%)    Advance         (99.95%)        Time            (99.95%) 
+ Nikkor                          ~> Calculator      (99.92%)    Order)          (99.89%)        Sigma           (99.86%) 
+attribute 
+ 4GB                             ~> GB              (99.94%)    64GB            (99.92%)        6GB             (99.90%) 
+ Black                           ~> black           (99.93%)    Black/Orange    (99.89%)        Blackjack       (99.87%) 
+ Windows                         ~> Windows,        (99.99%)    Window          (99.99%)        Mac/Windows     (99.97%) 
+ MP3 Playback                    ~> Radar           (99.97%)    Radica          (99.97%)        20-Pack         (99.97%) 
+ 24"                             ~> Tub             (99.95%)    Built-in        (99.89%)        Built           (99.87%)
+ ```
+
+
+ ## Normalize the product names
+
+$ python week3/extractTitles.py
+
+$ head /workspace/datasets/fasttext/titles.txt
+> orphen scion of sorcery playstation 2 ps2
+> delorme earthmate pn60w gps black
+> numark refurbished mixdeck dj system blacksilv
+> memorex slim jewel cases 30pack assort
+
+$ python week3/synonyms.py
+
+```
+brands 
+ appl                            ~> iphon           (99.88%)    ipad            (99.87%)        4thgeneration   (99.87%) 
+ soni                            ~> songs           (99.99%)    lets            (99.99%)        sonax           (99.99%) 
+ ubisoft                         ~> mice            (99.99%)    hitch           (99.99%)        fram            (99.98%) 
+ whirlpool                       ~> free            (99.99%)    frigidaire      (99.99%)        freezer         (99.98%) 
+ dell                            ~> hardshell       (99.99%)    desk            (99.98%)        allinone        (99.98%) 
+product types 
+ tablet                          ~> tablets         (100.00%)   tabletop        (99.99%)        outlet          (99.99%) 
+ hard driv                       ~> drive           (99.97%)    1tb             (99.97%)        hard            (99.96%) 
+ notebook                        ~> lifebook        (100.00%)   nook            (99.99%)        book            (99.99%) 
+ smartphon                       ~> verizon         (99.98%)    snapon          (99.98%)        headset         (99.98%) 
+ gaming keyboard                 ~> keyboards       (99.99%)    patriots        (99.99%)        indianapolis    (99.99%) 
+models 
+ vaio                            ~> laptops         (99.98%)    accessory       (99.98%)        pentium         (99.98%) 
+ game boy adv                    ~> game            (99.99%)    gamecub         (99.99%)        gamecube        (99.98%) 
+ nikkor                          ~> with            (99.95%)    210             (99.92%)        250             (99.92%) 
+attribute 
+ 4gb                             ~> gb              (99.97%)    6gb             (99.96%)        8gb             (99.95%) 
+ black                           ~> blackr          (99.98%)    orang           (99.97%)        rangers         (99.97%) 
+ window                          ~> windows         (100.00%)   macwindow       (99.99%)        wind            (99.99%) 
+ mp3 playback                    ~> playback        (99.99%)    lite            (99.99%)        moshi           (99.99%) 
+ 24                              ~> bisqueonbisqu   (99.94%)    dishwasher      (99.94%)        bisqu           (99.94%)
+```
+
+
+## Experiment with the minCount
+
+$ python week3/synonyms.py --epoch=25
+
+```
+brands 
+ appl                            ~> apple           (95.57%)    ipad            (87.10%)        4               (84.50%) 
+ soni                            ~> sonic           (86.00%)    sonax           (74.91%)        songs           (71.65%) 
+ ubisoft                         ~> soft            (71.75%)    microsoft       (71.73%)        2005            (71.27%) 
+ whirlpool                       ~> maytag          (94.51%)    biscuit         (93.32%)        biscuitonbiscuit (93.08%) 
+ dell                            ~> phenom          (82.37%)    64              (80.84%)        pentium         (80.83%) 
+product types 
+ tablet                          ~> tablets         (94.83%)    tabletop        (91.50%)        table           (87.91%) 
+ hard driv                       ~> hard            (93.70%)    320gb           (89.89%)        750gb           (89.00%) 
+ notebook                        ~> lifebook        (89.33%)    netbook         (89.27%)        ultrabook       (83.91%) 
+ smartphon                       ~> phon            (87.46%)    snapon          (80.11%)        headset         (78.12%) 
+ gaming keyboard                 ~> keyboard        (90.66%)    keyboards       (84.87%)        motherboard     (80.57%) 
+models 
+ vaio                            ~> e               (90.07%)    133             (87.57%)        duo             (85.08%) 
+ game boy adv                    ~> game            (98.94%)    gamecub         (93.99%)        gamecube        (92.28%) 
+ nikkor                          ~> refractor       (78.98%)    hydride         (78.86%)        gladiator       (74.18%) 
+attribute 
+ 4gb                             ~> 8gb             (96.46%)    12gb            (95.38%)        3gb             (95.05%) 
+ black                           ~> blackr          (92.15%)    blackjack       (90.21%)        blueblack       (89.10%) 
+ window                          ~> macwindow       (96.10%)    windows         (95.53%)        08              (82.48%) 
+ mp3 playback                    ~> playback        (98.54%)    5disc           (84.45%)        cd              (84.20%) 
+ 24                              ~> tub             (92.30%)    dishwasher      (90.03%)        bisqueonbisqu   (86.34%)
+```
+
+$ python week3/synonyms.py --epoch=25 --minCount=50
+
+```
+brands 
+ appl                            ~> apple           (97.78%)    ipad            (79.30%)        ipod            (78.54%) 
+ soni                            ~> sony            (81.82%)    panasonic       (78.35%)        kodak           (66.48%) 
+ ubisoft                         ~> microsoft       (90.85%)    360             (66.64%)        xbox            (65.08%) 
+ whirlpool                       ~> frigidaire      (94.43%)    maytag          (92.13%)        whiteonwhit     (90.50%) 
+ dell                            ~> inspiron        (82.70%)    desktop         (78.61%)        pavilion        (75.01%) 
+product types 
+ tablet                          ~> portable        (86.37%)    cable           (71.90%)        expandable      (62.15%) 
+ hard driv                       ~> hard            (96.58%)    500gb           (91.99%)        drive           (89.70%) 
+ notebook                        ~> netbook         (87.31%)    laptop          (76.98%)        core            (72.87%) 
+ smartphon                       ~> vacuum          (79.82%)    phon            (79.35%)        smart           (72.06%) 
+ gaming keyboard                 ~> keyboard        (92.46%)    leonard         (60.36%)        collection      (58.96%) 
+models 
+ vaio                            ~> radio           (80.14%)    audio           (75.13%)        av              (62.76%) 
+ game boy adv                    ~> game            (95.49%)    adv             (90.81%)        boy             (86.17%) 
+ nikkor                          ~> nikon           (84.46%)    extra           (80.75%)        camera          (80.29%) 
+attribute 
+ 4gb                             ~> memory          (89.89%)    8gb             (88.24%)        500gb           (82.98%) 
+ black                           ~> whit            (68.73%)    r               (65.13%)        white           (64.97%) 
+ window                          ~> macwindow       (95.12%)    edition         (69.66%)        xbox            (69.04%) 
+ mp3 playback                    ~> mp3             (77.02%)    player          (71.49%)        2gb             (69.40%) 
+ 24                              ~> tub             (96.89%)    tall            (95.31%)        dishwasher      (94.00%) 
+```
+
+
+$ python week3/synonyms.py --epoch=25 --minCount=50 --model=skipgram
+
+```
+brands 
+ appl                            ~> apple           (97.76%)    ipad            (75.30%)        ipod            (74.25%) 
+ soni                            ~> sony            (86.39%)    panasonic       (85.77%)        jvc             (68.16%) 
+ ubisoft                         ~> microsoft       (93.26%)    360             (66.23%)        edition         (62.20%) 
+ whirlpool                       ~> maytag          (91.63%)    frigidaire      (91.36%)        whiteonwhit     (84.26%) 
+ dell                            ~> inspiron        (88.57%)    asus            (80.41%)        pavilion        (77.85%) 
+product types 
+ tablet                          ~> portable        (90.16%)    gp              (69.51%)        cable           (66.94%) 
+ hard driv                       ~> hard            (96.34%)    drive           (85.70%)        500gb           (84.89%) 
+ notebook                        ~> netbook         (83.73%)    laptop          (73.04%)        intel           (68.50%) 
+ smartphon                       ~> smart           (81.01%)    phon            (80.50%)        vacuum          (75.64%) 
+ gaming keyboard                 ~> keyboard        (95.05%)    mouse           (67.37%)        leonard         (65.33%) 
+ iphon                           ~> iphone          (89.43%)    shell           (79.01%)        ipad            (78.84%) 
+models 
+ vaio                            ~> radio           (78.88%)    audio           (76.76%)        vacuum          (75.28%) 
+ game boy adv                    ~> game            (95.70%)    adv             (89.11%)        games           (85.69%) 
+ nikkor                          ~> nikon           (87.57%)    eos             (78.93%)        slr             (78.30%) 
+attribute 
+ 4gb                             ~> 8gb             (75.96%)    2gb             (74.70%)        memory          (70.16%) 
+ black                           ~> blackonblack    (66.72%)    r               (63.74%)        silv            (61.62%) 
+ window                          ~> macwindow       (94.32%)    edition         (71.29%)        xbox            (64.61%) 
+ mp3 playback                    ~> mp3             (75.06%)    player          (67.47%)        play            (65.30%) 
+ 24                              ~> tall            (84.54%)    tub             (82.35%)        dishwasher      (81.05%)
+```
