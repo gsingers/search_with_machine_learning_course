@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 from nltk.stem import SnowballStemmer
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 stemmer = SnowballStemmer("english")
 
@@ -33,8 +34,8 @@ general.add_argument("--output", default="/workspace/datasets/fasttext/output_pu
 # Consuming all of the product data will take over an hour! But we still want to be able to obtain a representative sample.
 general.add_argument("--sample_rate", default=1.0, type=float, help="The rate at which to sample input (default is 1.0)")
 
-# IMPLEMENT: Setting min_products removes infrequent categories and makes the classifier's task easier.
 general.add_argument("--min_products", default=0, type=int, help="The minimum number of products per category (default is 0).")
+general.add_argument("--train_test_ratio", default=0.1, type=float, help="Train / test ratio: if set it 0.1, 10% goes to test, 90% goes to train")
 
 args = parser.parse_args()
 output_file = args.output
@@ -45,9 +46,9 @@ if os.path.isdir(output_dir) == False:
 
 if args.input:
     directory = args.input
-# IMPLEMENT:  Track the number of items in each category and only output if above the min
 min_products = args.min_products
 sample_rate = args.sample_rate
+train_test_ratio = args.train_test_ratio
 
 df = pd.DataFrame(columns=['category', 'product'])
 
@@ -78,7 +79,25 @@ with open(output_file, 'w') as output:
     print(f"Filtering out by category frequency and min_products={min_products}")
     filtered = df.groupby("category").filter(lambda x: len(x) > min_products)
     print(f"Saving to output file {output_file}")
-    for i, row in filtered.iterrows():
+    # shuffle and create train / test splits
+    print("Shuffling dataset")
+    shuffled = filtered.sample(frac=1).reset_index(drop=True)  # shuffle things
+    print(f"Train/test split with ratio of {train_test_ratio}")
+    train, test = train_test_split(shuffled, test_size=train_test_ratio)
+    for i, row in shuffled.iterrows():
         cat = row["category"]
         name = row["product"]
         output.write("__label__%s %s\n" % (cat, transform_name(name)))
+    # save train and test
+    print("Saving train and test splits")
+    with open(output_file+".train", 'w') as train_output:
+        for i, row in train.iterrows():
+            cat = row["category"]
+            name = row["product"]
+            train_output.write("__label__%s %s\n" % (cat, transform_name(name)))
+
+    with open(output_file+".test", 'w') as test_output:
+        for i, row in test.iterrows():
+            cat = row["category"]
+            name = row["product"]
+            test_output.write("__label__%s %s\n" % (cat, transform_name(name)))
