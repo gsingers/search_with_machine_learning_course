@@ -3,6 +3,8 @@ import random
 import xml.etree.ElementTree as ET
 import argparse
 from pathlib import Path
+from nltk.tokenize import RegexpTokenizer
+from nltk.stem.snowball import SnowballStemmer
 
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products'
 parser = argparse.ArgumentParser(description='Process some integers.')
@@ -27,7 +29,18 @@ sample_rate = args.sample_rate
 
 def transform_training_data(name):
     # IMPLEMENT
-    return name.replace('\n', ' ')
+    # return name.replace('\n', ' ')
+    tokenizer = RegexpTokenizer(r'\w+')
+    snowballStemmer = SnowballStemmer("english")
+    # Make lower case
+    nameLowerCase = name.replace('\n', ' ').lower()
+    # tokenize
+    tokens = tokenizer.tokenize(nameLowerCase)
+    # stem
+    tokens = [snowballStemmer.stem(token) for token in tokens]
+    name = " ".join(tokens)
+    return name
+
 
 # Directory for product data
 
