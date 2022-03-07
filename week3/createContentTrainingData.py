@@ -31,16 +31,11 @@ def populate_category_at_max_depth(max_depth):
     for child in root:
         catPath = child.find('path')
         catId = child.find('id')
-        catPathStr = ''
         depth = 0
         ancestorId = ''
         for cat in catPath:
-            if catPathStr != '':
-                catPathStr = catPathStr + ' > '
-            catPathStr = catPathStr + cat.find('name').text
             ancestorId = cat.find('id').text
             depth = depth + 1
-            catPathStrs.add(catPathStr)
             if maxDepth > 0 and depth == maxDepth:
                 break
         cat_ancestor_at_depth.update({catId:ancestorId})
@@ -105,7 +100,7 @@ df = pd.DataFrame(columns=col_names)
 print("Writing results to %s" % output_file)
 with open(output_file, 'w') as output:
     for filename in os.listdir(directory):
-        if filename.endswith("_1.xml"):
+        if filename.endswith(".xml"):
             print("Processing %s" % filename)
             f = os.path.join(directory, filename)
             tree = ET.parse(f)
