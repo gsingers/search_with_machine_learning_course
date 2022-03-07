@@ -15,12 +15,12 @@ def transform_name(product_name):
     # credit: https://stackoverflow.com/a/34922745/158328
     clean = re.sub(r"[(),:.;@#?!&$/\"-]+\ *", " ", product_name)
     clean = re.sub(r"[ ]+", " ", clean)
+    # lowercase
     clean_lc = clean.lower()
     stemmed = " ".join([stemmer.stem(word) for word in clean_lc.split()])
     if stemmed == "":
         print("Empty stemmed sequence detected")
         exit(1)
-    # lowercase
     return stemmed
 
 # Directory for product data

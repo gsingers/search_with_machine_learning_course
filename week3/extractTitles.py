@@ -3,6 +3,10 @@ import random
 import xml.etree.ElementTree as ET
 import argparse
 from pathlib import Path
+import re
+from nltk.stem import SnowballStemmer
+
+stemmer = SnowballStemmer("english")
 
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products'
 parser = argparse.ArgumentParser(description='Process some integers.')
@@ -26,8 +30,17 @@ if args.input:
 sample_rate = args.sample_rate
 
 def transform_training_data(name):
-    # IMPLEMENT
-    return name.replace('\n', ' ')
+        # replace punctuation with spaces
+    # credit: https://stackoverflow.com/a/34922745/158328
+    clean = re.sub(r"[(),:.;@#?!&$/\"-]+\ *", " ", name)
+    clean = re.sub(r"[ ]+", " ", clean)
+    clean_lc = clean.lower()
+    #stemmed = " ".join([stemmer.stem(word) for word in clean_lc.split()])
+    #if stemmed == "":
+    #    print("Empty stemmed sequence detected")
+    #    exit(1)
+    #return stemmed.replace('\n', ' ')
+    return clean_lc.replace('\n', ' ')
 
 # Directory for product data
 
