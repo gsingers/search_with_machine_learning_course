@@ -1,3 +1,5 @@
+model.*
+
 data/phone_products/phone_products.xml.gz
 data/pruned_products/pruned_products_*.xml.gz
 
