@@ -16,7 +16,7 @@ def transform_name(product_name):
     clean = re.sub(r"[(),:.;@#?!&$/\"-]+\ *", " ", product_name)
     clean = re.sub(r"[ ]+", " ", clean)
     clean_lc = clean.lower()
-    stemmed = " ".join([stemmer.stem(word) for word in clean_lc.split()])
+    stemmed = " ".join([stemmer.stem(word) for word in clean_lc.split()])
     if stemmed == "":
         print("Empty stemmed sequence detected")
         exit(1)
@@ -77,6 +77,7 @@ with open(output_file, 'w') as output:
                       #output.write("__label__%s %s\n" % (cat, transform_name(name)))
     # filter out
     print(f"Filtering out by category frequency and min_products={min_products}")
+    # turns out, filter() returns a copy of data frame *without* the matched elements: https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.filter.html
     filtered = df.groupby("category").filter(lambda x: len(x) > min_products)
     print(f"Saving to output file {output_file}")
     # shuffle and create train / test splits
@@ -90,13 +91,13 @@ with open(output_file, 'w') as output:
         output.write("__label__%s %s\n" % (cat, transform_name(name)))
     # save train and test
     print("Saving train and test splits")
-    with open(output_file+".train", 'w') as train_output:
+    with open(output_file+f"_{min_products}.train", 'w') as train_output:
         for i, row in train.iterrows():
             cat = row["category"]
             name = row["product"]
             train_output.write("__label__%s %s\n" % (cat, transform_name(name)))
 
-    with open(output_file+".test", 'w') as test_output:
+    with open(output_file+f"_{min_products}.test", 'w') as test_output:
         for i, row in test.iterrows():
             cat = row["category"]
             name = row["product"]
