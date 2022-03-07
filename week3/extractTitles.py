@@ -43,8 +43,7 @@ def transform_training_data(name):
 
 
 # Directory for product data
-
-print("Writing results to %s" % output_file)
+print(f"Writing results to {output_file}")
 with open(output_file, "w") as output:
     for filename in os.listdir(directory):
         if filename.endswith(".xml"):
