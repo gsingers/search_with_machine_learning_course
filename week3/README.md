@@ -91,3 +91,10 @@ I experimented with stemming as well, but the synonyms also get stemmed, so deci
 | thinkpad      | ideapad 0.86554, ibm 0.819048, lenovo 0.815385, fujitsu 0.76064, atg 0.752287, biz 0.732815, nimh 0.719717 |
 | imac      | mac 0.75241, image 0.722575 |
 | elitebooks      | notebooks 0.848634, notebook 0.727201|
+| iphone | iphone® 0.935992, 4s 0.780405, 3gs 0.763268 |
+| galaxy | NONE |
+| white | NONE |
+| camera | cameras 0.791214, 2mp 0.762989, 1mp 0.746407, 0mp 0.737059, slr 0.73256, megapixel 0.729205, mp 0.725077, zoom 0.720591, nikon 0.710599, 85mm 0.701001 |
+| resolution | revolution 0.911922, evolution 0.905107 |
+| wireless | NONE |
+| bluetooth | jabra 0.72248 |
