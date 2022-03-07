@@ -4,8 +4,6 @@ import xml.etree.ElementTree as ET
 import argparse
 from pathlib import Path
 import nltk
-# nltk.download('punkt')
-# nltk.download('stopwords')
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 
