@@ -57,6 +57,11 @@ pyenv activate search_with_ml_week3
 
 python week3/extractTitles.py 
 
+# Train model
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/title_model
+
+~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+
 
 # Questions
 # 2. For deriving synonyms from content:
