@@ -36,6 +36,8 @@ Also, I used 20000 product names instead of 10000 in the training set.
 
 ### d. How did you prune infrequent category labels, and how did that affect your precision?
 
+I did  not try pruning the categories. 
+
 ## 2. For deriving synonyms from content:
 
 ### a. What 20 tokens did you use for evaluation?
