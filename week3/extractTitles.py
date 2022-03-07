@@ -3,6 +3,12 @@ import random
 import xml.etree.ElementTree as ET
 import argparse
 from pathlib import Path
+import nltk
+from nltk.stem import SnowballStemmer
+from nltk.corpus import stopwords 
+
+nltk.download("punkt")
+en_stopwords=set(stopwords.words('english'))
 
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products'
 parser = argparse.ArgumentParser(description='Process some integers.')
@@ -27,6 +33,13 @@ sample_rate = args.sample_rate
 
 def transform_training_data(name):
     # IMPLEMENT
+    name = name.lower()
+    stemmer = SnowballStemmer("english")
+    name = stemmer.stem(name)
+    words = nltk.word_tokenize(name)
+    new_words= [word for word in words if word.isalnum()]
+    new_words = [word for word in new_words if word not in en_stopwords]
+    name = ' '.join(new_words)
     return name.replace('\n', ' ')
 
 # Directory for product data
