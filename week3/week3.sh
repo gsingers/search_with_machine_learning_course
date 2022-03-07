@@ -32,12 +32,13 @@ tail -n -10000 /workspace/datasets/categories/output.fasttext > /workspace/datas
 # P@10    0.0966
 # R@10    0.967
 
-~/fastText-0.9.2/fasttext predict model.bin -
+# Use model interactively:
+# ~/fastText-0.9.2/fasttext predict model.bin -
 
 # Questions
 # 1. For classifying product names to categories:
 # 1.a. What precision (P@1) were you able to achieve?
-#   A: []
+#   A: P@1 : 0.741
 # 1.b. What fastText parameters did you use?
 #   A: -lr 1.0 -epoch 2 -thread 32
 # 1.c. How did you transform the product names?
