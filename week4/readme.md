@@ -195,7 +195,50 @@ fasttext supervised -input /workspace/datasets/labeled_query_data_1000.txt.train
 fasttext test queres.bin /workspace/datasets/labeled_query_data_1000.txt.test 1
 
 
+N       50000
+P@1     0.346
+R@1     0.346
 
+N       50000
+P@5     0.11
+R@5     0.55
+
+N       50000
+P@3     0.161
+R@3     0.484
+
+fasttext supervised -input /workspace/datasets/labeled_query_data_1000.txt.train -output queres -epoch 200 -minCount 100 -loss hs -lr 0.01 -wordNgrams 2
+
+fasttext test queres.bin /workspace/datasets/labeled_query_data_1000.txt.test 1
+
+N       50000
+P@1     0.492
+R@1     0.492
+
+N       50000
+P@3     0.221
+R@3     0.664
+
+N       50000
+P@5     0.145
+R@5     0.723
+
+
+fasttext supervised -input /workspace/datasets/labeled_query_data_1000.txt.train -output queres -epoch 200 -minCount 100 -loss hs -lr 0.01 -wordNgrams 3
+
+fasttext test queres.bin /workspace/datasets/labeled_query_data_1000.txt.test 1
+
+N       50000
+P@1     0.494
+R@1     0.494
+
+N       50000
+P@3     0.221
+R@3     0.662
+
+N       50000
+P@5     0.144
+R@5     0.72
 
 ### min_queries=10000
 
@@ -205,7 +248,7 @@ head -n 50000 /workspace/datasets/labeled_query_data_10000.txt.rand > /workspace
 tail -n 50000 /workspace/datasets/labeled_query_data_10000.txt.rand > /workspace/datasets/labeled_query_data_10000.txt.test
 
 
-fasttext supervised -input /workspace/datasets/labeled_query_data_10000.txt.train -output queres -loss hs -lr 0.3 -epoch 20 -wordNgrams 2
+fasttext supervised -input /workspace/datasets/labeled_query_data_10000.txt.train -output queres -loss hs -lr 0.3 -epoch 20 -wordNgrams 2 
 
 fasttext test queres.bin /workspace/datasets/labeled_query_data_10000.txt.test 1
 
@@ -222,8 +265,20 @@ P@5     0.166
 R@5     0.832
 
 
+fasttext supervised -input /workspace/datasets/labeled_query_data_10000.txt.train -output queres -epoch 200 -minCount 100 -loss hs -lr 0.01 -wordNgrams 2
 
+fasttext test queres.bin /workspace/datasets/labeled_query_data_10000.txt.test 1
 
+N       50000
+P@1     0.564
+R@1     0.564
+
+N       50000
+P@3     0.251
+R@3     0.753
+
+P@5     0.163
+R@5     0.815
 
 # Project Assessment
 
@@ -237,7 +292,14 @@ To assess your project work, you should be able to answer the following question
 
 - What values did you achieve for P@1, R@3, and R@5? You should have tried at least a few different models, varying the minimum number of queries per category as well as trying different fastText parameters or query normalization. Report at least 3 of your runs.
 
+    -loss hs -lr 0.3 -epoch 20 -wordNgrams 2 & n=1000
+    P@1 0.503; R@3 0.684 ; R@5 0.745
 
+    -epoch 200 -minCount 100 -loss hs -lr 0.01 -wordNgrams 2 & n=1000
+    P@1 0.492; R@3 0.664; R@5 0.723
+
+    -epoch 200 -minCount 100 -loss hs -lr 0.01 -wordNgrams 2 & n=10000
+    P@1 0.564; R@3 0.753; R@5 0.815
 
 - For integrating query classification with search:
 
