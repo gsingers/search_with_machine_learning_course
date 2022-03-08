@@ -10,6 +10,8 @@ from week4.opensearch import get_opensearch
 import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
 
+import json
+
 bp = Blueprint('search', __name__, url_prefix='/search')
 
 
@@ -57,7 +59,21 @@ def process_filters(filters_input):
     return filters, display_filters, applied_filters
 
 def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
+    if user_query is None or len(user_query) < 2:
+        return None
+    
+    # On production, input should be normalised in the same way as during training!
+    # Words with upper cases may return probabilities
+    (labels, scores) = query_class_model.predict(user_query, k=3)
+
+    print("")
+    print((labels, scores))
+    print("")
+
+    for i, score in enumerate(scores):
+        if score > .2:
+            return labels[i].replace("__label__", "")
+
     return None
 
 
@@ -138,8 +154,14 @@ def query():
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
     if query_category is not None:
-        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
-    #print("query obj: {}".format(query_obj))
+        query_obj["query"]["bool"]["filter"].append({
+            "term": {
+                "categoryPathIds.keyword": query_category
+            }
+        })
+
+    print("query_category = {}".format(query_category))
+    print("query obj = {}".format(json.dumps(query_obj)))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
