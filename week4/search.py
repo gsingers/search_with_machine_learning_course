@@ -58,7 +58,7 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
-def get_query_category(user_query, query_class_model):
+def get_query_categories(user_query, query_class_model, treshold=0.9):
     if user_query is None or len(user_query) < 2:
         return None
     
@@ -70,11 +70,16 @@ def get_query_category(user_query, query_class_model):
     print((labels, scores))
     print("")
 
+    result = []
+    total = 0
     for i, score in enumerate(scores):
-        if score > .2:
-            return labels[i].replace("__label__", "")
+        category = labels[i].replace("__label__", "")
+        result.append((category, score))
+        total += score
+        if total > treshold:
+            break
 
-    return None
+    return result
 
 
 @bp.route('/query', methods=['GET', 'POST'])
@@ -151,16 +156,27 @@ def query():
     else:
         query_obj = qu.create_query("*", "", [], sort, sortDir, size=100)
 
+    category_query = []
+    category_filter = []
     query_class_model = current_app.config["query_model"]
-    query_category = get_query_category(user_query, query_class_model)
-    if query_category is not None:
+    query_categories = get_query_categories(user_query, query_class_model)
+    if len(query_categories) > 0:
+        for (category, score) in query_categories:
+            category_filter.append(category)
+            category_query.append('"{}"^{}'.format(category, score))
+
+        query_obj["query"]["bool"]["should"].append({
+            "query_string": {
+                "query": "categoryPathIds.keyword:({})".format(" OR ".join(category_query))
+            }
+        })
         query_obj["query"]["bool"]["filter"].append({
-            "term": {
-                "categoryPathIds.keyword": query_category
+            "terms": {
+                "categoryPathIds.keyword": category_filter
             }
         })
 
-    print("query_category = {}".format(query_category))
+    print("query_categories = {}".format(query_categories))
     print("query obj = {}".format(json.dumps(query_obj)))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
@@ -169,7 +185,7 @@ def query():
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
-                               sort=sort, sortDir=sortDir, model=model, explain=explain, query_category=query_category)
+                               sort=sort, sortDir=sortDir, model=model, explain=explain, query_category=", ".join(category_filter))
     else:
         redirect(url_for("index"))
 
