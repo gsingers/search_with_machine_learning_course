@@ -48,9 +48,24 @@ parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 
 df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
-# IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+# Convert queries to lowercase, and optionally implement other normalization, like stemming.
+df["query"] = df["query"].map(lambda x: x.lower())
 
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+# Roll up categories to ancestors to satisfy the minimum number of queries per category.
+while True:
+    grouped = df.groupby('category').count()
+    tofold = grouped[grouped['query'] <= min_queries]
+    folded = pd.merge(tofold, parents_df, on="category")
+
+    # Update child category to parent
+    for index, row in df[df['category'].isin(folded['category'])].iterrows():
+        df.loc[index, "category"] = folded.loc[folded["category"] == row["category"], "parent"].values[0]
+
+    # Nothing to fold
+    if len(tofold) == 0:
+        break
+
+print("categories found = {}".format(len(df.groupby('category').count())))
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']
