@@ -3,7 +3,8 @@
 ## Setup
 pyenv activate search_with_ml_week4
 alias fasttext=~/fastText-0.9.2/fasttext
-pip install ipython numpy pandas nltk fasttext
+pip install ipython numpy pandas nltk fasttext 
+pip install flask opensearch-py requests
 
 ## Level 1 - Query Classification
 
@@ -280,6 +281,18 @@ R@3     0.753
 P@5     0.163
 R@5     0.815
 
+
+
+
+
+## Level 2: Integrating Query Classification with Search
+
+export FLASK_ENV=development
+export FLASK_APP=week4
+export QUERY_MODEL_PATH=/workspace/search_with_machine_learning_course/queres.bin
+
+flask run -p 3000
+
 # Project Assessment
 
 To assess your project work, you should be able to answer the following questions:
@@ -301,8 +314,25 @@ To assess your project work, you should be able to answer the following question
     -epoch 200 -minCount 100 -loss hs -lr 0.01 -wordNgrams 2 & n=10000
     P@1 0.564; R@3 0.753; R@5 0.815
 
-- For integrating query classification with search:
+## For integrating query classification with search:
+
+
+### treshold>0.2 only one category & sort by "relevance"
 
 Give 2 or 3 examples of queries where you saw a dramatic positive change in the results because of filtering. Make sure to include the classifier output for those queries.
 
+| query             | detected class:          | result quality | notes
+|--------------------------------------------------------------------------
+| ipad 2            | pcmcat209000050007       | good           | Because cateogory was "Best Buy; Computers & Tablets; Tablets & iPad; iPad"
+| ipad 2 covers     | pcmcat217900050000       | good           | Because cateogory was "Best Buy; Computers & Tablets; Tablets & iPad; iPad Accessories; iPad Cases, Covers & Sleeves"
+| nintendo          | abcat0700000             | good           | Because category was "Best Buy; Video Games;" and show different categories  
+
+
 Given 2 or 3 examples of queries where filtering hurt the results, either because the classifier was wrong or for some other reason. Again, include the classifier output for those queries.
+
+
+| query                             | detected class:          | result quality | notes
+|--------------------------------------------------------------------------
+| protective cover                  | cat02015                 | poor           | Because cateogory was "Best Buy; Movies & Music; Movies & TV Shows", where I was searching for protective covers for tablet; 
+| protective covers for tablet      | pcmcat217900050000       | poor           | Because category was "Best Buy; Computers & Tablets; Tablets & iPad; iPad Accessories; iPad Screen Protection"; and I didn't specify "iPad", and there exists  category "Tablet Screen Protection" that would be additional good fit; (('__label__pcmcat217900050000', '__label__abcat0500000', '__label__abcat0515025'), array([0.24846245, 0.07530551, 0.07070722]))
+| dvd                               | abcat0102000             | poor           | I was thing ing about DVD burners, but category was filtered to DVD players "Best Buy; TV & Home Theater; Blu-ray & DVD Players; DVD Players"; (('__label__abcat0102000', '__label__cat02015', '__label__abcat0300000'), array([0.5042845 , 0.30813003, 0.0621266 ]))
