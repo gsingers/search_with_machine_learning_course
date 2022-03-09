@@ -18,7 +18,7 @@ def create_prior_queries_from_group(click_group): # total impressions isn't curr
     if click_group is not None:
         for item in click_group.itertuples():
             try:
-                click_prior_query += "%s^%.3f  " % (item.doc_id, item.clicks)
+                click_prior_query += "%s^%.3f  " % (item.doc_id, item.clicks / item.num_impressions)
 
             except KeyError as ke:
                 pass # nothing to do in this case, it just means we can't find priors for this doc
@@ -33,7 +33,7 @@ def create_prior_queries(doc_ids, doc_id_weights, query_times_seen): # total imp
         for idx, doc in enumerate(doc_ids):
             try:
                 wgt = doc_id_weights[doc]  # This should be the number of clicks or whatever
-                click_prior_query += "%s^%.3f  " % (doc, wgt)
+                click_prior_query += "%s^%.3f  " % (doc, wgt / query_times_seen)
             except KeyError as ke:
                 pass # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query
@@ -254,7 +254,8 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
         query_obj["query"]["function_score"]["query"]["bool"]["should"].append({
                         "query_string":{  # This may feel like cheating, but it's really not, esp. in ecommerce where you have all this prior data,  You just can't let the test clicks leak in, which is why we split on date
                             "query": click_prior_query,
-                            "fields": ["_id"]
+                            "fields": ["_id"],
+                            "boost": 100000000
                         }
                     })
         #print(query_obj)
