@@ -26,8 +26,13 @@ if args.input:
 sample_rate = args.sample_rate
 
 def transform_training_data(name):
-    # IMPLEMENT
-    return name.replace('\n', ' ')
+    product_name = product_name.lower()
+    product_name = stemmer.stem(product_name)
+    product_name = product_name.translate(str.maketrans("", "", string.punctuation))
+    product_name = product_name.replace("\n"," ")
+    product_name = product_name.replace("\t"," ")
+    product_name = product_name.replace("™","").replace("®","")
+    return product_name
 
 # Directory for product data
 
