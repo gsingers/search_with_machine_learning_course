@@ -7,6 +7,8 @@ import query_utils as qu
 from opensearchpy import RequestError
 import os
 
+
+
 # from importlib import reload
 
 class DataPrepper:
@@ -82,7 +84,7 @@ class DataPrepper:
         pairs['num_impressions'] = pairs.groupby('query')['clicks'].transform('sum')
         # cut off the extreme end of the long tail due to low confidence in the evidence
         pairs = pairs[(pairs['num_impressions'] >= min_impressions) & (pairs['clicks'] >= min_clicks)]
-
+        # cut off the extreme end of the long tail due to low confidence in the evidence
         pairs['doc_id'] = pairs['sku']  # not technically the doc id, but since we aren't doing a search...
         pairs['product_name'] = "fake"
         query_ids = []
@@ -128,7 +130,7 @@ class DataPrepper:
                 prior_doc_ids = prior_clicks_for_query.sku.drop_duplicates()
                 prior_doc_id_weights = prior_clicks_for_query.sku.value_counts() # histogram gives us the click counts for all the doc_ids
                 query_times_seen = prior_clicks_for_query.sku.count()
-            click_prior_query = qu.create_prior_queries(prior_doc_ids, prior_doc_id_weights, query_times_seen)
+            click_prior_map, click_prior_query = qu.create_prior_queries(prior_doc_ids, prior_doc_id_weights, query_times_seen)
             query_obj = qu.create_query(key, click_prior_query, filters=None, size=retrieval_size, include_aggs=False, highlight=False,
                                         source=["name", "sku"])  # TODO: handle categories
             # Fetch way more than usual so we are likely to see our documents that have been clicked
@@ -181,10 +183,8 @@ class DataPrepper:
             "num_impressions": num_impressions,
             "product_name": product_names
         })
-        # remove low click/impressions,
         #remove low click/impressions
         impressions_df = impressions_df[(impressions_df['num_impressions'] >= min_impressions) & (impressions_df['clicks'] >= min_clicks)]
-
         return impressions_df, query_ids_map
 
     def log_features(self, train_data_df, terms_field="_id"):
@@ -232,26 +232,40 @@ class DataPrepper:
         log_query = lu.create_feature_log_query(key, query_doc_ids, click_prior_query, self.featureset_name,
                                                 self.ltr_store_name,
                                                 size=len(query_doc_ids), terms_field=terms_field)
-        # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
-        # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
-        # Your structure should look like the data frame below
-        feature_results = {}
-        feature_results["doc_id"] = []  # capture the doc id so we can join later
-        feature_results["query_id"] = []  # ^^^
-        feature_results["sku"] = []
-        feature_results["salePrice"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  # ^^^
-            feature_results["salePrice"].append(rng.random())
-            feature_results["name_match"].append(rng.random())
-        frame = pd.DataFrame(feature_results)
-        return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
-        # IMPLEMENT_END
+        try:
+            response = self.opensearch.search(body=log_query, index=self.index_name)
+        except RequestError as re:
+            print("Error logging features", re, log_query)
+        else:
+            # Get the features that have been logged.  They aren't in the same order as our first round, so we need to line them up
+            if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
+                hits = response['hits']['hits']
+                # extract the feautres based on the features passed into the Prepper
+                feature_results = {}  # key is the name of the feature from self.feature_names, value is an array of values
+                # for feature in self.feature_names: #initialize storage
+                feature_results["doc_id"] = []  # capture the doc id so we can join later
+                feature_results["query_id"] = []  # ^^^
+                feature_results["sku"] = []  # ^^^
+                for (idx, hit) in enumerate(hits):
+                    features = hit['fields']['_ltrlog'][0]['log_entry']
+                    feature_results["doc_id"].append(int(hit['_id']))
+                    feature_results["sku"].append(int(hit['_source']['sku'][0]))
+                    feature_results["query_id"].append(
+                        int(query_id))  # super redundant, but it will make it easier to join later
+                    for feat_idx, feature in enumerate(features):
+                        feat_name = feature.get('name')
+                        feat_val = feature.get('value', 0)
+                        feat_vals = feature_results.get(feat_name)
+                        if feat_vals is None:
+                            feat_vals = []
+                            feature_results[feat_name] = feat_vals
+                        feat_vals.append(feat_val)
+                frame = pd.DataFrame(feature_results)
+                # Make sure we type things appropriately
+                return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
+            else:  # Save any queries we couldn't match so that we can debug them later
+                no_results[key] = query_doc_ids
+        return None
 
     # Can try out normalizing data, but for XGb, you really don't have to since it is just finding splits
     def normalize_data(self, ranks_features_df, feature_set, normalize_type_map):
@@ -301,5 +315,4 @@ class DataPrepper:
 
     # Determine the number of clicks for this sku given a query (represented by the click group)
     def __num_clicks(self, all_skus_for_query, test_sku):
-        print("IMPLEMENT ME: __num_clicks(): Return how many clicks the given sku received in the set of skus passed ")
-        return 0
+        return all_skus_for_query[all_skus_for_query == test_sku].count()

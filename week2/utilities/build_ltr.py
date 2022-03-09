@@ -4,6 +4,8 @@
 #
 ###
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 import argparse
 import json
 import os
@@ -17,7 +19,6 @@ import pandas as pd
 import search_utils as su
 import xgb_utils as xgbu
 from opensearchpy import OpenSearch
-
 
 
 
@@ -255,7 +256,7 @@ if __name__ == "__main__":
             impressions_df.drop(["product_name", "sku"], axis=1)
             impressions_df = impressions_df.sample(n=args.generate_num_rows).reset_index(drop=True)  # shuffle things
             # impressions_df = impressions_df[:args.generate_num_rows]
-            (impressions_df, query_ids_map) = data_prepper.generate_impressions(impressions_df, train_df,
+            (impressions_df, query_ids_map) = data_prepper.generate_impressions(impressions_df,
                                                                                 query_ids_map,
                                                                                 min_impressions=args.min_impressions,
                                                                                 min_clicks=args.min_clicks)  # impressions as a Pandas DataFrame

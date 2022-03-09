@@ -13,7 +13,7 @@ def create_app(test_config=None):
         app.config.from_envvar('LTR_APPLICATION_SETTINGS', silent=True)
         PRIOR_CLICKS_LOC = os.environ.get("PRIOR_CLICKS_LOC", "/workspace/ltr_output/train.csv")
         print("PRIOR CLICKS: %s" % PRIOR_CLICKS_LOC)
-        if PRIOR_CLICKS_LOC and os.path.isfile(PRIOR_CLICKS_LOC):
+        if PRIOR_CLICKS_LOC:
             priors = pd.read_csv(PRIOR_CLICKS_LOC)
             priors_gb = priors.groupby("query")
             app.config["priors_df"] = priors
