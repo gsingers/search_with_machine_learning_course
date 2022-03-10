@@ -5,10 +5,19 @@ from flask import (
     Blueprint, redirect, render_template, request, url_for, current_app
 )
 
+import fasttext
+import numpy as np
 from week4.opensearch import get_opensearch
-
+import nltk
+from nltk.stem import SnowballStemmer
+from nltk.corpus import stopwords
+from nltk import sent_tokenize, word_tokenize
 import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
+
+
+stemmer = nltk.stem.PorterStemmer()
+
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
@@ -56,9 +65,36 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
+
+def transform_query(query):
+    tokens = word_tokenize(query)
+    tokens = [word for word in tokens if (word.isalpha()) & (word not in stopwords.words('english'))]
+    tokens = [word.lower() for word in tokens]
+    tokens = [stemmer.stem(word) for word in tokens]
+
+    if len(tokens) == 0:
+        return np.nan
+    else:
+        transformed_query = " ".join(tokens)
+    return transformed_query
+
+
+
 def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
-    return None
+    # stemming, lower case
+    user_query = transform_query(user_query)
+    # get predictions
+    categories = list(query_class_model.predict(user_query, 5))
+    # retrieve categories
+    categories[0] = [s.replace("__label__", "") for s in categories[0]]
+    
+    category_codes_idx = []
+    for idx, score in enumerate(categories[1]):
+        if score > 0.5:
+            category_codes_idx.append(idx)
+
+    category_codes = np.array(categories[0])[category_codes_idx]
+    return category_codes
 
 
 @bp.route('/query', methods=['GET', 'POST'])
