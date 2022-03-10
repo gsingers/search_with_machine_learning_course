@@ -1,3 +1,4 @@
+kaggle
 flask
 opensearch-py
 requests
