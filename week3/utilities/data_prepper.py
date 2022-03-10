@@ -15,16 +15,14 @@ class DataPrepper:
     opensearch = None
     index_name = "bbuy_products"
     ltr_store_name = "week3"
-    feature_names = []
 
     def __init__(self, opensearch_client, featureset_name="bbuy_product_featureset", index_name="bbuy_products",
-                 ltr_store_name="week3", feature_names=None) -> None:
+                 ltr_store_name="week3") -> None:
         self.opensearch = opensearch_client
         self.featureset_name = featureset_name
         self.index_name = index_name
         self.ltr_store_name = ltr_store_name
-        if feature_names is not None:
-            self.feature_names = feature_names
+
 
     def __get_query_id(self, query, query_ids_map, query_counter):
         qid = query_ids_map.get(query, None)
@@ -241,8 +239,7 @@ class DataPrepper:
             if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
                 hits = response['hits']['hits']
                 # extract the feautres based on the features passed into the Prepper
-                feature_results = {}  # key is the name of the feature from self.feature_names, value is an array of values
-                # for feature in self.feature_names: #initialize storage
+                feature_results = {}
                 feature_results["doc_id"] = []  # capture the doc id so we can join later
                 feature_results["query_id"] = []  # ^^^
                 feature_results["sku"] = []  # ^^^
