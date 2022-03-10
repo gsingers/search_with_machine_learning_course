@@ -1,3 +1,4 @@
+kaggle
 flask
 opensearch-py
 requests
@@ -5,7 +6,6 @@ ipython
 urljoin
 xgboost
 pandas
-numpy
 numba
 numexpr
 sklearn
