@@ -81,8 +81,7 @@ df['parent'] = df['category'].apply(get_parent)
 MIN_CUT = 100
 df.loc[df['nb_queries'] < MIN_CUT, 'to_swap'] = 1
 # apply boolean mask
-print( df[['category','parent']].mask(df['to_swap']==1, df[['parent','category']].values[:, 0]).shape)
-df[['category']] = df[['category','parent']].mask(df['to_swap']==1, df[['parent','category']].values[:, 0])
+df[['category']] = df[['parent']].mask(df['to_swap']==1, df[['parent']].values)
 print(df.head(20))
 
 # Create labels in fastText format.
