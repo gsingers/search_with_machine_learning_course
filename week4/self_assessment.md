@@ -1,0 +1,55 @@
+### Level 1
+- ```min_queries 100```
+    - Unique categories: **888**
+    - **v1** - default fasttext parameters 
+        - **P@1: 0.574**
+        - **R@1: 0.574**
+        - **R@3: 0.768**
+        - **R@5: 0.832**
+    - **v2** - epoch 20, lr 0.3
+        - **P@1: 0.577**
+        - **R@1: 0.577**
+        - **R@3: 0.771**
+        - **R@5: 0.834**
+    - **v3** - epoch 25, lr 0.5, wordNgrams 2
+        - **P@1: 0.582**
+        - **R@1: 0.582**
+        - **R@3: 0.776**
+        - **R@5: 0.84**
+
+- ```min_queries 1000```
+    - Unique categories: **404**
+    - **v1** - default fasttext parameters 
+        - **P@1: 0.576**
+        - **R@1: 0.576**
+        - **R@3: 0.774**
+        - **R@5: 0.837**
+     - **v2** - epoch 20, lr 0.3
+        - **P@1: 0.58**
+        - **R@1: 0.58**
+        - **R@3: 0.775**
+        - **R@5: 0.838**
+    - **v3** - epoch 25, lr 0.5, wordNgrams 2
+        - **P@1: 0.584**
+        - **R@1: 0.584**
+        - **R@3: 0.781**
+        - **R@5: 0.845**
+
+### Level 2
+- Improved Queries
+    - Query **iphone**:
+        - Predicted categories: ['pcmcat209400050001', 'pcmcat214700050000']
+        - **200** hits instead of 3,241
+    - Query **4s**
+        - Predicted categories: ['pcmcat209400050001']
+        - **28** hits instead of 459
+    - Query **computer**
+        - Predicted categories: ['pcmcat212600050008', 'pcmcat209700050013', 'pcmcat247400050000']
+        - **230** hits instead of 10,000
+- Problematic Queries
+    - Query **car**:
+        - Predicted categories: ['cat02015', 'pcmcat143700050032', 'cat09000', 'abcat0301014', 'pcmcat219900050000']
+        - Movies with title car is returned.
+    - Query **radio**:
+        - Predicted categories: ['abcat0302013', 'abcat0206001', 'abcat0208011', 'cat02015', 'pcmcat185400050003'] 
+        - Radio devices were ranked lower since the model did not return their category with a high confidence. The CD/DVDs with radio in their name is returned in the higher positions.

@@ -4,6 +4,9 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 import csv
+import string
+
+from nltk.stem.snowball import SnowballStemmer
 
 # Useful if you want to perform stemming.
 import nltk
@@ -48,9 +51,37 @@ parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 
 df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
-# IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+stemmer = SnowballStemmer("english")
 
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+def transform_query(query):
+    query = query.lower()
+    translator = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+    query = query.translate(translator)
+    query = ' '.join(query.split())
+    query = stemmer.stem(query)
+    return query
+
+def update_to_parent_category(cat, cats_to_be_updated, possible_parent_cats):
+    if cat in cats_to_be_updated and not cat in possible_parent_cats:
+        parent_of_cat_df = parents_df[parents_df['category'] == cat]
+        if len(parent_of_cat_df) == 0:
+            return cat
+        parent_df_row = parent_of_cat_df.iloc[0]
+        return parent_df_row['parent']
+    else:
+        return cat
+
+df['query'] = df['query'].transform(transform_query)
+print(len(df['category'].unique()))
+cat_counts = df.groupby(['category']).size().reset_index(name='counts')
+print(cat_counts)
+while len(cat_counts[cat_counts["counts"] < min_queries].index) != 0:
+    cats_wo_queries_df = cat_counts[cat_counts["counts"] < min_queries]
+    cats_wo_queries = cats_wo_queries_df['category'].values
+    possible_parent_cats = parents_df[parents_df['category'].isin(cats_wo_queries)]['parent'].values
+    df['category'] = df['category'].transform(lambda x: update_to_parent_category(x, cats_wo_queries, possible_parent_cats))
+    cat_counts = df.groupby(['category']).size().reset_index(name='counts')
+    print(len(df['category'].unique()))
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']
