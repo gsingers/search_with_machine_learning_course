@@ -94,7 +94,7 @@ tail -50000 .workspace/datasets/labeled_query_data_all_shuffled.txt \
 fasttext supervised \
   -input .workspace/datasets/labeled_query_data_all.train \
   -output model_query_cat_all \
-  -minCountLabel 100 \
+  -minCountLabel 1000 \
   -lr 0.5 \
   -dim 100 \
   -wordNgrams 2  \

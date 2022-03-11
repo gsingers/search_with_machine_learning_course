@@ -10,6 +10,9 @@ from week4.opensearch import get_opensearch
 import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
 
+import nltk
+stemmer = nltk.stem.PorterStemmer()
+
 bp = Blueprint('search', __name__, url_prefix='/search')
 
 
@@ -56,10 +59,24 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
+def normalize_query(query):
+    ret = query.lower()
+    ret = ''.join(c for c in ret if c.isalpha() or c.isnumeric() or c=='-' or c==' ' or c =='.')
+    ret = ' '.join(map(stemmer.stem, ret.split(' ')))
+    return ret
+
 def get_query_category(user_query, query_class_model):
     print("IMPLEMENT ME: get_query_category")
-    return None
-
+    user_query = normalize_query(user_query)
+    category_code, score = query_class_model.predict(user_query, 5)
+    category_code = [code.replace("__label__", "") for code in category_code]
+    predictions = zip(category_code, score)
+    category_codes = []
+    for (category_code, score) in predictions:
+        print(category_code, score)
+        if score > 0.45:
+            category_codes.append(category_code)
+    return category_codes
 
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
@@ -139,6 +156,7 @@ def query():
     query_category = get_query_category(user_query, query_class_model)
     if query_category is not None:
         print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
+        print(">>>>>", query_category)
     #print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
