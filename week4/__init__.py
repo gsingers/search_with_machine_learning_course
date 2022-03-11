@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 from flask import render_template
+import fasttext
 
 def create_app(test_config=None):
     # create and configure the app
@@ -19,6 +20,8 @@ def create_app(test_config=None):
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
+
+    app.config["index_name"] = os.environ.get("INDEX_NAME", "bbuy_products")
 
     # ensure the instance folder exists
     try:

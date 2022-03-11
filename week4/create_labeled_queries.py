@@ -9,9 +9,9 @@ import csv
 import nltk
 stemmer = nltk.stem.PorterStemmer()
 
-categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
+categories_file_name = r'.workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 
-queries_file_name = r'/workspace/datasets/train.csv'
+queries_file_name = r'.workspace/datasets/train.csv'
 output_file_name = r'/workspace/datasets/labeled_query_data.txt'
 
 parser = argparse.ArgumentParser(description='Process arguments.')
@@ -48,14 +48,35 @@ parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 
 df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
-# IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+# Convert queries to lowercase, and optionally implement other normalization, like stemming.
+# Shamelessly copied from week3 solution
+def normalize_query(query):
+    ret = query.lower()
+    ret = ''.join(c for c in ret if c.isalpha() or c.isnumeric() or c=='-' or c==' ' or c =='.')
+    ret = ' '.join(map(stemmer.stem, ret.split(' ')))
+    return ret
 
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+# Roll up categories to ancestors to satisfy the minimum number of queries per category.
+# Get count of the queries
+df["number_of_queries_per_category"] = df.groupby('category')['query'].transform(len)
+
+def get_parent(candidate):
+    return parents_df[parents_df['category'] == candidate]['parent'].values[0]
+
+df['parent'] = df['category'].apply(get_parent)
+# Replace cat if there are less queries than min_queries
+df['filtered_category'] = \
+    df.apply(lambda row: row.category if row.number_of_queries_per_category > min_queries else row.parent, axis=1)
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']
 
 # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
 df = df[df['category'].isin(categories)]
-df['output'] = df['label'] + ' ' + df['query']
+
+df['normalized_query'] = df.apply(lambda row: normalize_query(row.query), axis=1)
+
+print("Unique categories: ", df.category.nunique())
+
+df['output'] = df['label'] + ' ' + df['normalized_query']
 df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
