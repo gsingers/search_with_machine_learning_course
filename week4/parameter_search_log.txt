@@ -1,0 +1,125 @@
+Randomized order of data, shuffled file
+Created training and test files
+Training with default parameters
+N	50000
+P@1	0.578
+R@1	0.578
+N	50000
+P@3	0.243
+R@3	0.728
+N	50000
+P@5	0.157
+R@5	0.784
+
+Learning rate set to 0.1
+N	50000
+P@1	0.576
+R@1	0.576
+N	50000
+P@3	0.242
+R@3	0.727
+N	50000
+P@5	0.156
+R@5	0.782
+
+Learning rate set to 0.3
+N	50000
+P@1	0.617
+R@1	0.617
+N	50000
+P@3	0.261
+R@3	0.783
+N	50000
+P@5	0.167
+R@5	0.837
+
+Learning rate set to 0.5
+N	50000
+P@1	0.617
+R@1	0.617
+N	50000
+P@3	0.261
+R@3	0.782
+N	50000
+P@5	0.168
+R@5	0.839
+
+Learning rate set to 0.7
+
+Epochs set to 5
+N	50000
+P@1	0.575
+R@1	0.575
+N	50000
+P@3	0.243
+R@3	0.728
+N	50000
+P@5	0.157
+R@5	0.783
+
+Epochs set to 10
+N	50000
+P@1	0.615
+R@1	0.615
+N	50000
+P@3	0.258
+R@3	0.775
+N	50000
+P@5	0.166
+R@5	0.83
+
+Epochs set to 15,
+N	50000
+P@1	0.62
+R@1	0.62
+N	50000
+P@3	0.261
+R@3	0.783
+N	50000
+P@5	0.168
+R@5	0.838
+
+Epochs set to 20
+N	50000
+P@1	0.621
+R@1	0.621
+N	50000
+P@3	0.261
+R@3	0.783
+N	50000
+P@5	0.167
+R@5	0.835
+
+Word ngram set to 1
+N	50000
+P@1	0.578
+R@1	0.578
+N	50000
+P@3	0.243
+R@3	0.728
+N	50000
+P@5	0.156
+R@5	0.782
+
+Word ngram set to 2
+N	50000
+P@1	0.556
+R@1	0.556
+N	50000
+P@3	0.234
+R@3	0.702
+N	50000
+P@5	0.151
+R@5	0.754
+
+Word ngram set to 3
+N	50000
+P@1	0.547
+R@1	0.547
+N	50000
+P@3	0.229
+R@3	0.687
+N	50000
+P@5	0.148
+R@5	0.74
+

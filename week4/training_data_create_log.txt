@@ -1,0 +1,24 @@
+Minimum queries per label is set to 100
+There are 1486 categories in total
+There are 668 categories that don't meet the min_queries criterion
+For a minimum of 100, the number of categories remaining is 878
+
+Minimum queries per label is set to 300
+There are 1486 categories in total
+There are 916 categories that don't meet the min_queries criterion
+For a minimum of 300, the number of categories remaining is 649
+
+Minimum queries per label is set to 500
+There are 1486 categories in total
+There are 1027 categories that don't meet the min_queries criterion
+For a minimum of 500, the number of categories remaining is 542
+
+Minimum queries per label is set to 700
+There are 1486 categories in total
+There are 1108 categories that don't meet the min_queries criterion
+For a minimum of 700, the number of categories remaining is 461
+
+Minimum queries per label is set to 1000
+There are 1486 categories in total
+There are 1188 categories that don't meet the min_queries criterion
+For a minimum of 1000, the number of categories remaining is 386

@@ -30,6 +30,8 @@ output_file_name = args.output
 if args.min_queries:
     min_queries = int(args.min_queries)
 
+output_file_name = f"/workspace/datasets/labeled_query_data_{min_queries}.txt"
+
 # The root category, named Best Buy with id cat00000, doesn't have a parent.
 root_category_id = "cat00000"
 
@@ -88,6 +90,7 @@ invalid_categories = list(df[['category','query']]\
     .groupby('category')\
     .size().index)
 
+print(f"Minimum queries per label is set to {min_queries}")
 print(f"There are {str(len(total_categories))} categories in total")
 print(f"There are {str(len(invalid_categories))} categories that don't meet the min_queries criterion")
 
@@ -98,7 +101,7 @@ while len(invalid_categories)>0:
             # print(f"Replacing {cat} with its ancestor {parent_lookup[cat]}")
             df.loc[df['category']==cat,:] = parent_lookup[cat]
         except KeyError as e:
-            print(f'Cant replace {cat}')
+            # print(f'Cant replace {cat}')
             pass
     invalid_categories = list(df[['category','query_normalized']]\
         .groupby('category')\
