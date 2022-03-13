@@ -12,6 +12,15 @@ import week4.utilities.ltr_utils as lu
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
+#Additional imports to make cleanup of query work
+import nltk
+from nltk.stem import SnowballStemmer
+nltk.download("punkt")
+from nltk.tokenize import word_tokenize
+import string
+
+#stemmer = nltk.stem.PorterStemmer()
+stemmer = SnowballStemmer("english")
 
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
@@ -56,10 +65,25 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
-def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
-    return None
+#From Daniel T's solution
+def transform_query(query):
+    # Transforming the name strings to lowercase, changing punctuation characters  
+    # to spaces, and stemming (you can use the NLTK Snowball stemmer)
+   ret = query.lower()
+   ret = ''.join(c for c in ret if c.isalpha() or c.isnumeric() or c=='-' or c==' ' or c =='.')
+   ret = ' '.join(map(stemmer.stem, ret.split(' ')))
+   return ret
 
+def get_query_category(user_query, query_class_model, precision):
+    print("IMPLEMENTED: get_query_category")
+    cats_conf = []
+    #In order to obtain the k most likely labels and their associated probabilities for a piece of text, use:
+    #$ ~/fastText-0.9.2/fasttext predict-prob model_categories_1000.bin - 5
+    predicted_cat,prob_score = query_class_model.predict(transform_query(user_query), k=precision)
+    print("Predicted category for the given query : {} {}",predicted_cat , prob_score)
+    cats_conf += [pcat.replace('__label__','') for pcat, probs in zip(predicted_cat, prob_score) if probs > 0.5]
+    print(cats_conf)
+    return cats_conf
 
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
@@ -121,7 +145,7 @@ def query():
             explain = True
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
-        model = request.args.get("model", "simiple")
+        model = request.args.get("model", "simple")
         if model == "simple_LTR":
             query_obj = qu.create_simple_baseline(user_query, click_prior, filters, sort, sortDir, size=500)
             query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name, rescore_size=500)
@@ -136,10 +160,18 @@ def query():
         query_obj = qu.create_query("*", "", [], sort, sortDir, size=100)
 
     query_class_model = current_app.config["query_model"]
-    query_category = get_query_category(user_query, query_class_model)
+    # Precision and recall at desired value for e.g. 5 in this case
+    query_category = get_query_category(user_query, query_class_model,5)
     if query_category is not None:
-        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
-    #print("query obj: {}".format(query_obj))
+        print("IMPLEMENTED: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
+        if "query" in query_obj and "bool" in query_obj["query"]:
+            query_obj["query"]["bool"]["filter"] = [{
+                "terms": {
+                    "categoryPathIds.keyword": query_category
+                }
+            }]
+        print("Effective Query Object: {}".format(query_obj))
+        
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
@@ -171,5 +203,3 @@ def get_click_prior(user_query):
             # nothing to do here, we just haven't seen this query before in our training set
     print("prior: %s" % click_prior)
     return click_prior
-
-
