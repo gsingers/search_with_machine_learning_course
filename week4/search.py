@@ -82,16 +82,34 @@ def normalize_text(input_text, stemming=True):
 
 def get_query_category(user_query, query_class_model):
     print("IMPLEMENT ME: get_query_category")
+
+    num_predictions = 10
+    acc_probability = 0.5
+    min_probability = 0.1
     
+    # Prepare the text for predictions
     input_text = stemmer.stem(user_query)
     input_text = ''.join([i.lower() for i in input_text if (i.isalpha() or i.isnumeric() or i==' ')])
     input_text = ' '.join(input_text.split())
+    print(f"Processed query text for prediction is {input_text}")
 
-    category_prediction = query_class_model.predict(input_text, k=5)
-    print(category_prediction)
-    categories = [label[0][9:] for label in list(zip(*category_prediction)) if label[1]>0.1]
+    # Get the actual predictions from the model
+    predictions = query_class_model.predict(input_text, k=num_predictions)
+    predictions = [i for i in list(zip(*predictions)) if i[1]>=min_probability]
+    print(predictions)
 
-    return categories
+    prob = 0
+    terms = []
+    ix = 0
+
+    while (prob <= acc_probability and ix < len(predictions)-1):
+        prob += predictions[ix][1]
+        terms.append(predictions[ix][0][9:])
+        ix += 1
+
+    if len(terms)>0:
+        print(terms)
+        return terms
 
 
 @bp.route("/query", methods=["GET", "POST"])
@@ -216,11 +234,14 @@ def query():
 
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
+    print(f"The category predictions are {query_category}")
     if query_category is not None:
-        print(
-            "IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead"
-        )
-    # print("query obj: {}".format(query_obj))
+        query_obj["query"]["bool"]["filter"] = [{
+            "terms": {
+                "categoryPathIds.keyword": query_category
+            }
+        }]
+    print("query obj: {}".format(query_obj))
     response = opensearch.search(
         body=query_obj, index=current_app.config["index_name"], explain=explain
     )
