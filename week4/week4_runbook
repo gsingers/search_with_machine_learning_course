@@ -179,3 +179,41 @@ R@5     0.799
 N       50000
 P@3     0.246
 R@3     0.738
+
+## Fetching single prediction per query
+
+(search_with_ml_week4) gitpod /workspace/search_with_machine_learning_course $ ~/fastText-0.9.2/fasttext predict model_categories_1000.bin -
+samsung
+__label__pcmcat247400050000
+lenovo
+__label__pcmcat247400050000
+bread
+__label__cat02015
+camcorder
+__label__abcat0403004
+laptop
+__label__pcmcat247400050000
+xbox
+__label__abcat0701001
+video game
+__label__cat02015
+
+## Fetching 5 predictions for each query
+
+(search_with_ml_week4) gitpod /workspace/search_with_machine_learning_course $ ~/fastText-0.9.2/fasttext predict model_categories_1000.bin - 5
+samsung
+__label__pcmcat247400050000 __label__abcat0101001 __label__pcmcat209400050001 __label__pcmcat167300050040 __label__pcmcat209000050008
+camcorder
+__label__abcat0403004 __label__abcat0410012 __label__pcmcat225800050009 __label__cat09000 __label__abcat0404004
+lenovo
+__label__pcmcat247400050000 __label__pcmcat212600050008 __label__abcat0811004 __label__pcmcat209000050008 __label__pcmcat164200050013
+laptop
+__label__pcmcat247400050000 __label__pcmcat164200050013 __label__pcmcat247400050001 __label__pcmcat183800050007 __label__abcat0515028
+camera
+__label__abcat0401004 __label__abcat0403004 __label__pcmcat180400050000 __label__pcmcat186400050002 __label__pcmcat214000050002
+
+## Fetching probability score with predictions
+
+(search_with_ml_week4) gitpod /workspace/search_with_machine_learning_course $ ~/fastText-0.9.2/fasttext predict-prob model_categories_1000.bin - 5
+samsung
+__label__pcmcat247400050000 0.189546 __label__abcat0101001 0.108308 __label__pcmcat209400050001 0.0994821 __label__pcmcat167300050040 0.0875338 __label__pcmcat209000050008 0.0691625
