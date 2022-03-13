@@ -25,6 +25,15 @@ output_file_name = args.output
 if args.min_queries:
     min_queries = int(args.min_queries)
 
+# IMPLEMENTED: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+def transform_query(query):
+    # Transforming the name strings to lowercase, changing punctuation characters  
+    # to spaces, and stemming (you can use the NLTK Snowball stemmer)
+   ret = query.lower()
+   ret = ''.join(c for c in ret if c.isalpha() or c.isnumeric() or c=='-' or c==' ' or c =='.')
+   ret = ' '.join(map(stemmer.stem, ret.split(' ')))
+   return ret
+
 # The root category, named Best Buy with id cat00000, doesn't have a parent.
 root_category_id = 'cat00000'
 
@@ -43,11 +52,32 @@ for child in root:
         categories.append(leaf_id)
         parents.append(cat_path_ids[-2])
 parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 'parent'])
+#TODO:for debug , remove later
+print("Data from Parent: {}\n",parents_df.head())
 
 # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
 df = pd.read_csv(queries_file_name)[['category', 'query']]
-df = df[df['category'].isin(categories)]
+category_group = df['category'].value_counts()[lambda x: x>min_queries].index.tolist()
+#default code
+#df = df[df['category'].isin(categories)]
+df = df[df['category'].isin(category_group)]
+df['query']=df['query'].apply(transform_query)
 
+print("Data from Query:  {}\n",df.head())
+
+# count number of categories
+df["number_of_queries"] = df.groupby('category')['query'].transform(len)
+print("Number of queries:  {}\n",df.head())
+
+def get_parent_cat(query):
+    print("parent_df[category]: {}{}",parents_df['category'] , query)
+    return parents_df[parents_df['category']  == query]['parent'].values[0]
+
+# get parent for each category
+df['parent'] = df['category'].apply(get_parent_cat) 
+print("Parent Category:  {}\n",df.head())
+
+print("Unique categories : {}", df['category'].nunique())
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
