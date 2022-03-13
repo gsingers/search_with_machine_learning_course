@@ -3,7 +3,7 @@ declare -a MIN_QUERIES=(100 300 500 700 1000)
 
 for i in "${MIN_QUERIES[@]}"
 do
-    FILE=/workspace/datasets/labeled_query_data_${i}.txt     
+    FILE=/workspace/datasets/labeled_query_data_$i.txt     
     if test -f "$FILE"; then
         rm -f "$FILE"
     fi

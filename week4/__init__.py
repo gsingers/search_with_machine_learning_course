@@ -34,9 +34,9 @@ def create_app(test_config=None):
         pass
 
     # A simple landing page
-    # @app.route('/')
-    # def index():
-    #    return render_template('index.jinja2')
+    @app.route('/')
+    def index():
+       return render_template('index.jinja2')
 
     from . import search
 

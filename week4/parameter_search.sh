@@ -9,9 +9,10 @@ declare -a FILES=(
 # If they're there, remove them
 for i in "${FILES[@]}"
 do
-    if test -f "$FILES"; then 
+    #if test -f "$FILES"; then 
         rm -f "$FILES"
-    fi
+    #fi
+    echo "$i deleted"
 done
 
 # Shuffle the lines

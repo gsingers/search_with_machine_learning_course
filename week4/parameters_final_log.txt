@@ -1,0 +1,7 @@
+/workspace/datasets/shuffled_query_data.txt deleted
+/workspace/datasets/query_class_train.fasttext deleted
+/workspace/datasets/query_class_test.fasttext deleted
+/workspace/models/categories.bin deleted
+/workspace/models/categories.vec deleted
+Randomized order of data, shuffled file
+Created training and test files

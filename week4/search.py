@@ -4,7 +4,9 @@
 from flask import Blueprint, redirect, render_template, request, url_for, current_app
 
 from week4.opensearch import get_opensearch
-from create_labeled_queries import normalize_text
+
+from nltk.stem import *
+stemmer = PorterStemmer()
 
 import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
@@ -65,12 +67,29 @@ def process_filters(filters_input):
     return filters, display_filters, applied_filters
 
 
+def normalize_text(input_text, stemming=True):
+
+    input_text = stemmer.stem(input_text)
+
+    # Only retain lowercase letters, digits and spaces
+    processed = ''.join([i.lower() for i in input_text if (i.isalpha() or i.isnumeric() or i==' ')])
+
+    # Removing multiple spaces in sequence
+    processed = ' '.join(processed.split())
+    
+    return processed
+
+
 def get_query_category(user_query, query_class_model):
     print("IMPLEMENT ME: get_query_category")
-    normalized = normalize_text(input_text=user_query)
-    category_prediction = query_class_model.predict(normalized, k=5)
-    categories = [label[0][9:] for label in list(zip(*category_prediction)) if label[1]>0.1]
+    
+    input_text = stemmer.stem(user_query)
+    input_text = ''.join([i.lower() for i in input_text if (i.isalpha() or i.isnumeric() or i==' ')])
+    input_text = ' '.join(input_text.split())
 
+    category_prediction = query_class_model.predict(input_text, k=5)
+    print(category_prediction)
+    categories = [label[0][9:] for label in list(zip(*category_prediction)) if label[1]>0.1]
 
     return categories
 
