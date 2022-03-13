@@ -4,10 +4,13 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 import csv
+import re
 
 # Useful if you want to perform stemming.
 import nltk
+nltk.download('stopwords')
 stemmer = nltk.stem.PorterStemmer()
+stop_words = set(nltk.corpus.stopwords.words('english'))
 
 categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 
@@ -49,8 +52,42 @@ df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+def normalize_query(query):
+    query = query.lower()
+    query = re.sub('[\'"]', '', query)
+    tokenized_query = nltk.word_tokenize(query)
+    tokenized_query = [t for t in tokenized_query if t not in stop_words]
+    tokenized_query = [stemmer.stem(t) for t in tokenized_query]
+    query = ' '.join(tokenized_query)
+    return query
+
+def num_of_unique_queries():
+    return df['query'].nunique()
+
+
+print(f'Starting to normalize queries. Before normalization, there are {num_of_unique_queries()} unique queries.')
+df['query'] = df['query'].apply(normalize_query)
+print(f'Done. After normalization, there are {num_of_unique_queries()} unique queries.')
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+def num_of_unique_categories():
+    return df['category'].nunique()
+
+
+parent_categories_series = parents_df.set_index('category')['parent']
+parent_categories_series[root_category_id] = root_category_id
+queries_per_category = df.groupby('category')['query'].nunique()
+current_min_queries = queries_per_category.min()
+print(f'Before pruning the category tree, there are {num_of_unique_categories()} categories, and the current min_queries is {current_min_queries}.')
+while current_min_queries < min_queries:
+    small_categories_set = set(queries_per_category[queries_per_category < min_queries].index)
+    print(f'Since the current min_queries is below {min_queries}, replacing {len(small_categories_set)} categories with their parents.')
+    category_replacements_dict = parent_categories_series[small_categories_set].to_dict()
+    df['category'].replace(category_replacements_dict, inplace=True)
+    queries_per_category = df.groupby('category')['query'].nunique()
+    current_min_queries = queries_per_category.min()
+    print(f'Done. Now there are {num_of_unique_categories()} categories, and the current min_queries is {current_min_queries}.')
+
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']

@@ -10,6 +10,14 @@ from week4.opensearch import get_opensearch
 import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
 
+import nltk
+nltk.download('stopwords')
+stemmer = nltk.stem.PorterStemmer()
+stop_words = set(nltk.corpus.stopwords.words('english'))
+
+NUM_TO_PREDICT = 10
+SCORE_THRESHOLD = 0.5
+
 bp = Blueprint('search', __name__, url_prefix='/search')
 
 
@@ -56,9 +64,32 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
+def normalize_query(query):
+    print(f'Normalizing query {query}')
+    query = query.lower()
+    query = re.sub('[\'"]', '', query)
+    tokenized_query = nltk.word_tokenize(query)
+    tokenized_query = [t for t in tokenized_query if t not in stop_words]
+    tokenized_query = [stemmer.stem(t) for t in tokenized_query]
+    query = ' '.join(tokenized_query)
+    print(f'Done normalizing, got {query}')
+    return query
+
 def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
-    return None
+    norm_query = normalize_query(user_query)
+    print('Predicting...')
+    categories, scores = query_class_model.predict(stemmer_query, NUM_TO_PREDICT)
+    categories_and_scores = [(c.replace('__label__', ''), s) for c, s in zip(categories, scores)]
+    print(f'Done predicting, got {categories_and_scores}')
+    accumulated_score = 0
+    res = []
+    for c, s in categories_and_scores:
+        res.append(c)
+        accumulated_score += s
+        if accumulated_score >= SCORE_THRESHOLD:
+            break
+    print(f'Query categorization result: {res}')
+    return res
 
 
 @bp.route('/query', methods=['GET', 'POST'])
@@ -138,8 +169,14 @@ def query():
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
     if query_category is not None:
-        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
-    #print("query obj: {}".format(query_obj))
+        query_obj['query']['bool']['filter'] = [
+            {
+                'terms': {
+                    'categoryPathIds.keyword': query_category
+                }
+            }
+        ]
+    print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
