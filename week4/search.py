@@ -170,14 +170,14 @@ def query():
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
     print("query obj: {}".format(query_obj))
-    if len(query_category) > 0 and user_query != '*':
-        query_obj['query']['bool']['filter'].append(
+    if len(query_category) > 0 and user_query != '*' and 'query' in query_obj and 'bool' in query_obj['query']:
+        query_obj['query']['bool']['filter'] = [
             {
                 'terms': {
                     'categoryPathIds.keyword': query_category
                 }
             }
-        )
+        ]
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
