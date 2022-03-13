@@ -37,8 +37,8 @@ tree = ET.parse(categories_file_name)
 root = tree.getroot()
 # Parse the category XML file to map each category id to its parent category id in a dataframe.
 categories = []
-category_names = []
-category_path_names = []
+names = []
+paths = []
 parents = []
 for child in root:
     id = child.findtext("id")
@@ -48,18 +48,18 @@ for child in root:
     leaf_id = cat_path_ids[-1]
     if leaf_id != root_category_id:
         categories.append(leaf_id)
-        category_names.append(cat_path_names[-1])
-        category_path_names.append(" > ".join(reversed(cat_path_names)))
+        names.append(cat_path_names[-1])
+        paths.append(" > ".join(reversed(cat_path_names)))
         parents.append(cat_path_ids[-2])
 parents_df = pd.DataFrame(
     {
         "category": categories,
-        "category_name": category_names,
-        "category_path_names": category_path_names,
         "parent": parents,
+        "name": names,
+        "path": paths,
     },
 )
-parents_df = parents_df.set_index("category")
+parents_df = parents_df.set_index("category", drop=False)
 assert parents_df.index.is_unique
 
 # %%
@@ -73,33 +73,37 @@ tdf = df.assign(orig_category=df.category)
 
 # %%
 tdf.category = tdf.orig_category
-
+parents_df = parents_df.set_index("category", drop=False)
 while True:
-    # Find counts for each unique value in category column
     vc = tdf.category.value_counts()
-    assert vc.sum() == len(tdf)
+    small_cats = vc[vc < min_queries].index.to_series()
+    small_cats_parents = small_cats.map(parents_df.parent)
+    # Pick only leaf categories in one iteration ignoring non-leaf.
+    # It is non-leaf if it is also in parents, so remove it.
+    cats_to_filter = small_cats[~small_cats.isin(small_cats_parents)]
+
     print(f"\nNo. of unique categories = {len(vc)}")
-    # Find categories where count < min_queries
-    cats_to_filter = vc[vc < min_queries].index.to_series(name="category")
-    print(f"No. of categories with #queries < {min_queries} = {len(cats_to_filter)}")
-    # print(cats_to_filter.map(parents_df.category_path_names).sort_values().to_string())
+    print(f"No. of categories with #queries < {min_queries} = {len(cats_to_filter)} (leaf) / {len(small_cats)} (all)")
+    # print(cats_to_filter.map(parents_df.path).sort_values().to_string())
+
     if len(cats_to_filter) == 0:
         break
-    # Map category -> parent_category if category needs to be filtered
-    mask = tdf.category.isin(cats_to_filter)
-    updated_cats = tdf.loc[mask, "category"].map(parents_df.parent)
-    print(f"No. of affected rows = {len(updated_cats)}")
-    tdf.update(updated_cats)
-    # print(tdf.loc[mask, []].assign(
-    #     orig_path = tdf.orig_category.map(parents_df.category_path_names),
-    #     new_name = tdf.category.map(parents_df.category_name),
-    # ))
 
-# Make sure that every category is in the taxonomy.
-tdf = tdf[tdf.category.isin(categories)]
+    mask = tdf.category.isin(cats_to_filter)
+    updated_cats = tdf.category[mask].map(parents_df.parent)
+    tdf.update(updated_cats)
+
+    print(f"No. of affected rows = {len(updated_cats)}")
+    # print(tdf.loc[mask, []].assign(
+    #     q = tdf["query"].str[:20],
+    #     orig_path = tdf.orig_category.map(parents_df.path.str[:30]),
+    #     new_name = tdf.category.map(parents_df.name),
+    # ).to_markdown(index=False))
 
 
 # %%
+# Make sure that every category is in the taxonomy.
+tdf = tdf[tdf.category.isin(categories)]
 # Create labels in fastText format.
 lines = "__label__" + tdf["category"] + " " + tdf["query"]
 # Shuffle
@@ -116,6 +120,7 @@ def to_txt(df, filepath):
         index=False,
     )
 
+
 print()
 output_fp = Path(output_dir) / f"labeled_data.mq{min_queries}.txt"
 train_fp = Path(output_dir) / f"train.mq{min_queries}.txt"
@@ -123,5 +128,3 @@ test_fp = Path(output_dir) / f"test.mq{min_queries}.txt"
 to_txt(lines, output_fp)
 to_txt(lines[:50000], train_fp)
 to_txt(lines[-50000:], test_fp)
-
-

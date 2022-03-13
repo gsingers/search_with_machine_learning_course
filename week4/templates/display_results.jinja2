@@ -4,8 +4,10 @@
       <div class="search-result-name">{#do we have a highlight?#}
         {% if hit.highlight and hit.highlight.name %}
           {{ hit.highlight.name[0] }}
-        {% else%}
+        {% elif hit._source.name %}
           {{ hit._source.name[0] }}
+        {% else %}
+          Missing Name
         {% endif %}
       </div>
       <div><span class="search-result-header">ID</span>: {{ hit._source.productId[0] }}</div>

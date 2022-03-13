@@ -5,6 +5,10 @@ from flask import (
     Blueprint, redirect, render_template, request, url_for, current_app
 )
 
+import string
+import nltk
+import pandas as pd
+
 from week4.opensearch import get_opensearch
 
 import week4.utilities.query_utils as qu
@@ -12,6 +16,20 @@ import week4.utilities.ltr_utils as lu
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
+
+#####
+# Transform query text to lowercase/stem etc.
+#####
+punctuation_table = str.maketrans("", "", "®©™" + string.punctuation)
+stemmer = nltk.stem.PorterStemmer()
+
+
+def transform_query(text):
+    text = text.lower()
+    text = text.translate(punctuation_table)
+    tokens = nltk.word_tokenize(text)
+    tokens = [stemmer.stem(t) for t in tokens]
+    return " ".join(tokens)
 
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
@@ -56,9 +74,29 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
-def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
-    return None
+THRESHOLD_SCORE = .5 
+MIN_SCORE = 0.05 # Don't return category if score is less than min_score
+
+def get_query_category(user_query, query_class_model): 
+    # return None
+    query = transform_query(user_query)
+    # query = user_query
+    print(f"\nquery = {user_query}")
+    print(f"transformed = {query}")
+
+    cats = []
+    cumscore = 0.0
+    labels, scores = query_class_model.predict(query, k=5)
+    for label, score in zip(labels, scores):
+        if score < MIN_SCORE: break
+        cat = label.replace("__label__", "")
+        cats.append(cat)
+        print(cat, f"{score:.2}", current_app.config["categories_df"].loc[cat, "name"])
+        cumscore += score
+        if cumscore > THRESHOLD_SCORE: break
+    
+    print("cats=", cats)
+    return cats
 
 
 @bp.route('/query', methods=['GET', 'POST'])
@@ -121,7 +159,7 @@ def query():
             explain = True
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
-        model = request.args.get("model", "simiple")
+        model = request.args.get("model", "simple")
         if model == "simple_LTR":
             query_obj = qu.create_simple_baseline(user_query, click_prior, filters, sort, sortDir, size=500)
             query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name, rescore_size=500)
@@ -137,9 +175,13 @@ def query():
 
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
-    if query_category is not None:
-        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
-    #print("query obj: {}".format(query_obj))
+    if query_category:
+        query_obj["query"]["bool"]["filter"] = [{
+            "terms": {
+                "categoryPathIds.keyword": query_category
+            }
+        }]
+    print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
