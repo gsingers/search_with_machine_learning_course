@@ -76,11 +76,11 @@ print("Data from Parent: {}\n",parents_df.head())
 # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
 df = pd.read_csv(queries_file_name)[['category', 'query']]
 #deduce category groups to determine counts
-#category_group = df['category'].value_counts()[lambda x: x>min_queries].index.tolist()
-#df = df[df['category'].isin(category_group)]
+category_group = df['category'].value_counts()[lambda x: x>min_queries].index.tolist()
+df = df[df['category'].isin(category_group)]
 
 #default code
-df = df[df['category'].isin(categories)]
+#df = df[df['category'].isin(categories)]
 df['transformed_query']=df['query'].apply(transform_query)
 
 print("Data from transformed Query:  {}\n",df.head())
