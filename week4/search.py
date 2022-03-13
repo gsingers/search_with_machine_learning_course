@@ -10,6 +10,7 @@ from week4.opensearch import get_opensearch
 import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
 
+import re
 import nltk
 nltk.download('stopwords')
 stemmer = nltk.stem.PorterStemmer()
@@ -78,7 +79,7 @@ def normalize_query(query):
 def get_query_category(user_query, query_class_model):
     norm_query = normalize_query(user_query)
     print('Predicting...')
-    categories, scores = query_class_model.predict(stemmer_query, NUM_TO_PREDICT)
+    categories, scores = query_class_model.predict(user_query, NUM_TO_PREDICT)
     categories_and_scores = [(c.replace('__label__', ''), s) for c, s in zip(categories, scores)]
     print(f'Done predicting, got {categories_and_scores}')
     accumulated_score = 0
@@ -168,15 +169,15 @@ def query():
 
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
-    if query_category is not None:
-        query_obj['query']['bool']['filter'] = [
+    print("query obj: {}".format(query_obj))
+    if len(query_category) > 0 and user_query != '*':
+        query_obj['query']['bool']['filter'].append(
             {
                 'terms': {
                     'categoryPathIds.keyword': query_category
                 }
             }
-        ]
-    print("query obj: {}".format(query_obj))
+        )
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
