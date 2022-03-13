@@ -4,6 +4,7 @@ services:
     image: gsingers/opensearch-learning-to-rank:1.2.3
     container_name: opensearch-node1
     environment:
+      - network.host=0.0.0.0
       - discovery.type=single-node
       - http.max_content_length=1000mb
       - "OPENSEARCH_JAVA_OPTS=-Xms4G -Xmx4G"
