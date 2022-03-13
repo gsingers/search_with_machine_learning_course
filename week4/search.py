@@ -4,6 +4,8 @@
 from flask import Blueprint, redirect, render_template, request, url_for, current_app
 
 from week4.opensearch import get_opensearch
+from itertools import accumulate
+import numpy as np
 
 from nltk.stem import *
 stemmer = PorterStemmer()
@@ -81,7 +83,7 @@ def normalize_text(input_text, stemming=True):
 
 
 def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
+    #print("IMPLEMENT ME: get_query_category")
 
     num_predictions = 10
     acc_probability = 0.5
@@ -95,20 +97,14 @@ def get_query_category(user_query, query_class_model):
 
     # Get the actual predictions from the model
     predictions = query_class_model.predict(input_text, k=num_predictions)
-    predictions = [i for i in list(zip(*predictions)) if i[1]>=min_probability]
+    predictions = predictions + (np.array(list(accumulate(predictions[1]))),)
+    predictions = [i for i in list(zip(*predictions)) if i[1]>=min_probability and i[2]>=acc_probability]
     print(predictions)
 
-    prob = 0
-    terms = []
-    ix = 0
-
-    while (prob <= acc_probability and ix < len(predictions)-1):
-        prob += predictions[ix][1]
-        terms.append(predictions[ix][0][9:])
-        ix += 1
+    terms = [a[0][9:] for a in predictions]
 
     if len(terms)>0:
-        print(terms)
+        print(f"Filter terms are {terms}")
         return terms
 
 
