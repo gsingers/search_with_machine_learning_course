@@ -7,6 +7,7 @@ import csv
 
 # Useful if you want to perform stemming.
 import nltk
+nltk.download('punkt')
 stemmer = nltk.stem.PorterStemmer()
 
 categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
@@ -49,8 +50,36 @@ df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+# Convert the queries to lowercase, strip quotation marks (and perhaps other punctuation), and optionally 
+# implement other normalization, like using the nltk stemmer
+
+def normalize(query):
+    query = query.lower()
+    query = query.replace('"', '').replace('\'', '')
+    tokenized_query = nltk.word_tokenize(query)
+    tokenized_query = [stemmer.stem(t) for t in tokenized_query]
+    query = ' '.join(tokenized_query)
+    return query
+
+df['query'] = df['query'].apply(normalize)
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+def num_of_unique_categories():
+    return df['category'].nunique()
+
+
+parent_categories_series = parents_df.set_index('category')['parent']
+parent_categories_series[root_category_id] = root_category_id
+queries_per_category = df.groupby('category')['query'].nunique()
+current_min_queries = queries_per_category.min()
+print(f'Before pruning the category tree, there are {num_of_unique_categories()} categories, and the current min_queries is {current_min_queries}.')
+while current_min_queries < min_queries:
+    small_categories_set = set(queries_per_category[queries_per_category < min_queries].index)
+    category_replacements_dict = parent_categories_series[small_categories_set].to_dict()
+    df['category'].replace(category_replacements_dict, inplace=True)
+    queries_per_category = df.groupby('category')['query'].nunique()
+    current_min_queries = queries_per_category.min()
+    print(f'num_of_unique_categories() categories for {current_min_queries} unique queries')
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']
