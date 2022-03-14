@@ -9,6 +9,8 @@ from week4.opensearch import get_opensearch
 
 import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
+import nltk
+stemmer = nltk.stem.PorterStemmer()
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
@@ -56,8 +58,20 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
-def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
+def get_query_category(user_query, query_class_model, cutoff=0.5):
+    norm_query = qu.normalize_query(user_query)
+    labels, scores = query_class_model.predict(norm_query, 10)
+    labels = list(labels)
+    scores = list(scores)
+    pred_cats = []
+    tt_prob = 0
+    while tt_prob < cutoff and len(labels)>0:
+        tt_prob += scores[0]
+        pred_cats.append(labels[0].replace('__label__',''))
+        labels.pop(0)
+        scores.pop(0)
+    if tt_prob > cutoff:
+        return pred_cats
     return None
 
 
@@ -136,10 +150,12 @@ def query():
         query_obj = qu.create_query("*", "", [], sort, sortDir, size=100)
 
     query_class_model = current_app.config["query_model"]
-    query_category = get_query_category(user_query, query_class_model)
-    if query_category is not None:
-        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
-    #print("query obj: {}".format(query_obj))
+    query_categories = get_query_category(user_query, query_class_model)
+    if query_categories is not None:
+        if "bool" in query_obj["query"] and query_categories :
+            if "filter" not in query_obj["query"]["bool"]:
+                query_obj["query"]["bool"]["filter"] = []
+            query_obj["query"]["bool"]["filter"].append({"terms": {"categoryPathIds": query_categories}})
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
@@ -147,7 +163,7 @@ def query():
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
-                               sort=sort, sortDir=sortDir, model=model, explain=explain, query_category=query_category)
+                               sort=sort, sortDir=sortDir, model=model, explain=explain, query_category=query_categories)
     else:
         redirect(url_for("index"))
 
@@ -171,5 +187,4 @@ def get_click_prior(user_query):
             # nothing to do here, we just haven't seen this query before in our training set
     print("prior: %s" % click_prior)
     return click_prior
-
 

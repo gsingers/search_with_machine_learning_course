@@ -9,6 +9,8 @@
         {% endif %}
       </div>
       <div><span class="search-result-header">ID</span>: {{ hit._source.productId[0] }}</div>
+      <div><span class="search-result-header">Categories</span>: {{ hit._source.categoryPath }}</div>
+      <div><span class="search-result-header">Category IDs</span>: {{ hit._source.categoryPathIds }}</div>
       <div><span class="search-result-header">Description</span>:
         {% if hit._source.longDescription %}
           {#do we have a highlight?#}
