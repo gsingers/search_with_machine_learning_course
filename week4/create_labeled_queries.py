@@ -1,61 +1,113 @@
-import os
-import argparse
-import xml.etree.ElementTree as ET
-import pandas as pd
-import numpy as np
+import re
 import csv
+import argparse
+from typing import List
 
-# Useful if you want to perform stemming.
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import Element
+
+import pandas as pd
+
 import nltk
-stemmer = nltk.stem.PorterStemmer()
 
-categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
+# only once
+# nltk.download('stopwords')
+# nltk.download('punkt')
+stemmer = nltk.stem.SnowballStemmer('english', ignore_stopwords=True)
 
-queries_file_name = r'/workspace/datasets/train.csv'
-output_file_name = r'/workspace/datasets/labeled_query_data.txt'
-
-parser = argparse.ArgumentParser(description='Process arguments.')
-general = parser.add_argument_group("general")
-general.add_argument("--min_queries", default=1,  help="The minimum number of queries per category label (default is 1)")
-general.add_argument("--output", default=output_file_name, help="the file to output to")
-
-args = parser.parse_args()
-output_file_name = args.output
-
-if args.min_queries:
-    min_queries = int(args.min_queries)
+categories_file_name = r'../data/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
+queries_file_name = r'../data/train.csv'
+output_file_name = r'labeled_query_data.txt'
 
 # The root category, named Best Buy with id cat00000, doesn't have a parent.
-root_category_id = 'cat00000'
+ROOT_CATEGORY_ID = 'cat00000'
 
-tree = ET.parse(categories_file_name)
-root = tree.getroot()
 
-# Parse the category XML file to map each category id to its parent category id in a dataframe.
-categories = []
-parents = []
-for child in root:
-    id = child.find('id').text
-    cat_path = child.find('path')
-    cat_path_ids = [cat.find('id').text for cat in cat_path]
-    leaf_id = cat_path_ids[-1]
-    if leaf_id != root_category_id:
-        categories.append(leaf_id)
-        parents.append(cat_path_ids[-2])
-parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 'parent'])
+def transform_queries(query: str) -> str:
+    query_transformed = query.lower()
+    words = nltk.word_tokenize(query_transformed)
 
-# Read the training data into pandas, only keeping queries with non-root categories in our category tree.
-df = pd.read_csv(queries_file_name)[['category', 'query']]
-df = df[df['category'].isin(categories)]
+    words = [w.strip() for w in words if len(w) > 2]
+    words = [stemmer.stem(word) for word in words]
+    words = [re.sub("[^a-zA-Z0-9]+", " ", w) for w in words if w]
+    words = [w.strip() for w in words if w.strip()]
+    # normalize additionally by sorting alphabetically
+    words = sorted(words)
+    query_transformed = ' '.join(words)
+    # print(f'old query: {query}, transformed: {query_transformed}')
+    return query_transformed.strip()
 
-# IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
 
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+def get_parents_df() -> pd.DataFrame:
+    tree = ET.parse(categories_file_name)
+    root = tree.getroot()
+    # Parse the category XML file to map each category id to its parent category id in a dataframe.
+    categories = []
+    parents = []
+    for child in root:
+        # ??? what is this variable for?
+        category_id = child.find('id').text
+        cat_path: Element = child.find('path')
+        cat_path_ids: List[str] = [cat.find('id').text for cat in cat_path]
+        leaf_id = cat_path_ids[-1]
+        if leaf_id != ROOT_CATEGORY_ID:
+            categories.append(leaf_id)
+            parents.append(cat_path_ids[-2])
+    parents_df = pd.DataFrame(list(zip(categories, parents)), columns=['category', 'parent'])
 
-# Create labels in fastText format.
-df['label'] = '__label__' + df['category']
+    return parents_df
 
-# Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
-df = df[df['category'].isin(categories)]
-df['output'] = df['label'] + ' ' + df['query']
-df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
+
+def read_and_transform_training_data():
+    # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
+    df = pd.read_csv(queries_file_name)[['category', 'query']]
+    categories: List['str'] = df['category'].tolist()
+    df['query'] = df['query'].apply(transform_queries)
+    print(df.head())
+    print(len(df))
+    df.to_csv('transformed_queries.csv')
+    return df
+
+
+def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_queries=None) -> pd.DataFrame:
+    assert all(parents_df.columns == pd.Index(['category', 'parent']))
+    assert all(queries_df.columns == pd.Index(['category', 'query']))
+
+    queries_df = queries_df[queries_df['category'].isin(parents_df['category'])]
+    # Roll up categories to ancestors to satisfy the minimum number of queries per category.
+    if min_queries:
+        while True:
+            number_of_queries_per_category: pd.Series = queries_df.groupby('category').size()
+            print(number_of_queries_per_category.size)
+            categories_with_too_few_queries = number_of_queries_per_category[number_of_queries_per_category < min_queries].index.tolist()
+            print(f'got {len(categories_with_too_few_queries)} categories to replace')
+            if len(categories_with_too_few_queries) == 0:
+                break
+            for category in categories_with_too_few_queries:
+                if not category or category == 'None':
+                    continue
+                parent_category_found = parents_df[parents_df["category"] == category]['parent']
+                if not parent_category_found.empty:
+                    parent_category = parent_category_found.iloc[0]
+                    queries_df['category'] = queries_df['category'].replace(category, parent_category)
+                else:
+                    print(category)
+
+    # Create labels in fastText format.
+    queries_df['label'] = '__label__' + queries_df['category']
+    # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
+    queries_df = queries_df.dropna()
+    # random shuffle
+    queries_df = queries_df.sample(n=len(df), random_state=777)
+    queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
+    queries_df[['output']].to_csv(
+        output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
+
+
+if __name__ == '__main__':
+    parents_df = get_parents_df()
+    #df = read_and_transform_training_data()
+
+    queries_df = pd.read_csv('transformed_queries.csv', header=0)[['category', 'query']]
+    print(len(queries_df))
+    save_training_data(parents_df, queries_df, min_queries=100)

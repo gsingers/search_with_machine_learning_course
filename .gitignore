@@ -136,3 +136,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/data/train.csv
+/data/train.csv.tar.gz
+/data/categories_0001_abcat0010000_to_pcmcat99300050000.xml
