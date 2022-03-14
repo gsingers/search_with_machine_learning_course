@@ -13,7 +13,7 @@ import nltk
 # only once
 # nltk.download('stopwords')
 # nltk.download('punkt')
-
+TRAINING_DATA_SIZE = 100000
 
 stopwords = ["a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is",
              "it", "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there",
@@ -23,7 +23,6 @@ stemmer = nltk.stem.SnowballStemmer('english', ignore_stopwords=True)
 
 categories_file_name = r'../data/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 queries_file_name = r'../data/train.csv'
-output_file_name = r'labeled_query_data.txt'
 
 # The root category, named Best Buy with id cat00000, doesn't have a parent.
 ROOT_CATEGORY_ID = 'cat00000'
@@ -108,17 +107,30 @@ def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_q
     queries_df['label'] = '__label__' + queries_df['category']
     # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
     queries_df = queries_df.dropna()
+    number_unique_categories = len(queries_df['category'].unique())
+    print(f'{number_unique_categories} unique categories for min queries parameter {min_queries}')
     # random shuffle
     queries_df = queries_df.sample(frac=1, random_state=7)
     queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
-    queries_df[['output']].to_csv(
-        output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
+    queries_df[['output']].to_csv(f'labeled_query_data_{min_queries}.txt', header=False, sep='|', escapechar='\\',
+                                  quoting=csv.QUOTE_NONE,
+                                  index=False)
+    training_data = queries_df[['output']].head(TRAINING_DATA_SIZE)
+    training_data.to_csv(f'queries_train_{min_queries}', header=False, sep='|', escapechar='\\',
+                                  quoting=csv.QUOTE_NONE,
+                                  index=False)
+    testing_data = queries_df[['output']].tail(10000)
+    testing_data.to_csv(f'queries_test_{min_queries}', header=False, sep='|', escapechar='\\',
+                                  quoting=csv.QUOTE_NONE,
+                                  index=False)
 
 
 if __name__ == '__main__':
     parents_df = get_parents_df()
-    df = read_and_transform_training_data()
+    # df = read_and_transform_training_data()
 
     queries_df = pd.read_csv('transformed_queries.csv', header=0)[['category', 'query']]
     print(len(queries_df))
-    save_training_data(parents_df, queries_df, min_queries=100)
+    #for min_queries in [50, 100, 500, 1000]:
+    for min_queries in [100, 500, 1000]:
+        save_training_data(parents_df, queries_df, min_queries=min_queries)
