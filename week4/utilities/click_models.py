@@ -2,16 +2,22 @@
 import pandas as pd
 import numpy as np
 
+
 def binary_func(x):
     if x > 0:
         return 1
     return 0
 
+
 def step(x):
-    if x < 0.05: return 0
-    elif x >= 0.05 and x < 0.10: return 0.5
-    elif x >= 0.10 and x < 0.3: return 0.75
-    else: return 1
+    if x < 0.05:
+        return 0
+    elif x >= 0.05 and x < 0.10:
+        return 0.5
+    elif x >= 0.10 and x < 0.3:
+        return 0.75
+    else:
+        return 1
 
 
 # Given a click model type, transform the "grade" into an appropriate value between 0 and 1, inclusive
@@ -25,17 +31,18 @@ def apply_click_model(data_frame, click_model_type="binary", downsample=True):
             data_frame = down_sample_buckets(data_frame)
     elif click_model_type == "ctr":
         print("CTR click model")
-        data_frame["grade"] = (data_frame["clicks"]/data_frame["num_impressions"]).fillna(0)
+        data_frame["grade"] = (data_frame["clicks"] / data_frame["num_impressions"]).fillna(0)
         if downsample:
             data_frame = down_sample_continuous(data_frame)
     elif click_model_type == "heuristic":
         print("Heuristic click model")
-        data_frame["grade"] = (data_frame["clicks"]/data_frame["num_impressions"]).fillna(0).apply(lambda x: step(x))
+        data_frame["grade"] = (data_frame["clicks"] / data_frame["num_impressions"]).fillna(0).apply(lambda x: step(x))
         if downsample:
-            #print("Size pre-downsample: %s\nVal Counts: %s\n" % (len(data_frame), data_frame['grade'].value_counts()))
+            # print("Size pre-downsample: %s\nVal Counts: %s\n" % (len(data_frame), data_frame['grade'].value_counts()))
             data_frame = down_sample_buckets(data_frame)
-            #print("Size post-downsample: %s\nVal Counts: %s\n" % (len(data_frame), data_frame['grade'].value_counts()))
+            # print("Size post-downsample: %s\nVal Counts: %s\n" % (len(data_frame), data_frame['grade'].value_counts()))
     return data_frame
+
 
 # https://stackoverflow.com/questions/55119651/downsampling-for-more-than-2-classes
 def down_sample_buckets(data_frame):
@@ -48,12 +55,11 @@ def down_sample_buckets(data_frame):
 # If you want to learn more about this, see http://www.seas.ucla.edu/~vandenbe/236C/lectures/smoothing.pdf
 def down_sample_continuous(data_frame):
     x = np.sort(data_frame['grade'])
-    f_x = np.gradient(x)*np.exp(-x**2/2)
-    sample_probs = f_x/np.sum(f_x)
-    try: # if we have too many zeros, we can get value errors, so first try w/o replacement, then with
+    f_x = np.gradient(x) * np.exp(-x ** 2 / 2)
+    sample_probs = f_x / np.sum(f_x)
+    try:  # if we have too many zeros, we can get value errors, so first try w/o replacement, then with
         sample = data_frame.sort_values('grade').sample(frac=0.8, weights=sample_probs, replace=False)
     except Exception as e:
         print("Unable to downsample, keeping original:\n%s" % e)
-        sample = data_frame #data_frame.sort_values('grade').sample(frac=0.8, weights=sample_probs, replace=True)
+        sample = data_frame  # data_frame.sort_values('grade').sample(frac=0.8, weights=sample_probs, replace=True)
     return sample
-

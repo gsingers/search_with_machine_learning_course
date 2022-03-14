@@ -5,6 +5,7 @@
 ###
 
 import warnings
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 import argparse
 import json
@@ -19,8 +20,6 @@ import pandas as pd
 import search_utils as su
 import xgb_utils as xgbu
 from opensearchpy import OpenSearch
-
-
 
 if __name__ == "__main__":
     host = 'localhost'
@@ -220,7 +219,6 @@ if __name__ == "__main__":
         with open(os_model_file) as model_file:
             ltr.upload_model(model_path, json.load(model_file), auth)
 
-
     ######
     #
     # Impressions are candidate queries with *simulated* ranks added to them as well as things like number of impressions
@@ -329,7 +327,6 @@ if __name__ == "__main__":
         else:
             print("Unable to create training file, no ranks/features data available.")
 
-
     #############
     #
     # Train a model using XG Boost!  Taking in the training file (training.xgb by default) specified by --xgb,
@@ -381,14 +378,15 @@ if __name__ == "__main__":
         # DataFrame: query, doc, rank, type, miss, score, new
         results_df, no_results = su.evaluate_test_set(test_data, train_df, opensearch, args.xgb_model_name,
                                                       args.ltr_store, args.index, num_queries=args.xgb_test_num_queries,
-                                                      main_query_weight=args.xgb_main_query_weight, rescore_query_weight=args.xgb_rescore_query_weight
+                                                      main_query_weight=args.xgb_main_query_weight,
+                                                      rescore_query_weight=args.xgb_rescore_query_weight
                                                       )
         print("Writing results of test to %s" % "%s/%s" % (output_dir, args.xgb_test_output))
         results_df.to_csv("%s/%s" % (output_dir, args.xgb_test_output), index=False)
         no_results_df = pd.DataFrame(no_results)
         no_results_df.to_csv("%s/%s.no_results" % (output_dir, args.xgb_test_output), index=False)
         print("Meta:\nModel name: %s, Store Name: %s, Index: %s, Precision: %s \n" % (
-        args.xgb_model_name, args.ltr_store, args.index, 10))
+            args.xgb_model_name, args.ltr_store, args.index, 10))
         # do some comparisons
         print("Zero results queries: %s\n\n" % no_results)
         new_queries_df = results_df[results_df["new"] == True]["query"].drop_duplicates()
@@ -406,7 +404,8 @@ if __name__ == "__main__":
         no_results_df = pd.read_csv("%s/%s.no_results" % (output_dir, args.xgb_test_output))
         new_queries_df = pd.read_csv("%s/%s.new_queries" % (output_dir, args.xgb_test_output))
         su.analyze_results(results_df, no_results_df, new_queries_df, opensearch, args.index, args.xgb_model_name,
-                           args.ltr_store, train_df, test_df, output_dir, precision=args.precision, analyze_explains=args.analyze_explains, max_explains=args.max_explains)
+                           args.ltr_store, train_df, test_df, output_dir, precision=args.precision,
+                           analyze_explains=args.analyze_explains, max_explains=args.max_explains)
     # Given a query in --all_clicks, output to the screen all of the documents that matched this query.  Can be useful for debugging.
     if args.lookup_query:
         query = args.lookup_query
