@@ -13,6 +13,12 @@ import nltk
 # only once
 # nltk.download('stopwords')
 # nltk.download('punkt')
+
+
+stopwords = ["a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is",
+             "it", "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there",
+             "these", "they", "this", "to", "was", "will", "with"]
+
 stemmer = nltk.stem.SnowballStemmer('english', ignore_stopwords=True)
 
 categories_file_name = r'../data/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
@@ -23,11 +29,15 @@ output_file_name = r'labeled_query_data.txt'
 ROOT_CATEGORY_ID = 'cat00000'
 
 
+def keep_word(word):
+    return word not in stopwords and len(word) > 2
+
+
 def transform_queries(query: str) -> str:
     query_transformed = query.lower()
     words = nltk.word_tokenize(query_transformed)
 
-    words = [w.strip() for w in words if len(w) > 2]
+    words = [w.strip() for w in words if keep_word(w)]
     words = [stemmer.stem(word) for word in words]
     words = [re.sub("[^a-zA-Z0-9]+", " ", w) for w in words if w]
     words = [w.strip() for w in words if w.strip()]
@@ -79,7 +89,8 @@ def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_q
         while True:
             number_of_queries_per_category: pd.Series = queries_df.groupby('category').size()
             print(number_of_queries_per_category.size)
-            categories_with_too_few_queries = number_of_queries_per_category[number_of_queries_per_category < min_queries].index.tolist()
+            categories_with_too_few_queries = number_of_queries_per_category[
+                number_of_queries_per_category < min_queries].index.tolist()
             print(f'got {len(categories_with_too_few_queries)} categories to replace')
             if len(categories_with_too_few_queries) == 0:
                 break
@@ -98,7 +109,7 @@ def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_q
     # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
     queries_df = queries_df.dropna()
     # random shuffle
-    queries_df = queries_df.sample(n=len(df), random_state=777)
+    queries_df = queries_df.sample(frac=1, random_state=7)
     queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
     queries_df[['output']].to_csv(
         output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
@@ -106,7 +117,7 @@ def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_q
 
 if __name__ == '__main__':
     parents_df = get_parents_df()
-    #df = read_and_transform_training_data()
+    df = read_and_transform_training_data()
 
     queries_df = pd.read_csv('transformed_queries.csv', header=0)[['category', 'query']]
     print(len(queries_df))
