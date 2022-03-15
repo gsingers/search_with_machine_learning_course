@@ -78,30 +78,13 @@ def read_and_transform_training_data():
     return df
 
 
-def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_queries=None) -> pd.DataFrame:
+def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_queries) -> pd.DataFrame:
     assert all(parents_df.columns == pd.Index(['category', 'parent']))
     assert all(queries_df.columns == pd.Index(['category', 'query']))
 
     queries_df = queries_df[queries_df['category'].isin(parents_df['category'])]
     # Roll up categories to ancestors to satisfy the minimum number of queries per category.
-    if min_queries:
-        while True:
-            number_of_queries_per_category: pd.Series = queries_df.groupby('category').size()
-            print(number_of_queries_per_category.size)
-            categories_with_too_few_queries = number_of_queries_per_category[
-                number_of_queries_per_category < min_queries].index.tolist()
-            print(f'got {len(categories_with_too_few_queries)} categories to replace')
-            if len(categories_with_too_few_queries) == 0:
-                break
-            for category in categories_with_too_few_queries:
-                if not category or category == 'None':
-                    continue
-                parent_category_found = parents_df[parents_df["category"] == category]['parent']
-                if not parent_category_found.empty:
-                    parent_category = parent_category_found.iloc[0]
-                    queries_df['category'] = queries_df['category'].replace(category, parent_category)
-                else:
-                    print(category)
+    categories = reduce_categories(min_queries, parents_df, queries_df)
 
     # Create labels in fastText format.
     queries_df['label'] = '__label__' + queries_df['category']
@@ -109,8 +92,9 @@ def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_q
     queries_df = queries_df.dropna()
     number_unique_categories = len(queries_df['category'].unique())
     print(f'{number_unique_categories} unique categories for min queries parameter {min_queries}')
+
     # random shuffle
-    queries_df = queries_df.sample(frac=1, random_state=7)
+    queries_df = queries_df.sample(frac=1, random_state=min_queries)
     queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
     queries_df[['output']].to_csv(f'labeled_query_data_{min_queries}.txt', header=False, sep='|', escapechar='\\',
                                   quoting=csv.QUOTE_NONE,
@@ -125,12 +109,31 @@ def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_q
                                   index=False)
 
 
+def reduce_categories(min_queries: int, parents_df: pd.DataFrame, queries_df: pd.DataFrame):
+    while True:
+        number_of_queries_per_category: pd.Series = queries_df.groupby('category').size()
+        print(number_of_queries_per_category.size)
+        categories_with_too_few_queries = number_of_queries_per_category[
+            number_of_queries_per_category < min_queries].index.tolist()
+        print(f'got {len(categories_with_too_few_queries)} categories to replace')
+        if len(categories_with_too_few_queries) == 0:
+            break
+        for category in categories_with_too_few_queries:
+            if not category or category == 'None':
+                continue
+            parent_category_found = parents_df[parents_df["category"] == category]['parent']
+            if not parent_category_found.empty:
+                parent_category = parent_category_found.iloc[0]
+                queries_df['category'] = queries_df['category'].replace(category, parent_category)
+            else:
+                print(category)
+
+
 if __name__ == '__main__':
     parents_df = get_parents_df()
     # df = read_and_transform_training_data()
 
     queries_df = pd.read_csv('transformed_queries.csv', header=0)[['category', 'query']]
     print(len(queries_df))
-    #for min_queries in [50, 100, 500, 1000]:
-    for min_queries in [100, 500, 1000]:
+    for min_queries in [50, 100, 500, 1000, 2000, 5000]:
         save_training_data(parents_df, queries_df, min_queries=min_queries)

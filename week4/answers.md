@@ -1,27 +1,37 @@
 ## query classification
 
-How many unique categories did you see in your rolled up training data when you set the minimum number of queries per
-category to 100? To 1000?
+### How many unique categories did you see?
 
 
 | min_queries | unique categories |
 |-------------|-------------------|
+| 25          | 1133              |
 | 50          | 1016              |     
 | 100         | 878               |     
 | 500         | 542               |     
 | 1000        | 386               |     
+| 2000        | 247               |
+| 5000        | 124               |
 
 <br>
 
-What values did you achieve for P@1, R@3, and R@5? You should have tried at least a few different models, varying the
-minimum number of queries per category as well as trying different fastText parameters or query normalization. Report at
-least 3 of your runs.
+### What values did you achieve for P@1, R@3, and R@5? 
 
-| Learning Rate | Word Ngrams | Epochs | min_queries | P@1   | R@3   | R@5   |
-|---------------|-------------|--------|-------------|-------|-------|-------|
-| 0.5           | 2           | 25     | 50          | 0.518 | 0.697 | 0.763 |
-| 0.7           | 3           | 50     |             |       |       |       |
-|               |             |        |             |       |       |       |
+Number of Training examples: 100000
+
+| min_queries | Learning Rate | Word Ngrams | Epochs | minn | maxn | P@1   | R@3   | R@5   |
+|-------------|---------------|-------------|--------|------|------|-------|-------|-------|
+| 25          | 0.1           | 2           | 100    |      |      | 0.533 | 0.719 | 0.783 |
+| 25          | 0.1           | 2           | 200    | 4    | 8    | 0.541 | 0.723 | 0.784 |
+| 25          | 0.2           | 2           | 50     |      |      | 0.534 | 0.720 | 0.783 |
+| 50          | 0.5           | 2           | 25     |      |      | 0.518 | 0.697 | 0.763 |
+| 50          | 0.1           | 0           | 100    |      |      | 0.534 | 0.719 | 0.783 |
+| 100         |               |             |        |      |      |       |       |       |
+| 500         |               |             |        |      |      |       |       |       |
+| 500         |               |             |        |      |      |       |       |       |
+| 1000        |               |             |        |      |      |       |       |       |
+| 2000        |               |             |        |      |      |       |       |       |
+| 5000        |               |             |        |      |      |       |       |       |
 
 ## For integrating query classification with search:
 
