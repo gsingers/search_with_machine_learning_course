@@ -11,7 +11,7 @@ import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
 
 bp = Blueprint('search', __name__, url_prefix='/search')
-
+    
 
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
@@ -56,9 +56,18 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
-def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
-    return None
+def get_query_category(user_query, query_class_model, threshold=0.5):
+    "Top Category Prediction(s) for the query whose sum of scores atleast passing the threshold"
+    #print("IMPLEMENTED: get_query_category")
+    total_score, cats = 0, []
+    preds, scores = query_class_model.predict(user_query, 5) # get the top 5 predictions, scores
+    for pred, score in zip(preds, scores):
+        print(f'pred: {pred}, score: {score}')
+        total_score += score
+        cats.append(pred.replace('__label__', ''))
+        if total_score > 0.5: break # if total score is greater than threshold, exit and return 
+    print(f"categories: {cats}")
+    return cats
 
 
 @bp.route('/query', methods=['GET', 'POST'])
@@ -138,8 +147,19 @@ def query():
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
     if query_category is not None:
-        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
-    #print("query obj: {}".format(query_obj))
+        #print("IMPLEMENTED: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
+
+        the_filter = {"terms": {'categoryPathIds.keyword': query_category}}
+        '''
+        {"terms": 
+            {
+                "categoryPathIds": ["abcat0401004"] 
+            }}
+        '''
+        if query_obj and 'query' in query_obj and query_obj['query']['bool'] and query_obj['query']['bool']['filter']:
+            query_obj['query'].get('bool', {}).get('filter', []).append(the_filter)
+            
+    print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
