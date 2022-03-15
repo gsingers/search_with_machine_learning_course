@@ -4,7 +4,7 @@
 from flask import (
     Blueprint, redirect, render_template, request, url_for, current_app
 )
-
+from typing import List
 from week4.opensearch import get_opensearch
 
 import week4.utilities.query_utils as qu
@@ -13,10 +13,6 @@ import week4.utilities.ltr_utils as lu
 bp = Blueprint('search', __name__, url_prefix='/search')
 
 
-# Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
-# filters -- convert the URL GET structure into an OpenSearch filter query
-# display_filters -- return an array of filters that are applied that is appropriate for display
-# applied_filters -- return a String that is appropriate for inclusion in a URL as part of a query string.  This is basically the same as the input query string
 def process_filters(filters_input):
     # Filters look like: &filter.name=regularPrice&regularPrice.key={{ agg.key }}&regularPrice.from={{ agg.from }}&regularPrice.to={{ agg.to }}
     filters = []
@@ -57,10 +53,17 @@ def process_filters(filters_input):
     return filters, display_filters, applied_filters
 
 
-def get_query_category(user_query, query_class_model):
-
-    categories = query_class_model.predict(user_query, 5)
-    return None
+def get_query_category(user_query, query_class_model) -> List[str]:
+    # (('__label__cat02015', '__label__cat02661', '__label__cat02009', '__label__abcat0504005', '__label__cat02003'),
+    # array([0.97072554, 0.00247421, 0.00227388, 0.00157165, 0.00152982]))
+    prediction = query_class_model.predict(user_query, 5)
+    prediction = dict(zip(prediction[0], prediction[1]))
+    print(prediction)
+    CONFIDENCE_THRESHOLD = 0.8
+    predicted_categories = [c.removeprefix('__label__') for c in prediction.keys()
+                            if prediction[c] > CONFIDENCE_THRESHOLD]
+    print(predicted_categories)
+    return predicted_categories
 
 
 @bp.route('/query', methods=['GET', 'POST'])
@@ -96,26 +99,8 @@ def query():
         model = request.form.get("model", "simple")
         click_prior = get_click_prior(user_query)
 
-        if model == "simple_LTR":
-            query_obj = qu.create_simple_baseline(user_query, click_prior, [], sort, sortDir,
-                                                  size=500)  # We moved create_query to a utility class so we could use it elsewhere.
-            query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name,
-                                                    rescore_size=500, main_query_weight=0)
-            print("Simple LTR q: %s" % query_obj)
-        elif model == "ht_LTR":
-            query_obj = qu.create_query(user_query, click_prior, [], sort, sortDir,
-                                        size=500)  # We moved create_query to a utility class so we could use it elsewhere.
-            query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name,
-                                                    rescore_size=500, main_query_weight=0)
-            print("LTR q: %s" % query_obj)
-        elif model == "hand_tuned":
-            query_obj = qu.create_query(user_query, click_prior, [], sort, sortDir,
-                                        size=100)  # We moved create_query to a utility class so we could use it elsewhere.
-            print("Hand tuned q: %s" % query_obj)
-        else:
-            query_obj = qu.create_simple_baseline(user_query, click_prior, [], sort, sortDir,
-                                                  size=100)  # We moved create_query to a utility class so we could use it elsewhere.
-            print("Plain ol q: %s" % query_obj)
+        query_obj = qu.create_simple_baseline(user_query, click_prior, [], sort, sortDir, size=100)
+
     elif request.method == 'GET':  # Handle the case where there is no query or just loading the page
         user_query = request.args.get("query", "*")
         filters_input = request.args.getlist("filter.name")
@@ -127,29 +112,22 @@ def query():
             explain = True
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
-        model = request.args.get("model", "simiple")
-        if model == "simple_LTR":
-            query_obj = qu.create_simple_baseline(user_query, click_prior, filters, sort, sortDir, size=500)
-            query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name,
-                                                    rescore_size=500)
-        elif model == "ht_LTR":
-            query_obj = qu.create_query(user_query, click_prior, filters, sort, sortDir, size=100)
-            query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name,
-                                                    rescore_size=100)
-        elif model == "hand_tuned":
-            query_obj = qu.create_query(user_query, click_prior, filters, sort, sortDir, size=100)
-        else:
-            query_obj = qu.create_simple_baseline(user_query, click_prior, filters, sort, sortDir, size=100)
+        query_obj = qu.create_simple_baseline(user_query, click_prior, filters, sort, sortDir, size=100)
     else:
         query_obj = qu.create_query("*", "", [], sort, sortDir, size=100)
 
     query_class_model = current_app.config["query_model"]
-    print(query_class_model)
-    query_category = get_query_category(user_query, query_class_model)
-    if query_category is not None:
-        print(
-            "IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
-    # print("query obj: {}".format(query_obj))
+
+    # HIIIIER
+    query_categories: List[str] = get_query_category(user_query, query_class_model)
+
+    if query_categories:
+        query_obj['query']['bool']['filter'] = {
+            "terms": {
+                "categoryPathIds": query_categories
+            }
+        }
+    #print(query_obj)
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
@@ -157,7 +135,8 @@ def query():
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
-                               sort=sort, sortDir=sortDir, model=model, explain=explain, query_category=query_category)
+                               sort=sort, sortDir=sortDir, model=model, explain=explain,
+                               query_category=query_categories)
     else:
         redirect(url_for("index"))
 

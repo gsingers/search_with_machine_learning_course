@@ -15,7 +15,6 @@ bp = Blueprint('search', __name__, url_prefix='/search')
 PRODUCT_INDEX = 'bbuy_products'
 
 
-
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
 # display_filters -- return an array of filters that are applied that is appropriate for display
@@ -79,15 +78,14 @@ def query():
         query_obj = create_query(user_query, filters, sort, sortDir)
     else:
         query_obj = create_query("*", [], sort, sortDir)
-        
 
     response = opensearch.search(
-            body=query_obj,
-            index=PRODUCT_INDEX
-        )
-    
+        body=query_obj,
+        index=PRODUCT_INDEX
+    )
+
     print(response)
-    
+
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
@@ -162,7 +160,7 @@ def create_query(user_query: str, filters: List, sort="_score", sortDir="desc") 
             }
         ],
         "aggs": {
-            
+
         }
     }
 

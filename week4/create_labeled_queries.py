@@ -46,6 +46,21 @@ def transform_queries(query: str) -> str:
     # print(f'old query: {query}, transformed: {query_transformed}')
     return query_transformed.strip()
 
+def transform_queries2(query: str) -> str:
+
+    query_transformed = query.lower()
+    words = nltk.word_tokenize(query_transformed)
+
+    words = [w.strip() for w in words if keep_word(w)]
+    words = [word.removesuffix('s') for word in words]
+    words = [re.sub("[^a-zA-Z]+", " ", w) for w in words if w]
+    words = [w.strip() for w in words if w.strip()]
+    # normalize additionally by sorting alphabetically
+    words = sorted(words)
+    query_transformed = ' '.join(words)
+    # print(f'old query: {query}, transformed: {query_transformed}')
+    return query_transformed.strip()
+
 
 def get_parents_df() -> pd.DataFrame:
     tree = ET.parse(categories_file_name)
