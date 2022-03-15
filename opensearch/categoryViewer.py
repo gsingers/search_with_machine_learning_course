@@ -1,15 +1,16 @@
 import sys
 import os
 import xml.etree.ElementTree as ET
+import argparse
+from pathlib import Path
 
 # Location for category data
 categoriesFilename = '/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
-
-# Optional arg to specify max depth of category tree
-maxDepth = 0
-if (len(sys.argv) >- 2):
-    maxDepth = int(sys.argv[1])
-
+parser = argparse.ArgumentParser(description='Category viewer')
+general = parser.add_argument_group("general")
+general.add_argument("--max_depth", default=0, type=int, help="optional arg to specify max depth of category tree")
+args = parser.parse_args()
+maxDepth = args.max_depth
 tree = ET.parse(categoriesFilename)
 root = tree.getroot()
 
