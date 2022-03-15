@@ -53,17 +53,13 @@ def process_filters(filters_input):
     return filters, display_filters, applied_filters
 
 
-def get_query_category(user_query, query_class_model) -> List[str]:
+def get_query_category(user_query, query_class_model):
     # (('__label__cat02015', '__label__cat02661', '__label__cat02009', '__label__abcat0504005', '__label__cat02003'),
     # array([0.97072554, 0.00247421, 0.00227388, 0.00157165, 0.00152982]))
-    prediction = query_class_model.predict(user_query, 5)
+    prediction = query_class_model.predict(user_query, 5, threshold=0.2)
     prediction = dict(zip(prediction[0], prediction[1]))
     print(prediction)
-    CONFIDENCE_THRESHOLD = 0.8
-    predicted_categories = [c.removeprefix('__label__') for c in prediction.keys()
-                            if prediction[c] > CONFIDENCE_THRESHOLD]
-    print(predicted_categories)
-    return predicted_categories
+    return prediction
 
 
 @bp.route('/query', methods=['GET', 'POST'])
@@ -79,9 +75,6 @@ def query():
     sort = "_score"
     sortDir = "desc"
     model = "simple"
-    # TODO: Make these parameters
-    ltr_store_name = "week2"
-    ltr_model_name = "ltr_model"
     explain = False
     if request.method == 'POST':  # a query has been submitted
         user_query = request.form['query']
@@ -99,7 +92,39 @@ def query():
         model = request.form.get("model", "simple")
         click_prior = get_click_prior(user_query)
 
-        query_obj = qu.create_simple_baseline(user_query, click_prior, [], sort, sortDir, size=100)
+        # incredibly bad results
+        # query_obj = qu.create_simple_baseline(user_query, click_prior, [], sort, sortDir, size=100)
+
+        query_obj = {
+            "size": 100,
+            "query": {
+                "bool": {
+                    "should": [],
+                    "must": [
+                        {
+                            "multi_match": {
+                                "query": user_query,
+                                "fields": [
+                                    "name^10.0",
+                                    "manufacturer^2.0",
+                                    "color",
+                                    "class^5.0",
+                                    "categoryPath^20"
+                                ],
+                                "type": "cross_fields",
+                                "operator": "AND",
+                                "slop": 0,
+                                "minimum_should_match": "3<80%",
+                                "tie_breaker": 0.1,
+                                "boost": 1.0
+                            }
+                        }
+                    ]
+                }
+            },
+            "sort": []
+        }
+
 
     elif request.method == 'GET':  # Handle the case where there is no query or just loading the page
         user_query = request.args.get("query", "*")
@@ -118,16 +143,36 @@ def query():
 
     query_class_model = current_app.config["query_model"]
 
-    # HIIIIER
-    query_categories: List[str] = get_query_category(user_query, query_class_model)
+    prediction = get_query_category(user_query, query_class_model)
 
-    if query_categories:
+    CONFIDENCE_THRESHOLD_FILTER = 0.8
+    CONFIDENCE_THRESHOLD_BOOST = 0.3
+    BOOST_FACTOR = 200.0
+
+    categories_to_filter = [c.removeprefix('__label__') for c in prediction.keys()
+                            if prediction[c] > CONFIDENCE_THRESHOLD_FILTER]
+    categories_to_boost = [c.removeprefix('__label__') for c in prediction.keys()
+                           if prediction[c] > CONFIDENCE_THRESHOLD_BOOST]
+
+    print(f'Filtern mit: {categories_to_filter}')
+    print(f'Boosten mit: {categories_to_boost}')
+
+    if categories_to_filter:
         query_obj['query']['bool']['filter'] = {
             "terms": {
-                "categoryPathIds": query_categories
+                "categoryPathIds": categories_to_filter
             }
         }
-    #print(query_obj)
+
+    if categories_to_boost:
+        query_obj['query']['bool']['should'] = [{
+            "terms": {
+                "categoryPathIds": categories_to_boost,
+                "boost": BOOST_FACTOR
+            }}]
+
+    print(query_obj)
+    print()
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
@@ -136,7 +181,7 @@ def query():
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
                                sort=sort, sortDir=sortDir, model=model, explain=explain,
-                               query_category=query_categories)
+                               query_category=categories_to_filter)
     else:
         redirect(url_for("index"))
 
