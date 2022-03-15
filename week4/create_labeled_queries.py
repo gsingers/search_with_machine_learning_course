@@ -13,7 +13,8 @@ import nltk
 # only once
 # nltk.download('stopwords')
 # nltk.download('punkt')
-TRAINING_DATA_SIZE = 100000
+
+TRAINING_DATA_SIZE = 200000
 
 stopwords = ["a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is",
              "it", "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there",
@@ -46,31 +47,29 @@ def transform_queries(query: str) -> str:
     # print(f'old query: {query}, transformed: {query_transformed}')
     return query_transformed.strip()
 
-def transform_queries2(query: str) -> str:
 
+def transform_queries2(query: str) -> str:
     query_transformed = query.lower()
     words = nltk.word_tokenize(query_transformed)
 
     words = [w.strip() for w in words if keep_word(w)]
+    # don't stem this time just remove s
     words = [word.removesuffix('s') for word in words]
+    # this time remove also numbers
     words = [re.sub("[^a-zA-Z]+", " ", w) for w in words if w]
     words = [w.strip() for w in words if w.strip()]
-    # normalize additionally by sorting alphabetically
-    words = sorted(words)
+    # don't sort this time
+    # words = sorted(words)
     query_transformed = ' '.join(words)
-    # print(f'old query: {query}, transformed: {query_transformed}')
     return query_transformed.strip()
 
 
 def get_parents_df() -> pd.DataFrame:
     tree = ET.parse(categories_file_name)
     root = tree.getroot()
-    # Parse the category XML file to map each category id to its parent category id in a dataframe.
     categories = []
     parents = []
     for child in root:
-        # ??? what is this variable for?
-        category_id = child.find('id').text
         cat_path: Element = child.find('path')
         cat_path_ids: List[str] = [cat.find('id').text for cat in cat_path]
         leaf_id = cat_path_ids[-1]
@@ -83,13 +82,12 @@ def get_parents_df() -> pd.DataFrame:
 
 
 def read_and_transform_training_data():
-    # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
     df = pd.read_csv(queries_file_name)[['category', 'query']]
     categories: List['str'] = df['category'].tolist()
-    df['query'] = df['query'].apply(transform_queries)
+    df['query'] = df['query'].apply(transform_queries2)
     print(df.head())
     print(len(df))
-    df.to_csv('transformed_queries.csv')
+    df.to_csv('transformed_queries2.csv')
     return df
 
 
@@ -110,21 +108,23 @@ def save_training_data(parents_df: pd.DataFrame, queries_df: pd.DataFrame, min_q
 
     # random shuffle
     queries_df = queries_df.sample(frac=1, random_state=min_queries)
+
     queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
-    queries_df[['output']].to_csv(f'labeled_query_data_{min_queries}.txt', header=False, sep='|', escapechar='\\',
-                                  quoting=csv.QUOTE_NONE,
-                                  index=False)
+    # queries_df[['output']].to_csv(f'labeled_query_data_{min_queries}.txt', header=False, sep='|', escapechar='\\',
+    #                               quoting=csv.QUOTE_NONE,
+    #                               index=False)
+
     training_data = queries_df[['output']].head(TRAINING_DATA_SIZE)
     training_data.to_csv(f'queries_train_{min_queries}', header=False, sep='|', escapechar='\\',
-                                  quoting=csv.QUOTE_NONE,
-                                  index=False)
-    testing_data = queries_df[['output']].tail(10000)
+                         quoting=csv.QUOTE_NONE,
+                         index=False)
+    testing_data = queries_df[['output']].tail(20000)
     testing_data.to_csv(f'queries_test_{min_queries}', header=False, sep='|', escapechar='\\',
-                                  quoting=csv.QUOTE_NONE,
-                                  index=False)
+                        quoting=csv.QUOTE_NONE,
+                        index=False)
 
 
-def reduce_categories(min_queries: int, parents_df: pd.DataFrame, queries_df: pd.DataFrame):
+def reduce_categories(min_queries: int, parents_df: pd.DataFrame, queries_df: pd.DataFrame) -> pd.DataFrame:
     while True:
         number_of_queries_per_category: pd.Series = queries_df.groupby('category').size()
         print(number_of_queries_per_category.size)
@@ -132,7 +132,7 @@ def reduce_categories(min_queries: int, parents_df: pd.DataFrame, queries_df: pd
             number_of_queries_per_category < min_queries].index.tolist()
         print(f'got {len(categories_with_too_few_queries)} categories to replace')
         if len(categories_with_too_few_queries) == 0:
-            break
+            return queries_df
         for category in categories_with_too_few_queries:
             if not category or category == 'None':
                 continue
@@ -146,9 +146,10 @@ def reduce_categories(min_queries: int, parents_df: pd.DataFrame, queries_df: pd
 
 if __name__ == '__main__':
     parents_df = get_parents_df()
+
     # df = read_and_transform_training_data()
 
-    queries_df = pd.read_csv('transformed_queries.csv', header=0)[['category', 'query']]
+    queries_df = pd.read_csv('transformed_queries2.csv', header=0)[['category', 'query']]
     print(len(queries_df))
     for min_queries in [50, 100, 500, 1000, 2000, 5000]:
         save_training_data(parents_df, queries_df, min_queries=min_queries)
