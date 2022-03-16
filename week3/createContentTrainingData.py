@@ -8,7 +8,12 @@ from nltk.stem import SnowballStemmer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
+
 import pdb
+
+# Directory for product data
+directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
+
 
 # Directory for product data
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products/'
@@ -141,3 +146,4 @@ if __name__ == '__main__':
         filter_categories(unfiltered_labeled_data_file_path)
     else:
         write_results_to_output_file_and_return_category_counts_dict()
+
