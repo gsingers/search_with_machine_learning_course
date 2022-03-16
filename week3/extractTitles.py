@@ -3,6 +3,12 @@ import random
 import xml.etree.ElementTree as ET
 import argparse
 from pathlib import Path
+import string
+import nltk
+nltk.download('punkt')
+from nltk.stem import SnowballStemmer
+from nltk.tokenize import word_tokenize
+stemmer = SnowballStemmer('english')
 
 directory = r'/workspace/search_with_machine_learning_course/data/pruned_products'
 parser = argparse.ArgumentParser(description='Process some integers.')
@@ -26,8 +32,16 @@ if args.input:
 sample_rate = args.sample_rate
 
 def transform_training_data(name):
-    # IMPLEMENT
-    return name.replace('\n', ' ')
+    name = name.replace('\n', ' ')
+    name = name.replace(u"\u2122", ' ') # Remove ™ TM symbol  
+    name = name.replace(u"\u00AE", ' ') # Remove  ® Registered symbol
+    name = name.replace(u"\u00A9", ' ') # Remove  © Copyright symbol
+    name = name.lower()
+    name = name.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
+    words = word_tokenize(name)
+    words = [stemmer.stem(word) for word in words]    
+    name = " ".join(words)
+    return name
 
 # Directory for product data
 

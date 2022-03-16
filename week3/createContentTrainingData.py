@@ -1,11 +1,23 @@
 import argparse
 import os
 import random
+import string
 import xml.etree.ElementTree as ET
+import unicodedata
 from pathlib import Path
+import nltk
+nltk.download('punkt')
+from nltk.stem import SnowballStemmer
+from nltk.tokenize import word_tokenize
+stemmer = SnowballStemmer('english')
 
-def transform_name(product_name):
-    # IMPLEMENT
+
+def transform_name(product_name):    
+    product_name = product_name.lower()
+    product_name = product_name.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
+    words = word_tokenize(product_name)
+    words = [stemmer.stem(word) for word in words]    
+    product_name = " ".join(words)
     return product_name
 
 # Directory for product data
@@ -55,4 +67,5 @@ with open(output_file, 'w') as output:
                       # Replace newline chars with spaces so fastText doesn't complain
                       name = child.find('name').text.replace('\n', ' ')
                       output.write("__label__%s %s\n" % (cat, transform_name(name)))
+        
 

@@ -130,3 +130,45 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Cooking data and other related files created while running commands from class notes
+cooking.stackexchange.id
+cooking.stackexchange.tar.gz
+cooking.stackexchange.txt
+cooking.test
+cooking.train
+data/fil9.bin
+data/fil9.vec
+data/wiki.bin
+fil9.bin
+model_cooking.bin
+model_cooking.vec
+model_cooking_ft.bin
+model_cooking_ft.vec
+readme.txt
+test-shuffled.txt
+test.txt
+data/computer_products/computer_products.xml.gz
+data/phone_products/phone_products.xml.gz
+data/pruned_products/pruned_products_1.xml.gz
+data/pruned_products/pruned_products_2.xml.gz
+data/pruned_products/pruned_products_3.xml.gz
+data/pruned_products/pruned_products_4.xml.gz
+data/pruned_products/pruned_products_5.xml.gz
+data/pruned_products/pruned_products_6.xml.gz
+data/computer_products/computer_products.xml
+data/computer_products/computer_products.xml.gz
+data/phone_products/phone_products.xml.gz
+data/pruned_products/pruned_products_1.xml
+data/pruned_products/pruned_products_1.xml.gz
+data/pruned_products/pruned_products_2.xml
+data/pruned_products/pruned_products_2.xml.gz
+data/pruned_products/pruned_products_3.xml
+data/pruned_products/pruned_products_3.xml.gz
+data/pruned_products/pruned_products_4.xml
+data/pruned_products/pruned_products_4.xml.gz
+data/pruned_products/pruned_products_5.xml
+data/pruned_products/pruned_products_5.xml.gz
+data/pruned_products/pruned_products_6.xml
+data/pruned_products/pruned_products_6.xml.gz
+data/pruned_products_1_file/pruned_products_1.xml

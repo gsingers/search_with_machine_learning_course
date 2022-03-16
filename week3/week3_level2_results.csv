@@ -1,0 +1,292 @@
+﻿Sample Rate,Shuffled titles.txt,FT  MinCount,FT Epoch,FT Learning Rate,Loss ,Query Iphone,Query Sony ,Query Thinkpad,Query Ultrawide,Notes,Time Title Extraction (seconds),Time Skipgram
+0.2,No,,,,,"silicone 0.962078
+4s 0.919335
+android 0.912231
+droid 0.910229
+otterbox 0.910083","everio 0.886454
+dcr 0.878324
+gz 0.870842
+sr47 0.859393
+hdr 0.857332","ibm 0.981329
+laptops 0.942189
+t5450 0.936715
+lenovo 0.933658
+fujitsu 0.933307","efficiency 0.905604
+steamdryer 0.905036
+cabrio 0.904857
+superba 0.894967
+load 0.894245",Baseline??,,
+0.2,Yes,,,,,"silicone 0.955694
+4s 0.909817
+smoke 0.896548
+earphones 0.896098
+otterbox 0.89396","everio 0.874096
+dcr 0.870561
+gz 0.856519
+hdr 0.856313
+sr47 0.854673","ibm 0.967104
+laptops 0.953869
+lenovo 0.932836
+ideapad 0.928786
+notebooks 0.926329","superba 0.895068
+steamwasher 0.892241
+steamdryer 0.884048
+efficiency 0.883551
+supersize 0.879911",Marginal improvement. ,,
+0.2,Yes,,,,hs,"4s 0.802045
+apple 0.795184
+silicone 0.729224
+ifrogz 0.727824
+3gs 0.722726","hdr 0.520604
+shot 0.516828
+dvd610 0.512851
+dsc 0.484047
+w120 0.477597","lithium 0.724279
+lifebook 0.696999
+laptops 0.688206
+ion 0.683344
+lenmar 0.682752","ultra 0.793434
+ultrahd 0.647381
+ultrasonic 0.600797
+steamer 0.595463
+steam 0.584976",I think overall quality has gone down. Will not use loss = HS. TODO: Find exact reason why there is so much difference due to this parameter.,,
+0.5,No,,,,,"4s 0.888587
+3gs 0.816608
+ifrogz 0.8128
+apple 0.810389
+ozone 0.794375","sonos 0.757418
+dsc 0.712785
+w120 0.691698
+walkman 0.68088
+vaio 0.67468","ideapad 0.921924
+lenovo 0.906126
+qosmio 0.904767
+thinkcentre 0.903437
+ibm 0.895988","ef 0.893643
+8l 0.849265
+2d 0.843532
+72mm 0.835615
+neutral 0.834859",Ultrawide results are weird! Thinkpad looks really good. Iphone and sony got worse I think,,72
+0.5,Yes,,,,,"4s 0.891227
+3gs 0.815978
+ifrogz 0.813289
+ozone 0.807122
+apple 0.80623","sonos 0.747767
+dsc 0.664964
+xr160 0.65912
+w120 0.650258
+sr47 0.644257","ideapad 0.913025
+lenovo 0.904448
+thinkcentre 0.902824
+ibm 0.884616
+qosmio 0.87872","ef 0.869379
+2d 0.838365
+8l 0.837392
+16mm 0.835702
+24mm 0.826319",More or less same. Thinkpad ordered better,,71
+0.5,Yes,50,,,,"4s 0.845175
+apple 0.766953
+otterbox 0.725549
+silicone 0.71862
+shell 0.715597","dsc 0.599257
+dcr 0.588833
+vaio 0.58251
+walkman 0.571806
+cyber 0.561742","pad 0.73533
+ipad 0.716134
+slip 0.700293
+mad 0.696799
+keyscaper 0.694227","ultra 0.818576
+duet 0.67989
+efficiency 0.653811
+cycle 0.649131
+wide 0.619805",Thinkpad results got worse. I think Sony and Ultrwide look better,,50
+0.5,Yes,50,25,,,"4s 0.783367
+apple 0.760041
+ipod 0.694398
+ipad 0.623039
+earbud 0.537277","bravia 0.562247
+walkman 0.514127
+vaio 0.509461
+cyber 0.498674
+insignia 0.487814","pad 0.756032
+sleeve 0.594535
+slip 0.586637
+tiffany 0.584547
+mouse 0.581351","ultra 0.811531
+wide 0.633675
+side 0.490116
+cycle 0.454154
+capacity 0.447589","Except for thinkpad, All others show really good results. I think if I extract all the titles thinkpad will also get better results",,222
+0.5,Yes,50,50,,,"4s 0.809862
+apple 0.78608
+ipod 0.712017
+ipad 0.662406
+earbud 0.51928","insignia 0.542514
+bravia 0.521683
+vaio 0.51772
+jvc 0.510035
+walkman 0.498659","pad 0.715245
+slip 0.588923
+mouse 0.580592
+case 0.576819
+sleeve 0.572746","ultra 0.779406
+wide 0.65871
+side 0.452877
+oven 0.452283
+blender 0.42987",More or less same. Ultrawide got oven (not good). Sony got jvc (Different brand. Not good),,450
+0.5,Yes,50,25,0.2 (max) see notes,,"4s 0.818957
+apple 0.735038
+ipod 0.662356
+ipad 0.590081
+earbud 0.520556","bravia 0.567504
+cyber 0.525796
+insignia 0.496021
+vaio 0.489775
+walkman 0.479416","pad 0.708645
+mouse 0.59137
+tailgate 0.572422
+sales 0.562829
+keyscaper 0.552374","ultra 0.807708
+wide 0.613425
+cycle 0.50725
+capacity 0.497489
+efficiency 0.481772","Cannot increase LR more than 0.2. Fails with exception asttext::DenseMatrix::EncounteredNaNError
+Slightly improvement in scores. ",,237
+0.5,Yes,50,50,0.2,,"4s 0.810235
+apple 0.787376
+ipod 0.711295
+ipad 0.647755
+3g 0.550442","bravia 0.526237
+cyber 0.518085
+vaio 0.515146
+jvc 0.513101
+walkman 0.492654","pad 0.705013
+tiffany 0.566388
+mouse 0.543248
+sales 0.542403
+tailgate 0.542246","ultra 0.790204
+wide 0.617472
+efficiency 0.456479
+capacity 0.433989
+side 0.43331",Meh! Epoch doubling did not help,,571
+1,No,,,,,"4s 0.855478
+3gs 0.77322
+apple 0.752571
+ozone 0.727971
+ifrogz 0.720065","vaio 0.635122
+dsc 0.632409
+ericsson 0.625627
+sonos 0.622261
+bravia 0.614995","ideapad 0.893824
+lenovo 0.856271
+thinkcentre 0.851193
+think 0.825707
+qosmio 0.825127","7x 0.829342
+ef 0.828817
+8l 0.813194
+usm 0.810914
+2l 0.806752","ultrawide is not useful although you can see how its probably picking up words related to size. Iphone looks worse, thinkpad and sony look better. ",88,164
+1,Yes,,,,,"4s 0.861346
+3gs 0.790545
+ifrogz 0.761687
+apple 0.73099
+fabshell 0.72392","w120 0.629614
+bravia 0.604305
+dsc 0.593841
+insignia 0.591073
+xr160 0.588618","ideapad 0.858434
+thinkcentre 0.840517
+think 0.836422
+lifebook 0.828295
+ibm 0.824924","ef 0.837858
+8d 0.817495
+usm 0.813862
+2l 0.804831
+7x 0.799436",looks worse to me than when it was not shuffled. Lets try mincount 50,,155
+1,Yes,50,,,,"4s 0.829391
+apple 0.752752
+3gs 0.74783
+ipod 0.682465
+ipad 0.656297","insignia 0.58493
+bravia 0.569572
+jvc 0.562297
+dsc 0.557513
+cyber 0.548138","ideapad 0.85647
+ibm 0.829879
+lenovo 0.805238
+fujitsu 0.756732
+atg 0.73082",,Better. Much better overall,,119
+1,Yes,100,,,,"4s 0.824779
+apple 0.731257
+3gs 0.724951
+ipod 0.668853
+ipad 0.601363","bravia 0.567595
+jvc 0.560651
+alpha 0.540858
+cyber 0.530808
+vaio 0.518118","pad 0.7333
+slip 0.658549
+ipad 0.65848
+sleeve 0.627675
+mouse 0.622676","ultra 0.82845
+wide 0.638697
+cycle 0.545039
+vac 0.50225
+side 0.499288",Mincount 50 is better. ,,92
+1,Yes,50,25,0.2,,"4s 0.847645
+apple 0.768201
+3gs 0.728168
+ipod 0.683269
+ipad 0.634261","jvc 0.58055
+bravia 0.530101
+handycam 0.526933
+insignia 0.522036
+philips 0.521253","lenovo 0.791122
+ideapad 0.755177
+acer 0.672874
+toshiba 0.615939
+ibm 0.594778","ultra 0.606612
+size 0.423492
+electric 0.408329
+devil 0.407382
+cycle 0.396991",Not good. I think minCount 50 is making it worse,,522
+1,Yes,20,25,0.2,,"apple 0.770918
+4s 0.708956
+ipod 0.624281
+4th 0.619364
+ipad 0.599414","dcr 0.564165
+minidv 0.558775
+bravia 0.552743
+walkman 0.546662
+cyber 0.543574","lenovo 0.661415
+ibm 0.634186
+lifebook 0.614789
+acer 0.588413
+i3 0.557151","ultrasonic 0.853075
+humidifier 0.584398
+crane 0.529913
+kvm 0.524773
+ultrahd 0.524417","Words fail me. 
+--Calvin 
+Going to run one more time with stemming on. ",,625
+1,Yes,50,,,,"iphon 0.84734
+phone 0.764635
+4s 0.728403
+3gs 0.726206
+ipod 0.667965","sony
+song 0.737886
+soni 0.699988
+songbook 0.689152
+sonax 0.674859
+sonic 0.661722","ibm 0.866738
+ideapad 0.83536
+lenovo 0.82546
+fujitsu 0.731176
+atg 0.714312
+biz 0.682912","ultra 0.848137
+steamdryer 0.616128
+wide 0.601321
+cabrio 0.564385
+cycl 0.562825","Scores are back in the .8s . Sony --> soni is still an issue. But if this is ever used, then user query Sony will also be converted to Soni (apply same processing on queries as on indexed text). One last run with epoch 25 and lr  0.2",105,117
+1,Yes,50,25,,,,,,,,,
