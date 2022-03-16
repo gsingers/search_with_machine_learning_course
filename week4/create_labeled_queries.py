@@ -17,8 +17,8 @@ def normalize(queries):
         clean = re.sub(r"[(),:.;@#?!&$/\"-]+\ *", " ", query)
         clean = re.sub(r"[ ]+", " ", clean)
         clean_lc = clean.lower()
-        #stemmed = " ".join([stemmer.stem(word) for word in clean_lc.split()])
-        normalized_queries.append(clean_lc.replace('\n', ' '))
+        stemmed = " ".join([stemmer.stem(word) for word in clean_lc.split()])
+        normalized_queries.append(stemmed.replace('\n', ' '))
     return normalized_queries
     
 
