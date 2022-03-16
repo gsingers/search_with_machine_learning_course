@@ -57,8 +57,11 @@ def process_filters(filters_input):
     return filters, display_filters, applied_filters
 
 def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
-    return None
+    prediction = query_class_model.predict(user_query)
+    print(f"type={type(prediction)}")
+    query_cat = prediction[0][0].replace("__label__", "")
+    print(f"Predicted query_cat={query_cat}")
+    return query_cat
 
 
 @bp.route('/query', methods=['GET', 'POST'])
@@ -75,7 +78,7 @@ def query():
     sortDir = "desc"
     model = "simple"
     # TODO: Make these parameters
-    ltr_store_name = "week2"
+    ltr_store_name = "week4"
     ltr_model_name = "ltr_model"
     explain = False
     if request.method == 'POST':  # a query has been submitted
@@ -139,6 +142,8 @@ def query():
     query_category = get_query_category(user_query, query_class_model)
     if query_category is not None:
         print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
+        query_obj["query"]["filters"] = {"term": {"category.keyword": query_category}}
+        print(f"query_obj={query_obj}")
     #print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire

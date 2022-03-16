@@ -12,7 +12,7 @@ def create_app(test_config=None):
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
-        QUERY_CLASS_MODEL_LOC = os.environ.get("QUERY_CLASS_MODEL_LOC", "/workspace/datasets/fasttext/query_model.bin")
+        QUERY_CLASS_MODEL_LOC = os.environ.get("QUERY_CLASS_MODEL_LOC", "/workspace/datasets/fasttext/labeled_query_data_1000.bin")
         if QUERY_CLASS_MODEL_LOC and os.path.isfile(QUERY_CLASS_MODEL_LOC):
             app.config["query_model"] = fasttext.load_model(QUERY_CLASS_MODEL_LOC)
         else:
