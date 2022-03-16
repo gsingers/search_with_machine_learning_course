@@ -101,6 +101,7 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                        }
                     }
                 ],
+                "minimum_should_match": 1,
                 "filter": filters  #
             }
 
@@ -197,6 +198,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                }
                             }
                         ],
+                        "minimum_should_match": 1,
                         "filter": filters  #
                     }
                 },

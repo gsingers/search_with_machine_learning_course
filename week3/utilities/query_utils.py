@@ -100,6 +100,7 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                        }
                     }
                 ],
+                "minimum_should_match": 1,
                 "filter": filters  #
             }
 
@@ -116,9 +117,10 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
     if user_query == "*" or user_query == "#":
         #replace the bool
         try:
+            query_obj["query"].pop("bool")
             query_obj["query"] = {"match_all": {}}
         except:
-            print("Couldn't replace query for *")
+            pass
     if highlight:
         query_obj["highlight"] = {
             "fields": {
@@ -194,6 +196,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                }
                             }
                         ],
+                        "minimum_should_match": 1,
                         "filter": filters  #
                     }
                 },

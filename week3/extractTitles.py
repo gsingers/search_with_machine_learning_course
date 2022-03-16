@@ -6,7 +6,7 @@ from pathlib import Path
 from nltk.stem.snowball import SnowballStemmer
 from nltk import sent_tokenize, word_tokenize
 
-directory = r'/workspace/search_with_machine_learning_course/week3/pruned_products'
+directory = r'/workspace/search_with_machine_learning_course/data/pruned_products'
 parser = argparse.ArgumentParser(description='Process some integers.')
 general = parser.add_argument_group("general")
 general.add_argument("--input", default=directory,  help="The directory containing the products")
