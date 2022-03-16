@@ -74,20 +74,14 @@ print(f"queries={df}")
 to_rollup = df.groupby("query").filter(lambda x: len(x) < min_queries)
 print(f"to_rollup={to_rollup}")
 
+# super-slow:
 #rolledup_df = to_rollup['category'].transform(lambda x: parents_df.loc[parents_df['category'] == x]['parent'].iloc[0])
+# better use dictionary
 to_rollup['category'] = to_rollup['category'].apply(lambda x: parents_dict[x])
-
-
-#for i, row in to_rollup.iterrows():
-#    rolled_up = parents_df.loc[parents_df['category'] == row['category']]['parent'].iloc[0]
-#    #print(f"=====\nrolled_up={rolled_up}\n=====\n")
-#    dfi = pd.DataFrame({'category': [rolled_up], 'query': [row['query']]})
-#    rolledup_df = pd.concat([rolledup_df, dfi], ignore_index=True, axis=0)
-
 print(f"to_rollup={to_rollup}")
 
-df = df[df['query'].isin(to_rollup['query'])]
-print(f"After removing to_rollup df={df}")
+df = df[~df['query'].isin(to_rollup['query'])]
+print(f"After removing to_rollup queries={df}")
 
 merged = pd.concat([to_rollup, df], ignore_index=True, axis=0)
 
