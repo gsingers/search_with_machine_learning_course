@@ -1,6 +1,8 @@
 import nltk
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
+nltk.download('punkt')
+nltk.download('stopwords')
 import numpy as np
 
 #
@@ -165,12 +167,20 @@ def query():
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
     if query_category is not None:
-        # filter by query category:
-        # query_obj['query']['bool']['filter'] = {'terms':{'categoryLeaf.keyword':query_category}}
+        if 'bool' not in query_obj['query']:
+            query = query_obj['query']
+            del query_obj['query']
+            query_obj['query'] = {}
+            query_obj['query']['bool'] = {}
+            query_obj['query']['bool']['filter'] = []
+            query_obj['query']['bool']['filter'].append(query)
+        elif 'filter' not in query_obj['query']['bool']:
+            query_obj['query']['bool']['filter'] = []
+        query_obj['query']['bool']['filter'].append({'terms':{'categoryLeaf.keyword':query_category}})
         # alternatively, boost X 100 by query category:
-        boosting_wrapper_query = {'function_score':{'score_mode':'multiply','functions':[{'filter':{'terms':{'categoryLeaf.keyword':query_category}},'weight':100}],'query':query_obj['query']}}
-        query_obj['query'] = boosting_wrapper_query
-        #print("query obj: {}".format(query_obj))
+        # boosting_wrapper_query = {'function_score':{'boost_mode':'multiply','functions':[{'filter':{'terms':{'categoryLeaf.keyword':query_category}},'weight':100}],'query':query_obj['query']}}
+        # query_obj['query'] = boosting_wrapper_query
+    # print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
