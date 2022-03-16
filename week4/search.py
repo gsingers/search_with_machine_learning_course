@@ -60,7 +60,7 @@ def get_query_category(user_query, query_class_model):
     prediction = query_class_model.predict(user_query)
     print(f"type={type(prediction)}")
     query_cat = prediction[0][0].replace("__label__", "")
-    print(f"Predicted query_cat={query_cat}")
+    print(f"Predicted query_cat={query_cat} for query={user_query}")
     return query_cat
 
 
@@ -142,9 +142,20 @@ def query():
     query_category = get_query_category(user_query, query_class_model)
     if query_category is not None:
         print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
-        query_obj["query"]["filters"] = {"term": {"category.keyword": query_category}}
+        query_obj["query"] = {
+            "bool": {
+                "must": [
+                    { "match_all": {} }
+                ],
+                "filter": {
+                  "term":{
+                    "categoryPathIds":query_category
+                  }
+                }
+             }
+        }
         print(f"query_obj={query_obj}")
-    #print("query obj: {}".format(query_obj))
+
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 

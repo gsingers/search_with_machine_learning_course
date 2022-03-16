@@ -291,7 +291,7 @@ def add_aggs(query_obj):
         },
         "missing_images": {
             "missing": {
-                "field": "image"
+                "field": "image.keyword"
             }
         },
         "regularPrice": {
