@@ -13,6 +13,14 @@ After rollup with min_queries=1000: 433 259
 
 
 
+train:
+~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/labeled_query_data.txt.shuf.train -output /workspace/datasets/fasttext/labeled_query_data_1000 -loss hs -epoch 25
+
+test:
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/labeled_query_data_1000.bin /workspace/datasets/labeled_query_data.txt.shuf.test
+
+
+
 | min_queries | Stemming: Y/N | train   | test (10%) | P@1   | R@1   | P@3   | R@3   | P@5   | R@5   |
 |-------------|---------------|---------|------------|-------|-------|-------|-------|-------|-------|
 | 100         | **N**         | 1123975 | 124886     | **0.535** | **0.535** | 0.246 | 0.737 | 0.162 | 0.811 |
@@ -20,3 +28,9 @@ After rollup with min_queries=1000: 433 259
 | 1000        | **N**         | 446518  | 49613      | **0.633** | **0.633** | 0.264 | 0.791 | 0.17  | 0.85  |
 | 1000        | Y             | 560886  | 62320      | 0.579 | 0.579 | 0.249 | 0.748 | 0.163 | 0.815 |
 
+
+Level 2: Integrating Query Classification with Search
+===
+Queries that predicted with confidence >= 0.5:
+
+macbook
