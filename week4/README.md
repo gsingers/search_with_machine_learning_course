@@ -31,6 +31,17 @@ test:
 
 Level 2: Integrating Query Classification with Search
 ===
-Queries that predicted with confidence >= 0.5:
+Queries that predicted with confidence >= 0.5 were let to filter by category. The model with min_queries=1000 was used in this experiment.
 
-macbook
+Worked quite well:
+
+    macbook (pcmcat247400050001) -- brings good results with relevancy and category filtering
+    tv antenna (abcat0107004) -- brings mounts on top when sorted by popularity and antennas when sorted by relevance
+    microsoft office (abcat0508009) - brings mostly MS Office in top5
+    lcd tv (abcat0101001) -- brings different TV makes, like Toshiba and LG
+
+
+Not working so well:
+
+    tablet (pcmcat209000050008) -- brings better results when sorted by popularity
+    apple laptop (pcmcat247400050000) -- brings laptops of HP, Lenovo, Alienware -- no Apple at all on several scrolls

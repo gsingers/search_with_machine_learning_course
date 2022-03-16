@@ -143,8 +143,8 @@ def query():
 
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
+    print(f"sort={sort}")
     if query_category is not None:
-        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
         query_obj["query"] = {
             "bool": {
                 "must": [
