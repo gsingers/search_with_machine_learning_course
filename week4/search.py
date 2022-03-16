@@ -57,10 +57,13 @@ def process_filters(filters_input):
     return filters, display_filters, applied_filters
 
 def get_query_category(user_query, query_class_model):
-    prediction = query_class_model.predict(user_query)
-    print(f"type={type(prediction)}")
-    query_cat = prediction[0][0].replace("__label__", "")
-    print(f"Predicted query_cat={query_cat} for query={user_query}")
+    prediction, proba = query_class_model.predict(user_query)
+    print(f"query={query}: prediction={prediction[0]}, proba={proba[0]}")
+    if proba[0] >= 0.5:
+        query_cat = prediction[0].replace("__label__", "")
+        print(f"Predicted query_cat={query_cat} for query={user_query}")
+    else:
+        query_cat = None
     return query_cat
 
 
