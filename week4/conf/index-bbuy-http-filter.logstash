@@ -76,19 +76,6 @@ input {
         ]
       }
 
-      http{
-        url => "http://localhost:5000/documents/annotate"
-        body => {
-            "name" => "%{name}"
-            "shortDescription" => "%{shortDescription}"
-            "longDescription" => "%{longDescription}"
-            "sku" => "%{sku}"
-        }
-        body_format => "json"
-        verb => "POST"
-        target_body => "annotations"
-        headers => {"Content-Type" => "application/json"}
-      }
 
       # This is messed up, but I can't seem to figure out how to extract the substructure from annotations.  I've tried [annotations][name_cat_prediction]
       # Doing the stringf approach of %{[annotations][name_cat_prediction]) doesn't quite work since it creates strings and flattens our structures

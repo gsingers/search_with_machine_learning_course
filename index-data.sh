@@ -4,10 +4,10 @@ usage()
   exit 2
 }
 
-PRODUCTS_JSON_FILE="/workspace/search_with_machine_learning_course/opensearch/bbuy_products.json"
-QUERIES_JSON_FILE="/workspace/search_with_machine_learning_course/opensearch/bbuy_queries.json"
+PRODUCTS_JSON_FILE="/workspace/search_with_machine_learning_course/week4/conf/bbuy_products.json"
+QUERIES_JSON_FILE="/workspace/search_with_machine_learning_course/week4/conf/bbuy_queries.json"
 
-PRODUCTS_LOGSTASH_FILE="/workspace/search_with_machine_learning_course/logstash/index-bbuy.logstash"
+PRODUCTS_LOGSTASH_FILE="/workspace/search_with_machine_learning_course/week4/conf/index-bbuy-http-filter.logstash"
 QUERIES_LOGSTASH_FILE="/workspace/search_with_machine_learning_course/logstash/index-bbuy-queries.logstash"
 
 LOGSTASH_HOME="/workspace/logstash/logstash-7.13.2"
@@ -50,7 +50,7 @@ cd "$LOGSTASH_HOME"
 echo "Launching Logstash indexing in the background via nohup.  See product_indexing.log and queries_indexing.log for log output"
 echo " Cleaning up any old indexing information by deleting products_data.  If this is the first time you are running this, you might see an error."
 rm -rf "$LOGSTASH_HOME/products_data"
-nohup bin/logstash --pipeline.workers 7 --path.data ./products_data -f "$PRODUCTS_LOGSTASH_FILE" > "$LOGS_DIR/product_indexing.log" &
+nohup bin/logstash --pipeline.workers 10 --path.data ./products_data -f "$PRODUCTS_LOGSTASH_FILE" > "$LOGS_DIR/product_indexing.log" &
 echo " Cleaning up any old indexing information by deleting query_data.  If this is the first time you are running this, you might see an error."
 rm -rf "$LOGSTASH_HOME/query_data"
 nohup bin/logstash --pipeline.workers 1 --path.data ./query_data -f "$QUERIES_LOGSTASH_FILE" > "$LOGS_DIR/queries_indexing.log" &

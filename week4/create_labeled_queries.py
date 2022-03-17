@@ -5,9 +5,13 @@ import pandas as pd
 import numpy as np
 import csv
 
-# Useful if you want to perform stemming.
+# for normalize query
+import string
 import nltk
-stemmer = nltk.stem.PorterStemmer()
+nltk.download('punkt')
+from nltk.stem import SnowballStemmer
+from nltk.tokenize import word_tokenize
+stemmer = SnowballStemmer('english')
 
 categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 
@@ -16,7 +20,7 @@ output_file_name = r'/workspace/datasets/labeled_query_data.txt'
 
 parser = argparse.ArgumentParser(description='Process arguments.')
 general = parser.add_argument_group("general")
-general.add_argument("--min_queries", default=1,  help="The minimum number of queries per category label (default is 1)")
+general.add_argument("--min_queries", default=100,  help="The minimum number of queries per category label (default is 1)")
 general.add_argument("--output", default=output_file_name, help="the file to output to")
 
 args = parser.parse_args()
@@ -49,8 +53,39 @@ df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+# I did the same processing in extract_titles in week3
+def normalize_query(query):
+    query = query.replace('\n', ' ')
+    query = query.lower()
+    query = query.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
+    # words = word_tokenize(query)
+    # words = [stemmer.stem(word) for word in words]    
+    # query = word_tokenize(query)
+    # query = " ".join(words)
+    #print ("normalized query: " + query)
+    return query
 
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+# DF with cat count
+df_cat_counts = df.groupby('category').size().reset_index(name='count')
+print(df_cat_counts.loc[[0]])
+
+print("first query in df  " + df['query'].values[0])
+# apply query normalization to every query in Df
+df['query'] = df['query'].apply(normalize_query)
+print("Normalized first query in df " + df['query'].values[0])
+print(" Total unique Categories: ", len(df['category'].unique()))
+
+
+df_with_cat_counts = df.groupby('category').size().reset_index(name='count')
+df_with_cat_counts_parents_merged = df.merge(df_with_cat_counts, how='left', on='category').merge(parents_df, how='left', on='category')
+while len(df_with_cat_counts_parents_merged[df_with_cat_counts_parents_merged['count'] < min_queries]) > 0:
+    df_with_cat_counts_parents_merged.loc[df_with_cat_counts_parents_merged['count'] < min_queries, 'category'] = df_with_cat_counts_parents_merged['parent']
+    df = df_with_cat_counts_parents_merged[['category', 'query']]
+    df = df[df['category'].isin(categories)]
+    df_with_cat_counts = df.groupby('category').size().reset_index(name='count')
+    df_with_cat_counts_parents_merged = df.merge(df_with_cat_counts, how='left', on='category').merge(parents_df, how='left', on='category')
+
+
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']
@@ -58,4 +93,5 @@ df['label'] = '__label__' + df['category']
 # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
 df = df[df['category'].isin(categories)]
 df['output'] = df['label'] + ' ' + df['query']
+print(" Post Process: Total unique Categories: ", len(df['category'].unique()))
 df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
