@@ -49,70 +49,72 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
             {sort: {"order": sortDir}}
         ],
         "query": {
+            "function_score": {
+                "query": {
+                    "bool": {
+                        "must": [
 
-            "bool": {
-                "must": [
-
-                ],
-                "should":[ #
-                    {
-                      "match": {
-                            "name": {
-                                "query": user_query,
-                                "fuzziness": "1",
-                                "prefix_length": 2, # short words are often acronyms or usually not misspelled, so don't edit
-                                "boost": 0.01
+                        ],
+                        "should":[ #
+                            {
+                            "match": {
+                                    "name": {
+                                        "query": user_query,
+                                        "fuzziness": "1",
+                                        "prefix_length": 2, # short words are often acronyms or usually not misspelled, so don't edit
+                                        "boost": 0.01
+                                    }
                             }
-                       }
-                    },
-                    {
-                      "match_phrase": { # near exact phrase match
-                            "name.hyphens": {
-                                "query": user_query,
-                                "slop": 1,
-                                "boost": 50
+                            },
+                            {
+                            "match_phrase": { # near exact phrase match
+                                    "name.hyphens": {
+                                        "query": user_query,
+                                        "slop": 1,
+                                        "boost": 50
+                                    }
                             }
-                       }
-                    },
-                    {
-                      "multi_match": {
-                            "query": user_query,
-                            "type": "phrase",
-                            "slop": "6",
-                            "minimum_should_match": "2<75%",
-                            "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
-                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath", "name_analogies"]
-                       }
-                    },
-                    {
-                      "terms":{ # Lots of SKUs in the query logs, boost by it, split on whitespace so we get a list
-                        "sku": user_query.split(),
-                        "boost": 50.0
-                      }
-                    },
-                    { # lots of products have hyphens in them or other weird casing things like iPad
-                      "match": {
-                            "name.hyphens": {
-                                "query": user_query,
-                                "operator": "OR",
-                                "minimum_should_match": "2<75%"
+                            },
+                            {
+                            "multi_match": {
+                                    "query": user_query,
+                                    "type": "phrase",
+                                    "slop": "6",
+                                    "minimum_should_match": "2<75%",
+                                    "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
+                                            "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath", "name_analogies"]
                             }
-                       }
+                            },
+                            {
+                            "terms":{ # Lots of SKUs in the query logs, boost by it, split on whitespace so we get a list
+                                "sku": user_query.split(),
+                                "boost": 50.0
+                            }
+                            },
+                            { # lots of products have hyphens in them or other weird casing things like iPad
+                            "match": {
+                                    "name.hyphens": {
+                                        "query": user_query,
+                                        "operator": "OR",
+                                        "minimum_should_match": "2<75%"
+                                    }
+                            }
+                            }
+                        ],
+                        "minimum_should_match": 1,
+                        "filter": [] if filters is None else filters  #
                     }
-                ],
-                "minimum_should_match": 1,
-                "filter": [] if filters is None else filters  #
+                }
             }
-
         }
     }
 
     if user_query == "*" or user_query == "#":
-        #replace the filters
+        # reset the should
         try:
-            del query_obj['query']['bool']['should']
-            del query_obj['query']['bool']['minimum_should_match']
-            query_obj['query']['bool']['should'] = []
+            del query_obj['query']['function_score']['query']['bool']['should']
+            del query_obj['query']['function_score']['query']['bool']['minimum_should_match']
+            query_obj['query']['function_score']['query']['bool']['should'] = []
         except:
             pass
 
@@ -124,13 +126,7 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                         }
                     })
         #print(query_obj)
-    if user_query == "*" or user_query == "#":
-        #replace the filters
-        try:
-            del query_obj['query']['bool']['should']
-            del query_obj['query']['bool']['minimum_should_match']
-        except:
-            pass
+    
     if highlight:
         query_obj["highlight"] = {
             "fields": {
@@ -258,7 +254,6 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                         }
                     }
                 ]
-
             }
         }
     }
@@ -267,6 +262,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
         #replace the bool
         try:
             del query_obj["query"]["function_score"]["query"]["bool"]["should"]
+            del query_obj["query"]["function_score"]["query"]["bool"]["minimum_should_match"]
             ["query"]["function_score"]["query"]["bool"]["should"] = []
         except:
             print("Couldn't replace query for *")
@@ -326,5 +322,4 @@ def add_aggs(query_obj):
                 }
             }
         }
-
     }

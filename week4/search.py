@@ -167,15 +167,10 @@ def query():
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
     if query_category is not None:
-        if 'function_score' in query_obj['query']:
-            query_obj['query']['function_score']['query']['bool']['filter'].append({'terms':{'categoryLeaf.keyword':query_category}})
+            # query_obj['query']['function_score']['query']['bool']['filter'].append({'terms':{'categoryLeaf.keyword':query_category}})
             # alternatively, boost X 100 by query category:
-            # query_obj['query']['function_score']['query']['functions'].append({'filter':{'terms':{'categoryLeaf.keyword':query_category}},'weight':100})
-        else:
-            query_obj['query']['bool']['filter'].append({'terms':{'categoryLeaf.keyword':query_category}})
-            # alternatively, boost X 100 by query category:
-            # boosting_wrapper_query = {'function_score':{'boost_mode':'multiply','functions':[{'filter':{'terms':{'categoryLeaf.keyword':query_category}},'weight':100}],'query':query_obj['query']}}
-            # query_obj['query'] = boosting_wrapper_query
+            boosting_wrapper_query = {'function_score':{'boost_mode':'multiply','functions':[{'filter':{'terms':{'categoryLeaf.keyword':query_category}},'weight':100}],'query':query_obj['query']}}
+            query_obj['query'] = boosting_wrapper_query
     # print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
