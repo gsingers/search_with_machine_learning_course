@@ -1,3 +1,10 @@
+import nltk
+from nltk.stem.snowball import SnowballStemmer
+from nltk.corpus import stopwords
+nltk.download('punkt')
+nltk.download('stopwords')
+import numpy as np
+
 #
 # The main search hooks for the Search Flask application.
 #
@@ -56,10 +63,32 @@ def process_filters(filters_input):
 
     return filters, display_filters, applied_filters
 
-def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
-    return None
+def canonicalize(query):
+    query = query.lower()
+    query = query.translate ({ord(c): " " for c in "\ââ®™!@#$%^&*()[]\{\};:,./<>?\|`~-=_+"})
+    query = query.replace(u"\u2122", '').replace(u"\u00AE", '')
 
+    snowball = SnowballStemmer("english")
+    tokens = nltk.word_tokenize(query)
+    tokens = [token for token in tokens if (token not in stopwords.words('english') and token.isalnum())]
+    tokens = [snowball.stem(token) for token in tokens]
+    query = ' '.join(tokens)
+
+    return query
+
+def get_query_category(user_query, query_class_model):
+    category_labels, scores = query_class_model.predict(canonicalize(user_query), 10)
+    
+    scores_cumsum = np.cumsum(scores)
+    cutoff = np.where(scores_cumsum > 0.5)[0]
+    if cutoff.size == 0:
+        return None
+
+    category_ids = []
+    for cl in category_labels:
+        category_ids.append(cl.split('__')[2])
+
+    return category_ids[:cutoff[0]+1]
 
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
@@ -138,8 +167,20 @@ def query():
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
     if query_category is not None:
-        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
-    #print("query obj: {}".format(query_obj))
+        if 'bool' not in query_obj['query']:
+            query = query_obj['query']
+            del query_obj['query']
+            query_obj['query'] = {}
+            query_obj['query']['bool'] = {}
+            query_obj['query']['bool']['filter'] = []
+            query_obj['query']['bool']['filter'].append(query)
+        elif 'filter' not in query_obj['query']['bool']:
+            query_obj['query']['bool']['filter'] = []
+        query_obj['query']['bool']['filter'].append({'terms':{'categoryLeaf.keyword':query_category}})
+        # alternatively, boost X 100 by query category:
+        # boosting_wrapper_query = {'function_score':{'boost_mode':'multiply','functions':[{'filter':{'terms':{'categoryLeaf.keyword':query_category}},'weight':100}],'query':query_obj['query']}}
+        # query_obj['query'] = boosting_wrapper_query
+    # print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
 
@@ -171,5 +212,3 @@ def get_click_prior(user_query):
             # nothing to do here, we just haven't seen this query before in our training set
     print("prior: %s" % click_prior)
     return click_prior
-
-
