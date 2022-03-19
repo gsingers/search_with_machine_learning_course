@@ -25,6 +25,16 @@ def annotate():
             if the_text is not None and the_text.find("%{") == -1:
                 if item == "name":
                     if syns_model is not None:
-                        print("IMPLEMENT ME: call nearest_neighbors on your syn model and return it as `name_synonyms`")
+                        response['name_synonyms'] = synonymize(the_text, syns_model)
         return jsonify(response)
     abort(415)
+
+def synonymize(text, syns_model):
+    synonyms = []
+    tokens = nltk.word_tokenize(text)
+    for token in tokens:
+        nns = syns_model.get_nearest_neighbors(token)
+        for neighbor in nns:
+                if neighbor[0] >= 0.93:
+                    synonyms.append(neighbor[1])
+    return synonyms
