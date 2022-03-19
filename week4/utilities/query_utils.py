@@ -101,11 +101,21 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                     }
                 ],
                 "minimum_should_match": 1,
-                "filter": filters  #
+                "filter": [] if filters is None else filters  #
             }
 
         }
     }
+
+    if user_query == "*" or user_query == "#":
+        #replace the filters
+        try:
+            del query_obj['query']['bool']['should']
+            del query_obj['query']['bool']['minimum_should_match']
+            query_obj['query']['bool']['should'] = []
+        except:
+            pass
+
     if click_prior_query != "":
         query_obj["query"]["bool"]["should"].append({
                         "query_string":{  # This may feel like cheating, but it's really not, esp. in ecommerce where you have all this prior data,  You just can't let the test clicks leak in, which is why we split on date
@@ -115,10 +125,10 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                     })
         #print(query_obj)
     if user_query == "*" or user_query == "#":
-        #replace the bool
+        #replace the filters
         try:
-            query_obj["query"].pop("bool")
-            query_obj["query"] = {"match_all": {}}
+            del query_obj['query']['bool']['should']
+            del query_obj['query']['bool']['minimum_should_match']
         except:
             pass
     if highlight:
@@ -197,7 +207,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                             }
                         ],
                         "minimum_should_match": 1,
-                        "filter": filters  #
+                        "filter": [] if filters is None else filters  #
                     }
                 },
                 "boost_mode": "multiply", # how _score and functions are combined
@@ -252,6 +262,15 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
             }
         }
     }
+
+    if user_query == "*" or user_query == "#":
+        #replace the bool
+        try:
+            del query_obj["query"]["function_score"]["query"]["bool"]["should"]
+            ["query"]["function_score"]["query"]["bool"]["should"] = []
+        except:
+            print("Couldn't replace query for *")
+
     if click_prior_query != "":
         query_obj["query"]["function_score"]["query"]["bool"]["should"].append({
                         "query_string":{  # This may feel like cheating, but it's really not, esp. in ecommerce where you have all this prior data,  You just can't let the test clicks leak in, which is why we split on date
@@ -259,12 +278,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                             "fields": ["_id"]
                         }
                     })
-    if user_query == "*" or user_query == "#":
-        #replace the bool
-        try:
-            query_obj["query"] = {"match_all": {}}
-        except:
-            print("Couldn't replace query for *")
+
     if highlight:
         query_obj["highlight"] = {
             "fields": {
