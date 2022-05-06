@@ -1,17 +1,21 @@
 {% extends 'base.jinja2' %}
 
 {% block header %}
-  <h1>{% block title %}Search Results for {{query}} {% endblock %}</h1>
+  <h1 class="hidden">{% block title %}Search Results for {{query}} {% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-  <div id="did-you-mean">DYM goes here</div>
-  <div id="applied-filters">{% include 'display_filters.jinja2' %}</div>
+  <div class="p-4">
+  <div id="did-you-mean" class="hidden">DYM goes here</div>
+  {% if display_filters%}
+    <div id="applied-filters">{% include 'display_filters.jinja2' %}</div>
+  {% endif %}
   {% if search_response and search_response.hits%}
-    <div id="all-results">
-      <div id="search-meta-container">Your query of {{ query }} returned {{ "{:,d}".format(search_response.hits.total.value) }} hits in {{ search_response.took }} ms.</div>
-      <div id="aggregations-container">{% include 'aggregations.jinja2' %}</div>
-      <div id="search-results-container">{% include 'display_results.jinja2' %}</div>
+      <div id="search-meta-container" class="text-sm text-slate-500 py-4">Your query of {{ query }} returned {{ "{:,d}".format(search_response.hits.total.value) }} hits in {{ search_response.took }} ms.</div>
+      <div id="all-results" class="sm:grid grid-cols-12 flex flex-col-reverse">
+        <div id="aggregations-container" class="col-span-2">{% include 'aggregations.jinja2' %}</div>
+        <div id="search-results-container" class="col-span-10 sm:px-8">{% include 'display_results.jinja2' %}</div>
+      </div>
       <div id="debug">{% include 'debug.jinja2' %}</div>
     </div>
   {% else %}
@@ -20,4 +24,5 @@
       <div id="search-results-container">If you are seeing this, you haven't returned a valid search response object yet. Be sure to implement opensearch.py and search.py appropriately.</div>
     </div>
   {% endif %}
+  </div>
 {% endblock %}

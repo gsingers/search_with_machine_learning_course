@@ -1,3 +1,6 @@
+* {
+    box-sizing: border-box;
+}
 /* Search stylings */
 #search-box {
     height: 50px;

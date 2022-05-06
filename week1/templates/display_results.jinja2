@@ -1,30 +1,69 @@
 <div id="search-results" class="search-results">
   {% for hit in search_response.hits.hits %}
-    <div class="search-result search-result-{{ loop.cycle('odd', 'even') }}">
-      <div class="search-result-name">{#do we have a highlight?#}
-        {% if hit.highlight and hit.highlight.name %}
-          {{ hit.highlight.name[0] }}
-        {% else%}
-          {{ hit._source.name[0] }}
+    <div class="search-result">
+      <div class="sm:grid grid-cols-12 mb-4 border border-slate-100 p-4">
+      <div class="col-span-3">
+        {% if hit._source.image %}
+          <div class="p-2">
+            <img src="{{ hit._source.image[0] }}" alt="{{ hit._source.name[0] }}" class="mx-auto h-40 object-fit" />
+          </div>
         {% endif %}
       </div>
-      <div><span class="search-result-header">ID</span>: {{ hit._source.productId[0] }}</div>
-      <div><span class="search-result-header">Description</span>:
-        {% if hit._source.longDescription %}
-          {#do we have a highlight?#}
-          {% if hit.highlight and hit.highlight.longDescription %}
-            {{ hit.highlight.longDescription[0] }}
-          {% else %}
-            {{ hit._source.longDescription[0] }}
+      <div class="col-span-9 px-4 text-slate-500">
+        <div class="sm:grid grid-cols-12">
+        <div class="col-span-9">
+        <div class="search-result-name text-md text-zinc-600">{#do we have a highlight?#}
+          {% if hit.highlight and hit.highlight.name %}
+            {{ hit.highlight.name[0] }}
+          {% else%}
+            {{ hit._source.name[0] }}
           {% endif %}
-        {% elif hit._source.shortDescription %}
-          {#do we have a highlight?#}
-          {% if hit.highlight and hit.highlight.shortDescription %}
-            {{ hit.highlight.shortDescription }}
-          {% else %}
-            {{ hit._source.shortDescription[0] }}
+        </div>
+          <div class="py-2"><span class="search-result-header">ID</span>: {{ hit._source.productId[0] }}</div>
+          <div>
+            {% if hit._source.longDescription %}
+              {#do we have a highlight?#}
+              {% if hit.highlight and hit.highlight.longDescription %}
+                {{ hit.highlight.longDescription[0] }}
+              {% else %}
+                {{ hit._source.longDescription[0] }}
+              {% endif %}
+            {% elif hit._source.shortDescription %}
+              {#do we have a highlight?#}
+              {% if hit.highlight and hit.highlight.shortDescription %}
+                {{ hit.highlight.shortDescription }}
+              {% else %}
+                {{ hit._source.shortDescription[0] }}
+              {% endif %}
+            {% endif %}
+          </div>
+          <div class="text-sm mt-2">
+          {% if hit._source.department[0] %}
+          <div>
+            <span class="search-result-header">Department</span>:
+              {{ hit._source.department[0] }}
+          </div>
           {% endif %}
-        {% endif %}
+          {% if hit._source.customerReviewCount %}
+            <div>
+              <span class="search-result-header">Customer Reviews</span>:
+                {{ hit._source.customerReviewCount[0] }}
+            </div>
+          {% endif %}
+          </div>
+        </div>
+        <div class="col-span-3 sm:px-8">
+        <div>
+          <p class="text-xl text-slate-800 font-bold mb-2">
+            {% if hit._source.regularPrice %}
+              ${{ hit._source.regularPrice[0] }}
+            {% endif %}
+          </p>
+          <button class="bg-amber-300 text-black p-2 w-full">Add to Cart</button>
+        </div>
+        </div>
+        </div>
+        
       </div>
     </div>
   {% endfor %}

@@ -1,15 +1,12 @@
 <script>
 function toggleDebug() {
   var x = document.getElementById("debug-response");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
+  x.classList.toggle('hidden')
 }
-
 </script>
-<button onclick="toggleDebug()">View Raw Response</button>
-<div id="debug-response">
+<div class="py-8">
+  <button onclick="toggleDebug()" class="bg-slate-100 p-3">View Raw Response</button>
+</div>
+<div id="debug-response" class="hidden">
   <pre>{{ search_response|tojson(indent=4) }}</pre>
 </div>
