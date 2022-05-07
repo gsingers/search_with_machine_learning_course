@@ -1,6 +1,3 @@
-{% if display_filters %}<div><span class="filter-header">Filters</span>: {{ display_filters|join(", ") }}
+<div><span class="filter-header">Filters</span>: {{ display_filters|join(", ") }}
 <span><a href="{{url_for("search.query")}}?&query={{ query }}">Clear All Filters</a></span>
-</div>{% endif %}
-{% if query_category %}<div>
-  Your query categorization model predicted: {{ query_category }}
-</div>{% endif %}
+</div>

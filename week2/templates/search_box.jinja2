@@ -1,24 +1,46 @@
-<div id="search-box"> 
-  <form method="post" action="{{ url_for('search.query') }}">
-    <input name="query" id="query" type="search" value="{{ query|e }}" required>
-    <input type="submit" value="Query">
-    <label>Model: </label>
-    <select name="model">
-      <option value="simple" {% if model == "simple" %}selected{% endif %}>Simple</option>
-      <option value="simple_LTR" {% if model == "simple_LTR" %}selected{% endif %}>LTR -- Simple</option>
-      <option value="hand_tuned" {% if model == "hand_tuned" %}selected{% endif %} >Hand Tuned</option>
-      <option value="ht_LTR" {% if model == "ht_LTR" %}selected{% endif %}>LTR -- Hand Tuned</option>
-    </select>
-    <label>Explain?</label><input type="checkbox" name="explain" value="true" {% if explain %}checked{% else %}{% endif %}>
-    <select name="sort">
-      <option value="_score" {% if sort == "_score" %}selected{% endif %} >Relevance</option>
-      <option value="name.keyword" {% if sort == "name.keyword" %}selected{% endif %}>Name</option>
-      <option value="salesRankShortTerm" {% if sort == "salesRankShortTerm" %}selected{% endif %}>Popularity</option>
-      <option value="regularPrice" {% if sort == "regularPrice" %}selected{% endif %}>Price</option>
-    </select>
-    <select name="sortDir">
-      <option value="asc" {% if sortDir == "asc" %}selected{% endif %}>Ascending</option>
-      <option value="desc" {% if sortDir == "desc" %}selected{% endif %}>Descending</option>
-    </select>
+<div id="search-box" class="bg-blue-500 p-4"> 
+  <form method="post" action="{{ url_for('search.query') }}" id="searchForm">
+    <div class="sm:flex">
+    <input class="flex-grow w-full sm:w-auto" name="query" id="query" type="search" value="{{ query|e }}" required>
+    <input type="submit" value="Query" class="hidden">
+    <div class="sm:ml-2 pt-2 sm:pt-0 grid grid-cols-4 gap-2">
+      <select name="model" id="modelControl">
+        <option value="simple" {% if model == "simple" %}selected{% endif %}>Simple</option>
+        <option value="simple_LTR" {% if model == "simple_LTR" %}selected{% endif %}>LTR -- Simple</option>
+        <option value="hand_tuned" {% if model == "hand_tuned" %}selected{% endif %} >Hand Tuned</option>
+        <option value="ht_LTR" {% if model == "ht_LTR" %}selected{% endif %}>LTR -- Hand Tuned</option>
+      </select>
+      <select name="sort" id="sortControl">
+        <option value="_score" {% if sort == "_score" %}selected{% endif %} >Relevance</option>
+        <option value="name.keyword" {% if sort == "name.keyword" %}selected{% endif %}>Name</option>
+        <option value="salesRankShortTerm" {% if sort == "salesRankShortTerm" %}selected{% endif %}>Popularity</option>
+        <option value="regularPrice" {% if sort == "regularPrice" %}selected{% endif %}>Price</option>
+      </select>
+      <select name="sortDir" id="sortDirControl">
+        <option value="asc" {% if sortDir == "asc" %}selected{% endif %}>Ascending</option>
+        <option value="desc" {% if sortDir == "desc" %}selected{% endif %}>Descending</option>
+      </select>
+      <div class="flex items-center">
+        <label class="text-white">Explain?</label>
+        <input type="checkbox" name="explain" value="true" {% if explain %}checked{% else %}{% endif %}>
+      </div>
+    </div>
+    </div>
   </form>
 </div>
+
+<script>
+  const searchForm = document.getElementById('searchForm')
+  const sortControl = document.getElementById('sortControl');
+  const sortDirControl = document.getElementById('sortDirControl');
+  const modelControl = document.getElementById('modelControl');
+  sortControl.addEventListener('change', () => {
+    searchForm.submit();
+  })
+  sortDirControl.addEventListener('change', () => {
+    searchForm.submit();
+  })
+  modelControl.addEventListener('change', () => {
+    searchForm.submit();
+  })
+</script>
