@@ -96,8 +96,8 @@ def get_opensearch():
 
 @click.command()
 @click.option('--source_dir', '-s', help='XML files source directory')
-def main(source_dir):
-    index_name = 'bbuy_products'
+@click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
+def main(source_dir: str, index_name: str):
     client = get_opensearch()
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
