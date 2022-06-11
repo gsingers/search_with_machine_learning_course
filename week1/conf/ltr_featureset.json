@@ -1,0 +1,18 @@
+{
+  "featureset": {
+    "features": [
+      {
+        "name": "name_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "name": "{{keywords}}"
+          }
+        }
+      }
+    ]
+  }
+}

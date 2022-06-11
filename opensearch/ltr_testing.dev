@@ -1,42 +1,67 @@
-# This example requires the bbuy_queries index to exist and be populated.  See index-data.sh for details.
-# Get the top 10 queries from the queries log
-GET /bbuy_queries/_search
-{
-  "size": 0,
-  "aggs": {
-    "Query": {
-
-      "terms": {
-        "size": 10,
-        "field": "query.keyword"
-      },
-      "aggs":{
-        "Docs":{
-          "terms":{
-            "size": 5,
-            "field": "sku.keyword"
-          }
-        }
-      }
-    }
-  }
-}
-
-
-# Create the Search Template
-POST _scripts/hello_world_template
+# Some useful templates and queries for testing LTR
+POST _scripts/ltr_log_template
 {
   "script": {
     "lang": "mustache",
     "source": {
-      "size": "10",
-      "_source": ["sku", "name", "shortDescription"],
+      "size": 1,
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "terms": {
+                "sku": [
+                  "{{sku}}"
+                ]
+              }
+            },
+            {
+              "sltr": {
+                "_name": "logged_featureset",
+                "featureset": "bbuy_main_featureset",
+                "store": "week1",
+                "params": {
+                  "keywords": "{{user_query}}"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ext": {
+        "ltr_log": {
+          "log_specs": {
+            "name": "log_entry",
+            "named_query": "logged_featureset"
+          }
+        }
+      }
+    }
+  },
+  "params": {
+    "user_query": "",
+    "sku": ""
+  }
+}
+
+POST _scripts/ltr_template
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "size": 500,
+      "sort": [
+        {
+          "_score": {
+            "order": "desc"
+          }
+        }
+      ],
       "query": {
         "function_score": {
           "query": {
             "bool": {
-              "must": [
-              ],
+              "must": [],
               "should": [
                 {
                   "match": {
@@ -72,7 +97,8 @@ POST _scripts/hello_world_template
                       "sku",
                       "manufacturer",
                       "features",
-                      "categoryPath"
+                      "categoryPath",
+                      "name_analogies"
                     ]
                   }
                 },
@@ -89,6 +115,14 @@ POST _scripts/hello_world_template
                       "operator": "OR",
                       "minimum_should_match": "2<75%"
                     }
+                  }
+                },
+                {
+                  "query_string": {
+                    "query": "{{prior_skus}}",
+                    "fields": [
+                      "_id"
+                    ]
                   }
                 }
               ],
@@ -144,50 +178,63 @@ POST _scripts/hello_world_template
             }
           ]
         }
+      },
+      "_source": [
+        "sku",
+        "name"
+      ],
+      "rescore": {
+        "window_size": 500,
+        "query": {
+          "rescore_query": {
+            "sltr": {
+              "params": {
+                "keywords": "{{user_query}}",
+                "click_prior_query": "{{prior_skus}}"
+              },
+              "model": "ltr_model",
+              "store": "week1"
+            }
+          },
+          "score_mode": "total",
+          "query_weight": 0,
+          "rescore_query_weight": 1
+        }
       }
     }
   },
   "params": {
     "user_query": "",
-    "user_query_split": []
-  }
-}
-
-
-# Queries:
-
-GET bbuy_products/_search/template
-{
-  "id": "hello_world_template",
-  "params": {
-    "user_query": "lcd tv",
-    "user_query_split": ["lcd", "tv"]
+    "user_query_split": [],
+    "prior_skus": []
   }
 }
 
 GET bbuy_products/_search/template
 {
-  "id": "hello_world_template",
+  "id": "ltr_template",
   "params": {
-    "user_query": "ipad",
-    "user_query_split": ["ipad"]
+    "user_query": "playstation",
+    "user_query_split": ["playstation"],
+    "prior_skus": "  "
   }
 }
 
 GET bbuy_products/_search/template
 {
-  "id": "hello_world_template",
+  "id": "ltr_log_template",
   "params": {
-    "user_query": "Touchpad",
-    "user_query_split": ["Touchpad"]
+    "user_query": "wii",
+    "sku": "2803428"
   }
 }
 
 GET bbuy_products/_search/template
 {
-  "id": "hello_world_template",
+  "id": "ltr_log_template",
   "params": {
-    "user_query": "Beats",
-    "user_query_split": ["Beats"]
+    "user_query": "wii",
+    "sku": "8863296"
   }
 }
+

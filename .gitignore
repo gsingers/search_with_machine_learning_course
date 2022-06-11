@@ -1,3 +1,5 @@
+*.iml
+.idea
 data/phone_products/phone_products.xml
 output/
 logstash-*

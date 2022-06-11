@@ -18,8 +18,8 @@ def create_prior_queries_from_group(click_group): # total impressions isn't curr
     if click_group is not None:
         for item in click_group.itertuples():
             try:
-                click_prior_query += "%s^%.3f  " % (item.doc_id, item.clicks/item.num_impressions)
-
+                impressions = max(item.clicks / item.num_impressions, 0.001)
+                click_prior_query += "%s^%.3f  " % (item.doc_id, impressions)
             except KeyError as ke:
                 pass # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query
@@ -29,12 +29,12 @@ def create_prior_queries_from_group(click_group): # total impressions isn't curr
 def create_prior_queries(doc_ids, doc_id_weights, query_times_seen): # total impressions isn't currently used, but it mayb worthwhile at some point
     click_prior_query = ""
     # Create a string that looks like:  "query": "1065813^100 OR 8371111^89", where the left side is the doc id and the right side is the weight.  In our case, the number of clicks a document received in the training set
-    click_prior_map = "" # looks like: '1065813':100, '8371111':809
     if doc_ids is not None and doc_id_weights is not None:
         for idx, doc in enumerate(doc_ids):
             try:
                 wgt = doc_id_weights[doc]  # This should be the number of clicks or whatever
-                click_prior_query += "%s^%.3f  " % (doc, wgt/query_times_seen)
+                seen = max(wgt / query_times_seen, 0.001)
+                click_prior_query += "%s^%.3f  " % (doc, seen)
             except KeyError as ke:
                 pass # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query
@@ -81,7 +81,7 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                             "slop": "6",
                             "minimum_should_match": "2<75%",
                             "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
-                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath", "name_analogies"]
+                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath"]
                        }
                     },
                     {
@@ -100,7 +100,7 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                        }
                     }
                 ],
-                "minimum_should_match": 1, 
+                "minimum_should_match": 1,
                 "filter": filters  #
             }
 
@@ -138,6 +138,7 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
 
 # Hardcoded query here.  Better to use search templates or other query config.
 def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, include_aggs=True, highlight=True, source=None):
+
     query_obj = {
         'size': size,
         "sort":[
@@ -177,7 +178,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                     "slop": "6",
                                     "minimum_should_match": "2<75%",
                                     "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
-                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath", "name_analogies"]
+                                       "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath"]
                                }
                             },
                             {
@@ -259,12 +260,14 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                             "fields": ["_id"]
                         }
                     })
+        #print(query_obj)
     if user_query == "*" or user_query == "#":
         #replace the bool
         try:
+            query_obj["query"].pop("bool")
             query_obj["query"] = {"match_all": {}}
         except:
-            print("Couldn't replace query for *")
+            pass
     if highlight:
         query_obj["highlight"] = {
             "fields": {

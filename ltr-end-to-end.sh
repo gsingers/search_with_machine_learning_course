@@ -1,11 +1,11 @@
 usage()
 {
-  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course] [-c {ctr, heuristic, binary}] [ -w week2 ] [ -d ] [ -a /path/to/bbuy/products/train.csv ]  [-t num rows for the test split, default 100000] [-e num test queries to run. Default 200] [-r num rows for the training split, default 1000000] [-y] [-o output dir]"
+  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course] [-c {ctr, heuristic, binary}] [ -w week1 ] [ -d ] [ -a /path/to/bbuy/products/train.csv ]  [-t num rows for the test split, default 100000] [-e num test queries to run. Default 200] [-r num rows for the training split, default 1000000] [-y] [-o output dir]"
   exit 2
 }
 
 SOURCE_DIR="/workspace/search_with_machine_learning_course"
-WEEK="week2"
+WEEK="week1"
 OUTPUT_DIR="/workspace/ltr_output"
 ALL_CLICKS_FILE="/workspace/datasets/train.csv"
 SPLIT_TRAIN_ROWS=1000000
@@ -85,7 +85,7 @@ if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Run our test queries through
-python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --train_file "$OUTPUT_DIR/train.csv" --output_dir "$OUTPUT_DIR" --xgb_test_num_queries $NUM_TEST_QUERIES
+python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --train_file "$OUTPUT_DIR/train.csv" --output_dir "$OUTPUT_DIR" --xgb_test_num_queries $NUM_TEST_QUERIES  --xgb_main_query 0
 if [ $? -ne 0 ] ; then
   exit 2
 fi
