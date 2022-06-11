@@ -10,7 +10,7 @@ The class is a hands-on project-driven course where students will work with real
 # Class code layout (e.g. where the projects are)
 
 For our class, we have four weekly projects.  Each project
-is a standalone Python Flask application that interacts with an OpenSearch server (and perhaps other services).  
+is a standalone Python application that interacts with an OpenSearch server (and perhaps other services).  
 
 You will find these four projects in the directories below them organized in the following way:
 
@@ -63,10 +63,10 @@ The following things must be done each time you create a new Gitpod Workspace (u
 
 # Running the Weekly Project
 
-At the command line, do the following steps to run the example.  For purposes of demonstration, let's assume we are working on week 2.  Substitute accordingly for the week you are working on.
+At the command line, do the following steps to run the example.  
 
-1. Activate your Python Virtual Environment.  We use `pyenv` (Pyenv website)[https://github.com/pyenv/pyenv] and `pyenv-virtualenv` (Pyenv Virtualenv)[https://github.com/pyenv/pyenv-virtualenv], but you can use whatever you are most comfortable with.
-    1. `pyenv activate search_with_ml_week2` -- Activate that Virtualenv. Substitute in whatever week you are working on, e.g. `search_with_ml_week1`. 
+1. Activate your Python Virtual Environment.  We use `pyenv` (Pyenv website)[https://github.com/pyenv/pyenv] and `pyenv-virtualenv` (Pyenv Virtualenv)[https://github.com/pyenv/pyenv-virtualenv].
+    1. `pyenv activate search_with_ml` -- Activate the Virtualenv. 
 1. Run Flask: 
     1. `export FLASK_ENV=development`
     1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week2`

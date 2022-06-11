@@ -14,3 +14,4 @@ matplotlib
 fasttext
 nltk
 kaggle
+lxml

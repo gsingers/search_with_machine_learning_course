@@ -14,7 +14,7 @@ GET searchml_test/_search
   }
 }
 
-# Rework week 1 function score as a rescore
+# function score as a rescore
 POST searchml_test/_search
 {
   "query": {
