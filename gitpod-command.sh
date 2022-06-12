@@ -1,4 +1,4 @@
-ln -s /workspace/kaggle /home/gitpod/.kaggle
+ln -s /workspace/kaggle/ /home/gitpod/.kaggle
 
 mkdir -p /workspace/opensearch
 mkdir -p /workspace/datasets
