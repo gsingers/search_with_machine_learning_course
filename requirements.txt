@@ -15,4 +15,3 @@ fasttext
 nltk
 kaggle
 lxml
-sentence-transformers

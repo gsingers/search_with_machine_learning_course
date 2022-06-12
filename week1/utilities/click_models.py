@@ -17,7 +17,7 @@ def step(x):
 # Given a click model type, transform the "grade" into an appropriate value between 0 and 1, inclusive
 # This operates on the data frame and adds a "grade" column
 #
-def apply_click_model(data_frame, click_model_type="binary", downsample=True, prior=1000, alpha=30, beta=70, quantiles=10):
+def apply_click_model(data_frame, click_model_type="heuristic", downsample=True, prior=1000, alpha=30, beta=70, quantiles=10):
     if click_model_type == "binary":
         print("Binary click model")
         data_frame["grade"] = data_frame["clicks"].apply(lambda x: binary_func(x))

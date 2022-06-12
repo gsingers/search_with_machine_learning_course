@@ -1,6 +1,7 @@
 usage()
 {
-  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course] [-c {ctr, heuristic, binary}] [ -w week1 ] [ -d ] [ -a /path/to/bbuy/products/train.csv ]  [-t num rows for the test split, default 100000] [-e num test queries to run. Default 200] [-r num rows for the training split, default 1000000] [-y] [-o output dir]"
+  echo "Usage: $0 [-s /workspace/search_with_machine_learning_course] [-c {ctr, heuristic, binary}] [ -w week1 ] [ -d ] [ -a /path/to/bbuy/products/train.csv ]  [-t num rows for the test split, default 100000] [-e num test queries to run. Default 200] [-r num rows for the training split, default 1000000] [-y] [-o output dir] [-g RESCORE QUERY WEIGHT] [-m MAIN QUERY WEIGHT] "
+  echo "Example: ./ltr-end-to-end.sh -s ../python/search_ml -w week1_finished  -o /Users/grantingersoll/projects/corise/datasets/ltr/250 -a /Users/grantingersoll/projects/corise/datasets/bbuy/train.csv -y -c quantiles -e 100 -m 0"
   exit 2
 }
 
@@ -10,21 +11,25 @@ OUTPUT_DIR="/workspace/ltr_output"
 ALL_CLICKS_FILE="/workspace/datasets/train.csv"
 SPLIT_TRAIN_ROWS=1000000
 SPLIT_TEST_ROWS=1000000
-NUM_TEST_QUERIES=200 # the number of test queries to run
+NUM_TEST_QUERIES=100 # the number of test queries to run
 CLICK_MODEL="heuristic"
 SYNTHESIZE=""
 DOWNSAMPLE=""
-while getopts ':s:c:e:w:o:a:r:t:ydh' c
+MAIN_QUERY_WEIGHT=1
+RESCORE_WEIGHT=2
+while getopts ':s:c:e:g:m:w:o:a:r:t:ydh' c
 do
   case $c in
     a) ALL_CLICKS_FILE=$OPTARG ;;
     c) CLICK_MODEL=$OPTARG ;;
     d) DOWNSAMPLE="--downsample" ;;
     e) NUM_TEST_QUERIES=$OPTARG ;;
+    g) RESCORE_WEIGHT=$OPTARG ;;
+    m) MAIN_QUERY_WEIGHT=$OPTARG ;;
     o) OUTPUT_DIR=$OPTARG ;;
     r) SPLIT_TRAIN_ROWS=$OPTARG ;;
-    t) SPLIT_TEST_ROWS=$OPTARG ;;
     s) SOURCE_DIR=$OPTARG ;;
+    t) SPLIT_TEST_ROWS=$OPTARG ;;
     w) WEEK=$OPTARG ;;
     y) SYNTHESIZE="--synthesize" ;;
     h) usage ;;
@@ -85,7 +90,7 @@ if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Run our test queries through
-python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --train_file "$OUTPUT_DIR/train.csv" --output_dir "$OUTPUT_DIR" --xgb_test_num_queries $NUM_TEST_QUERIES  --xgb_main_query 0
+python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --train_file "$OUTPUT_DIR/train.csv" --output_dir "$OUTPUT_DIR" --xgb_test_num_queries $NUM_TEST_QUERIES  --xgb_main_query $MAIN_QUERY_WEIGHT --xgb_rescore_query_weight $RESCORE_WEIGHT
 if [ $? -ne 0 ] ; then
   exit 2
 fi

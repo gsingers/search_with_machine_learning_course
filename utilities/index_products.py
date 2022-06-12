@@ -9,6 +9,10 @@ from opensearchpy import OpenSearch
 from opensearchpy.helpers import bulk
 import logging
 
+from time import perf_counter
+import concurrent.futures
+
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -25,6 +29,7 @@ mappings =  [
             "active/text()", "active",
             "regularPrice/text()", "regularPrice",
             "salePrice/text()", "salePrice",
+            "artistName/text()", "artistName",
             "onSale/text()", "onSale",
             "digital/text()", "digital",
             "frequentlyPurchasedWith/*/text()", "frequentlyPurchasedWith",# Note the match all here to get the subfields
@@ -94,39 +99,53 @@ def get_opensearch():
     )
     return client
 
+def index_file(file, index_name):
+    docs_indexed = 0
+    client = get_opensearch()
+    logger.info(f'Processing file : {file}')
+    tree = etree.parse(file)
+    root = tree.getroot()
+    children = root.findall("./product")
+    docs = []
+    for child in children:
+        doc = {}
+        for idx in range(0, len(mappings), 2):
+            xpath_expr = mappings[idx]
+            key = mappings[idx + 1]
+            doc[key] = child.xpath(xpath_expr)
+        #print(doc)
+        if 'productId' not in doc or len(doc['productId']) == 0:
+            continue
+
+        docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
+        #docs.append({'_index': index_name, '_source': doc})
+        docs_indexed += 1
+        if docs_indexed % 200 == 0:
+            bulk(client, docs, request_timeout=60)
+            #logger.info(f'{docs_indexed} documents indexed')
+            docs = []
+    if len(docs) > 0:
+        bulk(client, docs, request_timeout=60)
+        logger.info(f'{docs_indexed} documents indexed')
+    return docs_indexed
+
+
 @click.command()
 @click.option('--source_dir', '-s', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
-def main(source_dir: str, index_name: str):
-    client = get_opensearch()
+@click.option('--workers', '-w', default=8, help="The name of the index to write to")
+def main(source_dir: str, index_name: str, workers: int):
+
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
-    for file in files:
-        logger.info(f'Processing file : {file}')
-        tree = etree.parse(file)
-        root = tree.getroot()
-        children = root.findall("./product")
-        docs = []
-        for child in children:
-            doc = {}
-            for idx in range(0, len(mappings), 2):
-                xpath_expr = mappings[idx]
-                key = mappings[idx + 1]
-                doc[key] = child.xpath(xpath_expr)
-            #print(doc)
-            if not 'productId' in doc or len(doc['productId']) == 0:
-                continue
+    start = perf_counter()
+    with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
+        futures = [executor.submit(index_file, file, index_name) for file in files]
+        for future in concurrent.futures.as_completed(futures):
+            docs_indexed += future.result()
 
-            docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
-            #docs.append({'_index': index_name, '_source': doc})
-            docs_indexed += 1
-            if docs_indexed % 200 == 0:
-                bulk(client, docs, request_timeout=60)
-                logger.info(f'{docs_indexed} documents indexed')
-                docs = []
-        if len(docs) > 0:
-            bulk(client, docs, request_timeout=60)
-            logger.info(f'{docs_indexed} documents indexed')
-    logger.info(f'Done. Total docs: {docs_indexed}')
+    finish = perf_counter()
+    logger.info(f'Done. Total docs: {docs_indexed} in {(finish - start)/60} minutes')
+
 if __name__ == "__main__":
     main()

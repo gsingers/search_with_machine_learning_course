@@ -32,5 +32,6 @@ def train(xgb_train_data, num_rounds=5, xgb_conf=None ):
         with open(xgb_conf) as json_file:
             xgb_params = json.load(json_file)
     print("Training XG Boost on %s for %s rounds with params: %s" % (xgb_train_data, num_rounds, xgb_params))
+    ##### Step 3.a
     print("IMPLEMENT ME: train()")
     return bst, xgb_params
