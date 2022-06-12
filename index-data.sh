@@ -12,7 +12,7 @@ PYTHON_LOC="/workspace/search_with_machine_learning_course/utilities"
 
 LOGS_DIR="/workspace/logs"
 
-while getopts ':p:q:g:y:d:h' c
+while getopts ':p:q:g:y:d:h:r' c
 do
   case $c in
     p) PRODUCTS_JSON_FILE=$OPTARG ;;
@@ -20,6 +20,7 @@ do
     d) DATASETS_DIR=$OPTARG ;;
     g) LOGS_DIR=$OPTARG ;;
     y) PYTHON_LOC=$OPTARG ;;
+    r) REDUCE="--reduced" ;;
     h) usage ;;
     [?]) usage ;;
   esac
@@ -40,7 +41,7 @@ cd $PYTHON_LOC
 echo ""
 if [ -f index_products.py ]; then
   echo "Indexing product data in $DATASETS_DIR/product_data/products and writing logs to $LOGS_DIR/index_products.log"
-  nohup python index_products.py -s "$DATASETS_DIR/product_data/products" > "$LOGS_DIR/index_products.log" &
+  nohup python index_products.py $REDUCE -s "$DATASETS_DIR/product_data/products" > "$LOGS_DIR/index_products.log" &
   if [ $? -ne 0 ] ; then
     echo "Failed to index products"
     exit 2
