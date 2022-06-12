@@ -99,7 +99,7 @@ def get_opensearch():
     )
     return client
 
-def index_file(file, index_name):
+def index_file(file, index_name, reduced):
     docs_indexed = 0
     client = get_opensearch()
     logger.info(f'Processing file : {file}')
@@ -116,7 +116,8 @@ def index_file(file, index_name):
         #print(doc)
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
-
+        if reduced and 'categoryPath' not in doc or 'Best Buy' not in doc['categoryPath'] or 'Movies & Music' in doc['categoryPath']:
+            continue
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
         docs_indexed += 1
@@ -133,8 +134,9 @@ def index_file(file, index_name):
 @click.command()
 @click.option('--source_dir', '-s', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
+@click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
 @click.option('--workers', '-w', default=8, help="The name of the index to write to")
-def main(source_dir: str, index_name: str, workers: int):
+def main(source_dir: str, index_name: str, reduced: bool, workers: int):
 
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
