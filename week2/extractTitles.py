@@ -26,6 +26,7 @@ if args.input:
 sample_rate = args.sample_rate
 
 def transform_training_data(name):
+    #### Level 2 Derive Synonyms
     # IMPLEMENT
     return name.replace('\n', ' ')
 

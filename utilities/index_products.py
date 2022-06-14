@@ -3,11 +3,16 @@ import opensearchpy
 import requests
 from lxml import etree
 
+import os
 import click
 import glob
 from opensearchpy import OpenSearch
 from opensearchpy.helpers import bulk
 import logging
+import fasttext
+from pathlib import Path
+
+import documents
 
 from time import perf_counter
 import concurrent.futures
@@ -99,7 +104,7 @@ def get_opensearch():
     )
     return client
 
-def index_file(file, index_name):
+def index_file(file, index_name, syns_model, reduced=False):
     docs_indexed = 0
     client = get_opensearch()
     logger.info(f'Processing file : {file}')
@@ -116,7 +121,11 @@ def index_file(file, index_name):
         #print(doc)
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
+        if reduced and 'categoryPath' not in doc or 'Best Buy' not in doc['categoryPath'] or 'Movies & Music' in doc['categoryPath']:
+            continue
 
+        if syns_model is not None:
+            documents.annotate(doc, syns_model)
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
         docs_indexed += 1
@@ -134,13 +143,18 @@ def index_file(file, index_name):
 @click.option('--source_dir', '-s', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--workers', '-w', default=8, help="The name of the index to write to")
-def main(source_dir: str, index_name: str, workers: int):
+@click.option('--synonyms_file', '-y', default=None, help="The path of the FastText synonyms model.  Week 2.")
+@click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
+def main(source_dir: str, index_name: str, reduced: bool, workers: int, synonyms_file: str):
 
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
+    syns_model = None
+    if synonyms_file and os.path.isfile(synonyms_file):
+        syns_model = fasttext.load_model(synonyms_file)
     start = perf_counter()
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(index_file, file, index_name) for file in files]
+        futures = [executor.submit(index_file, file, index_name, syns_model, reduced) for file in files]
         for future in concurrent.futures.as_completed(futures):
             docs_indexed += future.result()
 

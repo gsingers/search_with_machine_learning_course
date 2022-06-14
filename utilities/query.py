@@ -9,8 +9,13 @@ import os
 from getpass import getpass
 from urllib.parse import urljoin
 import pandas as pd
+import fileinput
+import logging
 
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logging.basicConfig(format='%(levelname)s:%(message)s')
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -44,8 +49,7 @@ def create_prior_queries(doc_ids, doc_id_weights,
 
 
 # Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, include_aggs=True,
-                 highlight=True, source=None):
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
     query_obj = {
         'size': size,
         "sort": [
@@ -163,7 +167,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
             }
         }
     }
-    if click_prior_query != "":
+    if click_prior_query is not None and click_prior_query != "":
         query_obj["query"]["function_score"]["query"]["bool"]["should"].append({
             "query_string": {
                 # This may feel like cheating, but it's really not, esp. in ecommerce where you have all this prior data,  You just can't let the test clicks leak in, which is why we split on date
@@ -177,22 +181,18 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
             query_obj["query"] = {"match_all": {}}
         except:
             print("Couldn't replace query for *")
-    if highlight:
-        query_obj["highlight"] = {
-            "fields": {
-                "name": {},
-                "shortDescription": {},
-                "longDescription": {}
-            }
-        }
     if source is not None:  # otherwise use the default and retrieve all source
         query_obj["_source"] = source
-
-    if include_aggs:
-        add_aggs(query_obj)
     return query_obj
 
 
+def search(client, user_query, index="bbuy_products"):
+    query_obj = create_query(user_query, click_prior_query=None, filters=None, source=["name", "shortDescription"])
+    logging.info(query_obj)
+    response = client.search(query_obj, index=index)
+    if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
+        hits = response['hits']['hits']
+        print(json.dumps(response, indent=2))
 
 
 if __name__ == "__main__":
@@ -236,3 +236,15 @@ if __name__ == "__main__":
         ssl_show_warn=False,
 
     )
+    index_name = args.index
+    query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
+    print(query_prompt)
+    for line in fileinput.input():
+        query = line.rstrip()
+        if query == "Exit":
+            break
+        search(client=opensearch, user_query=query, index=index_name)
+
+        print(query_prompt)
+
+    
