@@ -121,7 +121,7 @@ def index_file(file, index_name, syns_model, reduced=False):
         #print(doc)
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
-        if reduced and 'categoryPath' not in doc or 'Best Buy' not in doc['categoryPath'] or 'Movies & Music' in doc['categoryPath']:
+        if reduced and ('categoryPath' not in doc or 'Best Buy' not in doc['categoryPath'] or 'Movies & Music' in doc['categoryPath']):
             continue
 
         if syns_model is not None:
