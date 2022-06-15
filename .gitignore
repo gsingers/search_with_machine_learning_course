@@ -1,3 +1,6 @@
+data/computer_products*
+data/pruned_products*
+data/phone_products*
 *.iml
 .idea
 data/phone_products/phone_products.xml
