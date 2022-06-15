@@ -146,7 +146,7 @@ def index_file(file, index_name, syns_model, reduced=False):
 @click.option('--synonyms_file', '-y', default=None, help="The path of the FastText synonyms model.  Week 2.")
 @click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
 def main(source_dir: str, index_name: str, reduced: bool, workers: int, synonyms_file: str):
-
+    logger.info(f"Indexing {source_dir} to {index_name} with {workers} workers, {synonyms_file} and the reduced flag set to {reduced}")
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
     syns_model = None
