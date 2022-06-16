@@ -24,4 +24,4 @@ RUN bash  -i -c "pyenv activate search_with_ml && pip install -r /home/gitpod/re
 RUN wget https://github.com/facebookresearch/fastText/archive/v0.9.2.zip
 RUN unzip v0.9.2.zip
 RUN cd /home/gitpod/fastText-0.9.2 && /usr/bin/make -f /home/gitpod/fastText-0.9.2/Makefile fasttext
-RUN rm v0.9.2.zip
+#RUN rm v0.9.2.zip
