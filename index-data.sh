@@ -41,46 +41,48 @@ mkdir $LOGS_DIR
 cd $PYTHON_LOC || exit
 echo "Running python scripts from $PYTHON_LOC"
 
-echo "Creating index settings and mappings"
 
-if [ -f $PRODUCTS_JSON_FILE ]; then
-  echo " Product file: $PRODUCTS_JSON_FILE"
-  curl -k -X PUT -u admin  "https://localhost:9200/bbuy_products" -H 'Content-Type: application/json' -d "@$PRODUCTS_JSON_FILE"
-  if [ $? -ne 0 ] ; then
-    echo "Failed to create index with settings of $PRODUCTS_JSON_FILE"
-    exit 2
+if [ "$ANNOTATE" != "--annotate" ]; then
+  echo "Creating index settings and mappings"
+  if [ -f $PRODUCTS_JSON_FILE ]; then
+    echo " Product file: $PRODUCTS_JSON_FILE"
+    curl -k -X PUT -u admin  "https://localhost:9200/bbuy_products" -H 'Content-Type: application/json' -d "@$PRODUCTS_JSON_FILE"
+    if [ $? -ne 0 ] ; then
+      echo "Failed to create index with settings of $PRODUCTS_JSON_FILE"
+      exit 2
+    fi
+
+    if [ -f index_products.py ]; then
+      echo "Indexing product data in $DATASETS_DIR/product_data/products and writing logs to $LOGS_DIR/index_products.log"
+      nohup python index_products.py $REDUCE -s "$DATASETS_DIR/product_data/products" > "$LOGS_DIR/index_products.log" &
+      if [ $? -ne 0 ] ; then
+        echo "Failed to index products"
+        exit 2
+      fi
+    fi
   fi
 
-  if [ -f index_products.py ]; then
-    echo "Indexing product data in $DATASETS_DIR/product_data/products and writing logs to $LOGS_DIR/index_products.log"
-    nohup python index_products.py $REDUCE -s "$DATASETS_DIR/product_data/products" > "$LOGS_DIR/index_products.log" &
+  if [ -f $QUERIES_JSON_FILE ]; then
+    echo ""
+    echo " Query file: $QUERIES_JSON_FILE"
+    curl -k -X PUT -u admin  "https://localhost:9200/bbuy_queries" -H 'Content-Type: application/json' -d "@$QUERIES_JSON_FILE"
     if [ $? -ne 0 ] ; then
-      echo "Failed to index products"
+      echo "Failed to create index with settings of $QUERIES_JSON_FILE"
       exit 2
+    fi
+    if [ -f index_queries.py ]; then
+      echo "Indexing queries data and writing logs to $LOGS_DIR/index_queries.log"
+      nohup python index_queries.py -s "$DATASETS_DIR/train.csv" > "$LOGS_DIR/index_queries.log" &
+      if [ $? -ne 0 ] ; then
+        echo "Failed to index queries"
+        exit 2
+      fi
     fi
   fi
 fi
-
-if [ -f $QUERIES_JSON_FILE ]; then
-  echo ""
-  echo " Query file: $QUERIES_JSON_FILE"
-  curl -k -X PUT -u admin  "https://localhost:9200/bbuy_queries" -H 'Content-Type: application/json' -d "@$QUERIES_JSON_FILE"
-  if [ $? -ne 0 ] ; then
-    echo "Failed to create index with settings of $QUERIES_JSON_FILE"
-    exit 2
-  fi
-  if [ -f index_queries.py ]; then
-    echo "Indexing queries data and writing logs to $LOGS_DIR/index_queries.log"
-    nohup python index_queries.py -s "$DATASETS_DIR/train.csv" > "$LOGS_DIR/index_queries.log" &
-    if [ $? -ne 0 ] ; then
-      echo "Failed to index queries"
-      exit 2
-    fi
-  fi
-fi
-
 
 if [ "$ANNOTATE" == "--annotate" ]; then
+  echo "Creating Annotations index"
   if [ -f $ANNOTATIONS_JSON_FILE ]; then
     echo " Product Annotations file: $ANNOTATIONS_JSON_FILE"
     curl -k -X PUT -u admin  "https://localhost:9200/bbuy_annotations" -H 'Content-Type: application/json' -d "@$ANNOTATIONS_JSON_FILE"
