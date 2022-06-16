@@ -11,3 +11,4 @@ cp data/validity.csv /workspace/ltr_output/
 cd docker
 docker-compose up -d
 
+RUN cd /home/gitpod/fastText-0.9.2 && /usr/bin/make -f /home/gitpod/fastText-0.9.2/Makefile clean fasttext
