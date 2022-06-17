@@ -15,16 +15,26 @@ bp = Blueprint('documents', __name__, url_prefix='/documents')
 def annotate():
     if request.mimetype == 'application/json':
         the_doc = request.get_json()
-        response = {}
-        cat_model = current_app.config.get("cat_model", None) # see if we have a category model
-        syns_model = current_app.config.get("syns_model", None) # see if we have a synonyms/analogies model
-        # We have a map of fields to annotate.  Do POS, NER on each of them
-        sku = the_doc["sku"]
-        for item in the_doc:
-            the_text = the_doc[item]
-            if the_text is not None and the_text.find("%{") == -1:
-                if item == "name":
-                    if syns_model is not None:
-                        print("IMPLEMENT ME: call nearest_neighbors on your syn model and return it as `name_synonyms`")
-        return jsonify(response)
+        if the_doc is not None and the_doc != "":
+
+            response = {}
+            # We have a map of fields to annotate.  Do POS, NER on each of them
+            val = the_doc["name"]
+            if val is not None and len(val) > 0:
+                the_text = val[0]
+                print(the_text)
+                if the_text is not None:
+                    # Implement to add synonyms for the name field.
+                    result = []
+                    syns_model = current_app.config.get("syns_model", None) # see if we have a synonyms/analogies model
+                    #### Level 3 Derive Synonyms
+                    print("IMPLEMENT ME: call nearest_neighbors on your syn model and return it as `name_synonyms`")
+                    response["name_synonyms"] = result
+                else:
+                    print(f"Unable to process {the_doc}")
+            else:
+                print(f"Unable to process {the_doc}")
+            return jsonify(response)
+        else:
+            print("Unable to process request.  Doc is empty or None")
     abort(415)

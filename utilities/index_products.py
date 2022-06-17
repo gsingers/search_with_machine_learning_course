@@ -11,8 +11,8 @@ from opensearchpy.helpers import bulk
 import logging
 import fasttext
 from pathlib import Path
-
-import documents
+import requests
+import json
 
 from time import perf_counter
 import concurrent.futures
@@ -104,7 +104,24 @@ def get_opensearch():
     )
     return client
 
-def index_file(file, index_name, syns_model, reduced=False):
+def annotate_document(doc, doc_url):
+    #payload = json.dumps(doc)
+    payload = json.dumps(doc)
+    #logger.info(f"Sending doc: {payload} to {doc_url}")
+    headers = {
+      'Content-Type': 'application/json'
+    }
+    response = requests.request("POST", doc_url, headers=headers, data=payload)
+    logger.info(f"Annotation response: {response.status_code}")
+    name_syns = response.json()
+    if name_syns is not None and len(name_syns) > 0 and name_syns["name_synonyms"] is not None:
+        doc["name_synonyms"] = name_syns["name_synonyms"]
+        logger.info(f"Adding: {name_syns} to document: {doc}")
+    else:
+        logger.info(f"Invalid synonyms response: {name_syns}")
+
+
+def index_file(file, index_name, synonyms=False, documents_url="http://localhost:5000/documents/annotate", reduced=False):
     docs_indexed = 0
     client = get_opensearch()
     logger.info(f'Processing file : {file}')
@@ -123,9 +140,9 @@ def index_file(file, index_name, syns_model, reduced=False):
             continue
         if reduced and ('categoryPath' not in doc or 'Best Buy' not in doc['categoryPath'] or 'Movies & Music' in doc['categoryPath']):
             continue
-
-        if syns_model is not None:
-            documents.annotate(doc, syns_model)
+        if synonyms:
+            annotate_document(doc, documents_url)
+            logger.info(f"Added Syns: {doc}")
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
         docs_indexed += 1
@@ -138,23 +155,20 @@ def index_file(file, index_name, syns_model, reduced=False):
         logger.info(f'{docs_indexed} documents indexed')
     return docs_indexed
 
-
 @click.command()
 @click.option('--source_dir', '-s', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--workers', '-w', default=8, help="The name of the index to write to")
-@click.option('--synonyms_file', '-y', default=None, help="The path of the FastText synonyms model.  Week 2.")
+@click.option('--documents_url', '-d', default="http://localhost:5000/documents/annotate", help="The location of the Flask App endpoint, something like http://localhost:5000/documents/annotate")
+@click.option('--synonyms', is_flag=True, show_default=True, default=False, help="If true, add synonyms to the document using the --documents_url endpoint.")
 @click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
-def main(source_dir: str, index_name: str, reduced: bool, workers: int, synonyms_file: str):
-    logger.info(f"Indexing {source_dir} to {index_name} with {workers} workers, {synonyms_file} and the reduced flag set to {reduced}")
+def main(source_dir: str, index_name: str, reduced: bool, workers: int, synonyms: bool, documents_url: str):
+    logger.info(f"Indexing {source_dir} to {index_name} with {workers} workers, synonyms is {synonyms} and the reduced flag set to {reduced}.  Documents URL is {documents_url}")
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
-    syns_model = None
-    if synonyms_file and os.path.isfile(synonyms_file):
-        syns_model = fasttext.load_model(synonyms_file)
     start = perf_counter()
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(index_file, file, index_name, syns_model, reduced) for file in files]
+        futures = [executor.submit(index_file, file, index_name, synonyms, documents_url, reduced) for file in files]
         for future in concurrent.futures.as_completed(futures):
             docs_indexed += future.result()
 

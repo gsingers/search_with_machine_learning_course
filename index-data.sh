@@ -1,13 +1,12 @@
 usage()
 {
-  echo "Usage: $0 [-y /path/to/python/indexing/code] [-d /path/to/kaggle/best/buy/datasets] [-p /path/to/bbuy/products/field/mappings] [-n ] [-a /path/to/bbuy/product annotations/field/mappings] [ -q /path/to/bbuy/queries/field/mappings ] [ -g /path/to/write/logs/to ] [ -s /path/to/fasttext/synonyms/model/from/week2]"
+  echo "Usage: $0 [-y /path/to/python/indexing/code] [-d /path/to/kaggle/best/buy/datasets] [-p /path/to/bbuy/products/field/mappings] [-n ] [-a /path/to/bbuy/product annotations/field/mappings] [ -q /path/to/bbuy/queries/field/mappings ] [ -g /path/to/write/logs/to ]"
   echo "if -n is specified, then ONLY annotations indexing (week 2 content) will be done"
   echo "Synonyms are ONLY applied to the annotation indexing (-n), which is on a reduced set of results"
   echo "Example: ./index-data.sh  -y /Users/grantingersoll/projects/corise/search_ml_instructor/src/main/python/search_ml/week1_finished   -d /Users/grantingersoll/projects/corise/datasets/bbuy -q /Users/grantingersoll/projects/corise/search_ml_instructor/src/main/conf/bbuy_queries.json -p /Users/grantingersoll/projects/corise/search_ml_instructor/src/main/conf/bbuy_products.json -g /tmp"
   exit 2
 }
 
-SYNONYMS_FILE="/workspace/datasets/fasttext/phone_model"
 ANNOTATIONS_JSON_FILE="/workspace/search_with_machine_learning_course/conf/bbuy_annotations.json"
 PRODUCTS_JSON_FILE="/workspace/search_with_machine_learning_course/conf/bbuy_products.json"
 QUERIES_JSON_FILE="/workspace/search_with_machine_learning_course/conf/bbuy_queries.json"
@@ -16,7 +15,7 @@ PYTHON_LOC="/workspace/search_with_machine_learning_course/utilities"
 
 LOGS_DIR="/workspace/logs"
 ANNOTATE=""
-while getopts ':p:a:q:g:s:y:d:hrn' c
+while getopts ':p:a:q:g:y:d:hrn' c
 do
   case $c in
     a) ANNOTATIONS_JSON_FILE=$OPTARG ;;
@@ -24,7 +23,6 @@ do
     q) QUERIES_JSON_FILE=$OPTARG ;;
     d) DATASETS_DIR=$OPTARG ;;
     g) LOGS_DIR=$OPTARG ;;
-    s) SYNONYMS_FILE=$OPTARG ;;
     y) PYTHON_LOC=$OPTARG ;;
     n) ANNOTATE="--annotate" ;;
     r) REDUCE="--reduced" ;;
@@ -41,6 +39,7 @@ mkdir $LOGS_DIR
 cd $PYTHON_LOC || exit
 echo "Running python scripts from $PYTHON_LOC"
 
+set -x
 
 if [ "$ANNOTATE" != "--annotate" ]; then
   echo "Creating index settings and mappings"
@@ -87,13 +86,13 @@ if [ "$ANNOTATE" == "--annotate" ]; then
     echo " Product Annotations file: $ANNOTATIONS_JSON_FILE"
     curl -k -X PUT -u admin  "https://localhost:9200/bbuy_annotations" -H 'Content-Type: application/json' -d "@$ANNOTATIONS_JSON_FILE"
     if [ $? -ne 0 ] ; then
-      echo "Failed to create index with settings of $QUERIES_JSON_FILE"
+      echo "Failed to create index with settings of $ANNOTATIONS_JSON_FILE"
       exit 2
     fi
     echo ""
     if [ -f index_products.py ]; then
       echo "Indexing product annotations data in $DATASETS_DIR/product_data/products and writing logs to $LOGS_DIR/index_annotations.log"
-      nohup python index_products.py "--reduced" --synonyms_file "$SYNONYMS_FILE" --index_name "bbuy_annotations" -s "$DATASETS_DIR/product_data/products" > "$LOGS_DIR/index_annotations.log" &
+      nohup python index_products.py "--reduced" --index_name "bbuy_annotations" -s "$DATASETS_DIR/product_data/products" > "$LOGS_DIR/index_annotations.log" &
       if [ $? -ne 0 ] ; then
         echo "Failed to index product annotations"
         exit 2
