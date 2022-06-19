@@ -15,7 +15,7 @@ services:
       - 9600:9600 # required for Performance Analyzer
     networks:
       - opensearch-net
-  
+
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:1.2.0
     container_name: opensearch-dashboards
@@ -29,6 +29,23 @@ services:
       - opensearch-node1
     networks:
       - opensearch-net
+
+  logstash:
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.2
+    container_name: logstash
+    # entrypoint: |
+    #   input { stdin { } } output {
+    #      opensearch {
+    #        hosts => ["https://opensearch:9200"]
+    #        index => "opensearch-logstash-docker-%{+YYYY.MM.dd}"
+    #        user => "admin"
+    #        password => "admin"
+    #        ssl => true
+    #        ssl_certificate_verification => false
+    #      }
+    #    }
+
+
 
 
 volumes:
