@@ -2,7 +2,7 @@
 
 from joblib import Parallel, delayed
 import ltr_utils as lu
-from collections import defaultdict
+from collections import Counter, defaultdict
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -240,22 +240,23 @@ class DataPrepper:
         # Your structure should look like the data frame below
         feature_results = defaultdict(list)
         for hit in response['hits']['hits']:
+            doc_id = int(hit['_id'])
             ltrlog = hit['fields']['_ltrlog']
             assert len(ltrlog) == 1
             log_entries = ltrlog[0]['log_entry']
-            assert len(log_entries) == 1
-            log_entry = log_entries[0]
-            assert log_entry['name'] == 'name_match'
+
+            # Check that we have a score for all features
+            missing_values = [log_entry['name'] for log_entry in log_entries if 'value' not in log_entry]
+            if missing_values:
+                no_results[query_id].append(doc_id)
 
             doc_id = int(hit['_id'])
-            if 'value' not in log_entry:
-                no_results[query_id].append(doc_id)
-                continue
 
             feature_results['doc_id'].append(doc_id)
             feature_results['query_id'].append(query_id)
             feature_results['sku'].append(doc_id)
-            feature_results[log_entry['name']].append(log_entry.get('value', -1))
+            for log_entry in log_entries:
+                feature_results[log_entry['name']].append(log_entry.get('value', 0))
         return pd.DataFrame(feature_results)
 
 
