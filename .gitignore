@@ -140,3 +140,4 @@ dmypy.json
 .deactivate.sh
 
 /workspace
+/ltr_demo.ipynb
