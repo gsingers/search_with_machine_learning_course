@@ -4,6 +4,7 @@ import ltr_utils as lu
 import numpy as np
 import pandas as pd
 import query_utils as qu
+from collections import defaultdict
 from opensearchpy import RequestError
 import os
 
@@ -242,13 +243,16 @@ class DataPrepper:
         #then extract out the features from the response per query_id and doc id.  
         #Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
-        es_data = {'sku': [], 'name_match': []}
+        es_data = defaultdict(list)
+        #es_data = {'sku': [], 'name_match': [], 'name_phrase_match': []}
         if response and response["hits"]["hits"]:
             hits = response["hits"]["hits"]
             for hit in hits:
                 es_data['sku'].append(hit["_id"])
-                log_data = hit["fields"]['_ltrlog'][0]['log_entry'][0]
-                es_data['name_match'].append(log_data.get('value', 0))
+                log_data = hit["fields"]['_ltrlog'][0]['log_entry']
+                for log in log_data:
+                    es_data[log['name']].append(log.get('value', 0))
+                    #es_data['name_match'].append(log_data.get('value', 0))
         feature_val_df = pd.DataFrame(es_data)
         
         feature_results = {}
