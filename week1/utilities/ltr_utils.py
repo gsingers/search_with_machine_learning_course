@@ -57,7 +57,17 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     ##### Step 3.b:
-    print("IMPLEMENT ME: create_feature_log_query")
+    # print("IMPLEMENT ME: create_feature_log_query")
+    sltr = {
+        "sltr": {
+            "_name": "logged_featureset",
+            "featureset": featureset_name,
+            "store": ltr_store_name,
+            "params": {
+                "keywords": query
+            }
+        }
+    }
     return None
 
 
