@@ -138,3 +138,5 @@ dmypy.json
 
 .activate.sh
 .deactivate.sh
+
+/workspace
