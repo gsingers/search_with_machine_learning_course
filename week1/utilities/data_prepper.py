@@ -1,6 +1,9 @@
 # This file processes our queries, runs them through OpenSearch against the BBuy Products index to fetch their "rank" and so they can be used properly in a click model
 
+from joblib import Parallel, delayed
 import ltr_utils as lu
+from collections import defaultdict
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
 import query_utils as qu
@@ -86,7 +89,7 @@ class DataPrepper:
         query_ids = []
         query_ids_map = {}
         query_counter = 1
-        for item in pairs.itertuples():
+        for item in tqdm(pairs.itertuples(), desc='synthesize_impressions'):
             query_id, query_counter = self.__get_query_id(item.query, query_ids_map, query_counter)
             query_ids.append(query_id)
 
@@ -110,12 +113,13 @@ class DataPrepper:
         doc_ids = []
         ranks = []
         clicks = []
+        total_clicks = []
         num_impressions = []
         product_names = []
         skus = []
         query_gb = query_df.groupby("query")  # small
         no_results = set()
-        for key in query_gb.groups.keys():
+        for key in tqdm(query_gb.groups.keys(), desc='generate_impressions'):
             query_id, query_counter = self.__get_query_id(key, query_ids_map, query_counter)
             #print("Q[%s]: %s" % (query_id, key))
             query_times_seen = 0 # careful here
@@ -154,12 +158,12 @@ class DataPrepper:
                             total_clicked_docs_per_query += 1
                         num_impressions.append(query_times_seen)
                         clicks.append(num_clicks)
-                        if hit['_source'].get('name') is not None:
+                        if hit['_source'].get('name'):
                             product_names.append(hit['_source']['name'][0])
                         else:
                             product_names.append("SKU: %s -- No Name" % sku)
                         # print("Name: {}\n\nDesc: {}\n".format(hit['_source']['name'], hit['_source']['shortDescription']))
-
+                    total_clicks.extend((total_clicked_docs_per_query for _ in hits))
                     #print("\tQ[%s]: %s clicked" % (query_id, total_clicked_docs_per_query))
                 else:
                     if response and (response['hits']['hits'] == None or len(response['hits']['hits']) == 0):
@@ -175,10 +179,12 @@ class DataPrepper:
             "doc_id": doc_ids,
             "rank": ranks,
             "clicks": clicks,
+            "total_clicks": total_clicks,
             "sku": skus,
             "num_impressions": num_impressions,
             "product_name": product_names
         })
+        # breakpoint()
         # remove low click/impressions,
         #remove low click/impressions
         impressions_df = impressions_df[(impressions_df['num_impressions'] >= min_impressions) & (impressions_df['clicks'] >= min_clicks)]
@@ -188,13 +194,9 @@ class DataPrepper:
     def log_features(self, train_data_df, terms_field="_id"):
         feature_frames = []
         query_gb = train_data_df.groupby("query")
-        no_results = {}
-        ctr = 0
+        no_results = defaultdict(list)
         #print("Number queries: %s" % query_gb.count())
-        for key in query_gb.groups.keys():
-            if ctr % 500 == 0:
-                print("Progress[%s]: %s" % (ctr, key))
-            ctr += 1
+        def _log_key(key):
             # get all the docs ids for this query
             group = query_gb.get_group(key)
             doc_ids = group.doc_id.values
@@ -202,15 +204,16 @@ class DataPrepper:
             if isinstance(doc_ids, np.ndarray):
                 doc_ids = doc_ids.tolist()
             click_prior_query = qu.create_prior_queries_from_group(group)
-            ltr_feats_df = self.__log_ltr_query_features(group[:1]["query_id"], key, doc_ids, click_prior_query, no_results,
+            ltr_feats_df = self.__log_ltr_query_features(group.iloc[0]["query_id"], key, doc_ids, click_prior_query, no_results,
                                                          terms_field=terms_field)
-            if ltr_feats_df is not None:
-                feature_frames.append(ltr_feats_df)
+            return ltr_feats_df
 
+        feature_frames = Parallel(n_jobs=-1, verbose=4, prefer='threads')(delayed(_log_key)(key) for key in query_gb.groups.keys())
+        feature_frames = [df for df in feature_frames if df is not None]
         features_df = None
         if len(feature_frames) > 0:
             features_df = pd.concat(feature_frames)
-        print("The following queries produced no results: %s" % no_results)
+        print(f'{len(no_results)}/{100 * len(no_results) / len(query_gb.groups):g}% of queries had no results')
         return features_df
 
     # Features look like:
@@ -232,9 +235,30 @@ class DataPrepper:
                                                 size=len(query_doc_ids), terms_field=terms_field)
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+        response = self.opensearch.search(body=log_query, index='bbuy_products')
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
+        feature_results = defaultdict(list)
+        for hit in response['hits']['hits']:
+            ltrlog = hit['fields']['_ltrlog']
+            assert len(ltrlog) == 1
+            log_entries = ltrlog[0]['log_entry']
+            assert len(log_entries) == 1
+            log_entry = log_entries[0]
+            assert log_entry['name'] == 'name_match'
+
+            doc_id = int(hit['_id'])
+            if 'value' not in log_entry:
+                no_results[query_id].append(doc_id)
+                continue
+
+            feature_results['doc_id'].append(doc_id)
+            feature_results['query_id'].append(query_id)
+            feature_results['sku'].append(doc_id)
+            feature_results[log_entry['name']].append(log_entry.get('value', -1))
+        return pd.DataFrame(feature_results)
+
+
         feature_results = {}
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
@@ -244,7 +268,7 @@ class DataPrepper:
         for doc_id in query_doc_ids:
             feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  
+            feature_results["sku"].append(doc_id)
             feature_results["name_match"].append(rng.random())
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
