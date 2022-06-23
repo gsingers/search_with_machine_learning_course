@@ -5,6 +5,9 @@ usage()
   exit 2
 }
 
+set -e
+set -x
+
 SOURCE_DIR="."
 WEEK="week1"
 OUTPUT_DIR="workspace/ltr_output"
@@ -13,7 +16,7 @@ SPLIT_TRAIN_ROWS=1000000
 SPLIT_TEST_ROWS=1000000
 NUM_TEST_QUERIES=100 # the number of test queries to run
 CLICK_MODEL="heuristic"
-SYNTHESIZE=""
+SYNTHESIZE="--synthesize"
 DOWNSAMPLE=""
 MAIN_QUERY_WEIGHT=1
 RESCORE_WEIGHT=2
