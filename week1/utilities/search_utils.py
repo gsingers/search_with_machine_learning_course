@@ -1,6 +1,10 @@
 # Some handy utilities for dealing with searches
 
+from collections import defaultdict
+from itertools import islice
+from joblib import Parallel, delayed
 import json
+from tqdm import tqdm
 
 import query_utils as qu
 import ltr_utils as lu
@@ -23,31 +27,19 @@ def evaluate_test_set(test_data, prior_clicks_df, opensearch, xgb_model_name, lt
     prior_clicks_gb = prior_clicks_df.groupby(["query"]) #large
     source = ["sku", "name"]
 
-    no_simple = []
-    no_ltr_simple = []
-    no_hand_tuned = []
-    no_ltr_hand_tuned = []
-    no_results = {"simple": no_simple, "ltr_simple": no_ltr_simple, "hand_tuned": no_hand_tuned, "ltr_hand_tuned": no_ltr_hand_tuned}
     # Build a data frame
-    q = []
-    sku = [] #
-    rank = []
-    type = []
-    score = []
-    found = [] # boolean indicating whether this result was a match or not
-    new = [] # boolean indicating whether this query was in the training set or not
-    results = {"query": q, "sku": sku, "rank": rank, "type": type, "found": found, "new": new, "score": score}
 
     print("Running %s test queries." % num_queries)
-    ctr = 0
 
-    for key in query_gb.groups.keys():
-        if ctr >= num_queries:
-            print("We've executed %s queries. Finishing." % ctr)
-            break
-        if ctr % 50 == 0:
-            print("Progress[%s]: %s" % (ctr, key))
-        ctr += 1
+    test_keys = list(query_gb.groups.keys())[:num_queries]
+
+    def _evaluate_key(key):
+        no_simple = []
+        no_ltr_simple = []
+        no_hand_tuned = []
+        no_ltr_hand_tuned = []
+        no_results = {"simple": no_simple, "ltr_simple": no_ltr_simple, "hand_tuned": no_hand_tuned, "ltr_hand_tuned": no_ltr_hand_tuned}
+        results = defaultdict(list)
         test_clicks_for_query = query_gb.get_group(key) # this is the set of docs in our test set that have clicks
         # this is the set of skus that were clicked w/o dupes
         # since we are using prior clicks to learn from and boost, we cannot use them for judgment
@@ -85,7 +77,21 @@ def evaluate_test_set(test_data, prior_clicks_df, opensearch, xgb_model_name, lt
                                                          rescore_size=rescore_size, main_query_weight=main_query_weight, rescore_query_weight=rescore_query_weight)
         #print(ltr_hand_query_obj)
         __judge_hits(test_skus_for_query, index, key, no_ltr_hand_tuned, opensearch, ltr_hand_query_obj, "ltr_hand_tuned", results, seen)
+        return results, no_results
 
+    all_results_and_no_results = Parallel(n_jobs=-1, prefer='threads', verbose=4)(delayed(_evaluate_key)(key) for key in test_keys)
+    all_results = [result for result, _ in all_results_and_no_results]
+    all_no_results = [no_result for _, no_result in all_results_and_no_results]
+
+    results = defaultdict(list)
+    for result in all_results:
+        for k, v in result.items():
+            results[k].extend(v)
+    assert set(results.keys()) == set('query sku rank type found new score'.split())
+    no_results = defaultdict(list)
+    for no_result in all_no_results:
+        for k, v in no_result.items():
+            no_results[k].extend(v)
     return pd.DataFrame(results), no_results
 
 
@@ -223,10 +229,8 @@ def compare_explains(join, type, opensearch, index, ltr_model_name, ltr_store_na
     scores = [] # the top level score
     results = {"query": query, "sku":sku, "score": scores}
     ctr = 0
-    for item in join.itertuples():
+    for item in tqdm(join.itertuples(), desc='compare_explains'):
         ctr += 1
-        if ctr % 10 == 0:
-            print("Progress[%s]: %s" % (ctr, item.query))
         if max_explains == ctr:
             break
         click_prior_query = ""
@@ -347,7 +351,7 @@ def lookup_query(query, all_clicks_df, opensearch, explain=False, index="bbuy_pr
                         print("Explain query %s" % query_obj)
                         response = opensearch.explain(index, sku, body=query_obj)
                         print(json.dumps(response, indent=4))
-                    
-                
+
+
         else:
             print("No clicks for query %s" % query)
