@@ -35,4 +35,4 @@ hit['_id']
 
 hit['_source']['sku']
 
-hit['']
+hit['fields']['_ltrlog'][0]['log_entry'][0]['value']
