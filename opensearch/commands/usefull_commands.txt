@@ -1,0 +1,41 @@
+
+GET /bbuy_queries/_search
+{
+  "size": 0,
+  "aggs": {
+    "Query": {
+      "terms": {
+        "size": 10, 
+        "field": "query.keyword"
+      },
+      "aggs":{
+        "Docs":{
+          "terms":{
+            "size": 5,
+            "field": "sku.keyword"
+          }
+        }
+      }
+    }
+  }
+}
+
+GET /bbuy_products/_search
+
+########### GROUPING ##########
+# group by type
+
+GET /bbuy_products/_search
+{
+  "size": 0,
+  "aggs": {
+    "CATEGORY": {
+      "terms": {
+        "field": "type.keyword"
+      }
+    }
+  }
+}
+
+Run STEP 3
+python week1/utilities/build_ltr.py --ltr_terms_field sku --output_dir /workspace/ltr_output --create_xgb_training -f week1/conf/ltr_featureset.json --click_model heuristic
