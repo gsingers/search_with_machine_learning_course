@@ -58,7 +58,90 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     ##### Step 3.b:
     print("IMPLEMENT ME: create_feature_log_query")
-    return None
+    """
+    Step 3.b: We need to log our features, so implement create_feature_log_query() in ltr_utils.py
+    by creating a feature logging query (e.g. use the SLTR query with the ext setting) that can
+    be passed to the OpenSearch client just like any other OpenSearch query
+
+    -See the Create Training Data section above for an example of using the SLTR query for
+    logging features.  See also our ltr_toy.py program.
+
+    -You can safely ignore using the click_prior_query parameter as part of your solution for 
+    now, we will use it later.
+
+    -See ltr_testing.dev for some examples of using the SLTR query in the Dev Tools UI.
+
+    featureset_name = "bbuy_main_featureset"
+    index_name="bbuy_products"
+    ltr_store_name="week1"
+    query= "ipad"
+    doc_ids=["5879736", "2678269"]
+    size=5
+    terms_field="_id"
+
+    """
+    """
+    This part works
+    query_obj = {
+        'size':size,
+        'query': {
+            'bool': {
+                "filter": [  # use a filter so that we don't actually score anything
+                    {
+                        "terms": {
+                            terms_field: doc_ids,
+                        }
+                    },
+                ],
+            }
+        },
+        "ext": {
+                "ltr_log": {
+                    "log_specs": {
+                        "name": "log_entry",
+                        "named_query": "logged_featureset"
+                    }
+                }
+            }
+    }
+    response = client.search(body=query_obj, index=index_name)
+    """
+    # SLTR query
+    query_obj = {
+        'size':size,
+        'query': {
+            'bool': {
+                "filter": [  # use a filter so that we don't actually score anything
+                    {
+                        "terms": {
+                            terms_field: [doc_ids]
+                        }
+                    },
+                    {  # use the LTR query bring in the LTR feature set
+                        "sltr": {
+                            "_name": "logged_featureset",
+                            "featureset": featureset_name,
+                            "store": ltr_store_name,
+                            "params": {
+                                "keywords": query
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        # Turn on feature logging so that we get weights back for our features
+        "ext": {
+            "ltr_log": {
+                "log_specs": {
+                    "name": "log_entry",
+                    "named_query": "logged_featureset"
+                }
+            }
+        }
+    }
+    # print(response)
+    return query_obj
 
 
 # Item is a Pandas namedtuple
