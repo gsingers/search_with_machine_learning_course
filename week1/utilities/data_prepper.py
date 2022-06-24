@@ -234,23 +234,27 @@ class DataPrepper:
         # IMPLEMENT_START --
         # print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
-        # hits = log_query["hits"]["hits"]
+        response = self.opensearch.search(body=log_query, index=self.index_name)
+        hits = response["hits"]["hits"]
         # Your structure should look like the data frame below
-        # hit["_id"] for hit in hits
-        # hit["sku"] for hit in hits
         feature_results = {}
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
         feature_results["name_match"] = []
         rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
+        for e, doc_id in enumerate(query_doc_ids):
             feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
             feature_results["sku"].append(doc_id)  
-            feature_results["name_match"].append(rng.random())
+            # feature_results["name_match"].append(rng.random())
+            try:
+                log_entry = hits[e]["fields"]["_ltrlog"][0]["log_entry"][0]
+                feature_results["name_match"].append(log_entry.get("value", 0))
+            except:
+                feature_results["name_match"].append(0)
         frame = pd.DataFrame(feature_results)
-        return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
+        return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64', 'name_match': 'float'})
         # IMPLEMENT_END
 
     # Can try out normalizing data, but for XGb, you really don't have to since it is just finding splits
