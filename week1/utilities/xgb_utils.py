@@ -36,7 +36,7 @@ def train(xgb_train_data, num_rounds=5, xgb_conf=None ):
     print("IMPLEMENT ME: train()")
     bst = xgb.train(
         params=xgb_params,
-        dtrain=xgb_train_data,
+        dtrain=xgb.DMatrix(xgb_train_data),
         num_boost_round=num_rounds,
     )
     return bst, xgb_params
