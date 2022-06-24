@@ -12,6 +12,40 @@
             "name": "{{keywords}}"
           }
         }
+      },
+      {
+        "name": "customerReviewAverage",
+        "template_language": "mustache",
+        "template": {
+            "function_score": {
+                "functions": [{
+                    "field_value_factor": {
+                        "field": "customerReviewAverage",
+                        "missing": 0
+                    }
+                }],
+                "query": {
+                    "match_all": {}
+                }
+            }
+        }
+      },
+      {
+        "name": "customerReviewCount",
+        "template_language": "mustache",
+        "template": {
+            "function_score": {
+                "functions": [{
+                    "field_value_factor": {
+                        "field": "customerReviewCount",
+                        "missing": 0
+                    }
+                }],
+                "query": {
+                    "match_all": {}
+                }
+            }
+        }
       }
     ]
   }
