@@ -132,6 +132,7 @@ class DataPrepper:
             # Fetch way more than usual so we are likely to see our documents that have been clicked
             try:
                 response = self.opensearch.search(body=query_obj, index=self.index_name)
+                print(query_obj)
             except RequestError as re:
                 print(re, query_obj)
             else:
