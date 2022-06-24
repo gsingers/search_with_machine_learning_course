@@ -117,6 +117,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                 }
             }
         }
+    #print(query_obj)
     return query_obj
 
 
