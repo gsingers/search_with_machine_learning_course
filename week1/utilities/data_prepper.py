@@ -233,7 +233,7 @@ class DataPrepper:
                                                 size=len(query_doc_ids), terms_field=terms_field)
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+        #print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
         feature_results = {}
@@ -242,6 +242,22 @@ class DataPrepper:
         feature_results["sku"] = []
         feature_results["name_match"] = []
         rng = np.random.default_rng(12345)
+        response = self.opensearch.search(body=log_query, index=self.index_name)
+        print(f'RESPONSE ARE {response}')
+
+        #RESPONSE ARE {'took': 0, 'timed_out': False, '_shards': {'total': 1, 'successful': 1, 'skipped': 0, 'failed': 0}, 'hits': {'total': {'value': 1, 'relation': 'eq'}, 
+        #'max_score': 0.0, 
+        #'hits': [{'_index': 'bbuy_products', '_type': '_doc', '_id': '1946197', '_score': 0.0, '_source': {'productId': ['1218305633252'], 'sku': ['1946197'], 'name': ['Motorola - XOOM Tablet Wi-Fi with 32GB Hard Drive - Dark Titanium'], 'type': ['HardGood'], 'startDate': ['2011-03-21'], 'active': ['false'], 'regularPrice': ['499.00'], 'salePrice': ['499.00'], 'artistName': [], 'onSale': ['false'], 'digital': ['false'], 'frequentlyPurchasedWith': [], 'accessories': [], 'relatedProducts': [], 'crossSell': [], 'salesRankShortTerm': [], 'salesRankMediumTerm': ['25257'], 'salesRankLongTerm': ['35084'], 'bestSellingRank': [], 'url': [], 'categoryPath': ['Best Buy', 'Computers & Tablets', 'Tablets & iPad', 'Tablets'], 'categoryPathIds': ['cat00000', 'abcat0500000', 'pcmcat209000050006', 'pcmcat209000050008'], 'categoryLeaf': ['pcmcat209000050008'], 'categoryPathCount': 4.0, 'customerReviewCount': ['149'], 'customerReviewAverage': ['4.3'], 'inStoreAvailability': ['true'], 'onlineAvailability': ['false'], 'releaseDate': ['2011-03-27'], 'shippingCost': [], 'shortDescription': ['Android 3.2 Honeycomb10.1" high-definition widescreen touch screenWi-FiFeature 4Google Mobile Services'], 'shortDescriptionHtml': ['<ul class="product-short-description"><li>Android 3.2 Honeycomb</li><li>10.1" high-definition widescreen touch screen</li><li>Wi-Fi</li><li>Feature 4</li><li>Google Mobile Services</li></ul>'], 'class': ['TABLET'], 'classId': ['403'], 'subclass': ['ANDROID WIFI'], 'subclassId': ['631'], 'department': ['COMPUTERS'], 'departmentId': ['6'], 'bestBuyItemId': ['1559981'], 'description': [], 'manufacturer': ['Motorola'], 'modelNumber': ['MOTMZ604'], 'image': ['http://images.bestbuy.com/BestBuy_US/images/products/1946/1946197_sc.jpg'], 'condition': ['New'], 'inStorePickup': ['false'], 'homeDelivery': ['false'], 'quantityLimit': ['2'], 'color': ['Dark Titanium'], 'depth': ['6.6"'], 'height': ['0.5"'], 'weight': ['1.5 lbs.'], 'shippingWeight': ['2.25'], 'width': ['9.8"'], 'longDescription': ['This tablet features built-in Wi-Fi for connecting to the Internet without wires. Capture high-definition video with the 5.0MP camera and enjoy video chatting with friends and family using the 2.0MP webcam. Now upgradable to Android 3.2 (Honeycomb) for an enhanced tablet experience. See details.'], 'longDescriptionHtml': ['This tablet features built-in Wi-Fi for connecting to the Internet without wires. Capture high-definition video with the 5.0MP camera and enjoy video chatting with friends and family using the 2.0MP webcam. Now upgradable to Android 3.2 (Honeycomb) for an enhanced tablet experience. <a href="http://images.bestbuy.com/BestBuy_US/en_US/images/abn/2011/com/pcon/xoom3_2.pdf" target="_blank">See details.</a>'], 'features': ['Android 3.0 Honeycomb operating system\nUpgradable to Android 3.2 (Honeycomb). See details', 'NVIDIA Tegra dual-core processor T20\nFeatures a 1.0GHz processor speed, 600MHz system bus and 1MB L2 cache.', '1GB DDR2 memory\nFor multitasking power.', '10.1" high-definition widescreen touch-screen display\nShowcases movies and games in stunning clarity.', '32GB hard drive\nOffers spacious storage.', 'ULP GeForce graphics\nFor lush images. HDMI output for connection to an HDTV.', 'Built-in 2.0MP webcam\nMakes it easy to video chat with family and friends. The 5.0MP camera allows you to capture and play back high-definition video.', 'High-speed USB 2.0 port\nFor fast digital video, audio and data transfer.', 'Built-in 2.4GHz and 5.0GHz Wi-Fi (802.11b/g/n)\nConnect to the Internet without wires.', 'Bluetooth 2.1 EDR + HID interface\nEasily link with other Bluetooth-enabled devices, such as a mobile phone or MP3 player.', 'Weighs only 1.5 lbs. and measures just 0.5" thin\nFor lightweight portability.', 'Google Mobile Services\nInclude Google Maps 5.0 with 3D interaction, access to more than 3 million Google eBooks and Google Talk with video chat.']}, 
+        #'fields': {'_ltrlog': [{'log_entry': [{'name': 'name_match'}]}]}, 'matched_queries': ['logged_featureset']}]}}
+
+        hits = response['hits']['hits']
+        for hit in hits:
+            fieds = hits['fields']
+            ltrlogs = fieds['_ltrlog']
+            for log_entry in ltrlogs:
+                feature_name = log_entry['name']
+                feature_value = log_entry['name']
+
         for doc_id in query_doc_ids:
             feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
