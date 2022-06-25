@@ -89,7 +89,6 @@ Note: these have only been tested on a Mac running OS 12.2.1.  YMMV.  Much of wh
 1. `pyenv install 3.9.7`
 1. `pip install` all of the libraries you see in `.gitpod.Dockerfile`
 1. Setup your weekly python environments per the "Weekly Project" above.
-1. Install [Logstash with the OpenSearch Plugin](https://opensearch.org/docs/latest/clients/logstash/index/)
 1. Install [Fasttext](https://fasttext.cc/)  
 1. Run OpenSearch: 
     1. `cd docker`
