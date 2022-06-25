@@ -249,7 +249,7 @@ class DataPrepper:
                                                 size=len(query_doc_ids), terms_field=terms_field)
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+        # print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
 
@@ -268,7 +268,7 @@ class DataPrepper:
         if response and len(response['hits']) > 0 and len(response['hits']['hits']) == 1:
             hits = response['hits']['hits']
             # # there should only be one hit
-            score = hits[0]['fields']['_ltrlog'][0]['log_entry']
+            feat_values_dicts = hits[0]['fields']['_ltrlog'][0]['log_entry']
             sku = response['hits']['hits'][0]['_source']['sku'][0]
             # xgb_format = "%s\tqid:%s\t%s %s" % (self.grade, self.query, "\t".join(featuresAsStrs), comment)
             # # 		<grade> qid:<query_id> <feature_number>:<weight>... # <doc_id> <comments>
@@ -280,8 +280,14 @@ class DataPrepper:
             for doc_id in query_doc_ids:
                 feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
                 feature_results["query_id"].append(query_id)
-                feature_results["sku"].append(sku)  
-                feature_results["name_match"].append(score)
+                feature_results["sku"].append(sku)
+                for feat_values_dict in feat_values_dicts:
+                    #NOTE: Why is the value sometimes empty for this? One case I logged the
+                    # query was a sku was the doc was that doc_id
+                    feature_results[feat_values_dict["name"]].append(feat_values_dict.get("value", 0)) 
+                    # q = __import__("functools").partial(__import__("os")._exit, 0)  # FIXME
+                    # __import__("IPython").embed()  # FIXME 
+                        
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
