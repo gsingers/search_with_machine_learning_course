@@ -58,7 +58,43 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     ##### Step 3.b:
     print("IMPLEMENT ME: create_feature_log_query")
-    return None
+    # Note: we are executing one query per judgment doc id here because it's easier, but we could do this
+    # by adding all the doc ids for this query and scoring them all at once and cut our number of queries down
+    # significantly
+    # Create our SLTR query, filtering so we only retrieve the doc id in question
+    query_obj = {
+        'query': {
+            'bool': {
+                "filter": [  # use a filter so that we don't actually score anything
+                    {
+                        "terms": {
+                            "_id": str(doc_ids)
+                        }
+                    },
+                    {  # use the LTR query bring in the LTR feature set
+                        "sltr": {
+                            "_name": "logged_featureset",
+                            "featureset": featureset_name,
+                            "store": ltr_store_name,
+                            "params": {
+                                "keywords": query
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        # Turn on feature logging so that we get weights back for our features
+        "ext": {
+            "ltr_log": {
+                "log_specs": {
+                    "name": "log_entry",
+                    "named_query": "logged_featureset"
+                }
+            }
+        }
+    }
+    return query_obj
 
 
 # Item is a Pandas namedtuple
