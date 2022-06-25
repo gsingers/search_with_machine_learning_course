@@ -37,7 +37,7 @@
               {
                 "field_value_factor": {
                   "field": "customerReviewAverage",
-                  "missing": 100000000
+                  "missing": 2.5
                 }
               }
             ],
@@ -56,12 +56,57 @@
               {
                 "field_value_factor": {
                   "field": "customerReviewCount",
-                  "missing": 100000000
+                  "missing": 0
                 }
               }
             ],
             "query": {
               "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "artistName",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "artistName": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "shortDescription",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "shortDescription": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "longDescription",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "longDescription": {
+              "query": "{{keywords}}",
+              "slop": 6
             }
           }
         }

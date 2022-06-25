@@ -77,36 +77,37 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
     ##### Step 3.b:
     # print("IMPLEMENT ME: create_feature_log_query")
     query_obj = {
-            'query': {
-                'bool': {
-                    'filter': [
-                        {
-                            'terms': {
-                                terms_field: doc_ids
-                            }
-                        },
-                        {
-                            'sltr': {
-                                '_name': 'logged_featureset',
-                                'featureset': featureset_name,
-                                'store': ltr_store_name,
-                                'params': {
-                                    'keywords': query
-                                }
+        'size': size,
+        'query': {
+            'bool': {
+                'filter': [
+                    {
+                        'terms': {
+                            terms_field: doc_ids
+                        }
+                    },
+                    {
+                        'sltr': {
+                            '_name': 'logged_featureset',
+                            'featureset': featureset_name,
+                            'store': ltr_store_name,
+                            'params': {
+                                'keywords': query
                             }
                         }
-                    ]
-                }
-            },
-            'ext': {
-                'ltr_log': {
-                    'log_specs': {
-                        'name': 'log_entry',
-                        'named_query': 'logged_featureset'
                     }
+                ]
+            }
+        },
+        'ext': {
+            'ltr_log': {
+                'log_specs': {
+                    'name': 'log_entry',
+                    'named_query': 'logged_featureset'
                 }
             }
         }
+    }
 
     return query_obj
 

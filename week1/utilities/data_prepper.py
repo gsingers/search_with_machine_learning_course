@@ -239,19 +239,25 @@ class DataPrepper:
         response = self.opensearch.search(body=log_query, index=self.index_name)
         if response and len(response['hits']) > 0 and len(response['hits']['hits']) == 1:
             hits = response['hits']['hits']
-            log_entry = hits[0]['fields']['_ltrlog'][0]['log_entry']
+            log_entries = hits[0]['fields']['_ltrlog'][0]['log_entry']
 
             feature_results = {}
             feature_results["doc_id"] = []  # capture the doc id so we can join later
             feature_results["query_id"] = []  # ^^^
             feature_results["sku"] = []
-            feature_results["name_match"] = []
+
+            for log_entry in log_entries:
+                feature_results[log_entry['name']] = []
+
             for doc_id in query_doc_ids:
-                if 'value' in log_entry[0]:
                     feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
                     feature_results["query_id"].append(query_id)
                     feature_results["sku"].append(doc_id)
-                    feature_results["name_match"].append(log_entry[0]['value'])
+
+                    for log_entry in log_entries:
+                        name = log_entry['name']
+                        value = log_entry.get('value', 0)
+                        feature_results[name].append(value)
             frame = pd.DataFrame(feature_results)
             return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         else:
