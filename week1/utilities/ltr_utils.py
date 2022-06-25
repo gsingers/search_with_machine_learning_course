@@ -10,10 +10,14 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
     # Create the base query, use a much bigger window
     #add on the rescore
     ##### Step 4.e:
-    print("IMPLEMENT ME: create_rescore_ltr_query")
+    # print("IMPLEMENT ME: create_rescore_ltr_query")
     if active_features is not None and len(active_features) > 0:
+        query_obj["rescore"]["window_size"] =  rescore_size
+        query_obj["rescore"]["query"]["rescore_query"]["sltr"]["params"]["keywords"] =  user_query
+        query_obj["rescore"]["query"]["rescore_query"]["sltr"]["model"] =  ltr_model_name
+        query_obj["rescore"]["query"]["rescore_query"]["sltr"]["store"] =  ltr_store_name
         query_obj["rescore"]["query"]["rescore_query"]["sltr"]["active_features"] =  active_features
-
+        query_obj["rescore"]["query"]["rescore_query_weight"] =  rescore_query_weight
     return query_obj
 
 # take an existing query and add in an SLTR so we can use it for explains to see how much SLTR contributes
@@ -57,7 +61,7 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     ##### Step 3.b:
-    print("IMPLEMENT ME: create_feature_log_query")
+    # print("IMPLEMENT ME: create_feature_log_query")
     # Note: we are executing one query per judgment doc id here because it's easier, but we could do this
     # by adding all the doc ids for this query and scoring them all at once and cut our number of queries down
     # significantly
