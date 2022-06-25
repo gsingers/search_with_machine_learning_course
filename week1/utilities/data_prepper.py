@@ -261,7 +261,6 @@ class DataPrepper:
 
         # Run the query just like any other search
         response = self.opensearch.search(body=log_query, index=self.index_name)
-        print(response)
         # For each response, extract out the features and build our training features
         # We are going to do this by iterating through the hits, which should be in doc_ids order and put the
         # values back onto the Judgment object, which has a place to store these.
@@ -280,7 +279,7 @@ class DataPrepper:
 
             for doc_id in query_doc_ids:
                 feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-                feature_results["query_id"].append(key)
+                feature_results["query_id"].append(query_id)
                 feature_results["sku"].append(sku)  
                 feature_results["name_match"].append(score)
         frame = pd.DataFrame(feature_results)
