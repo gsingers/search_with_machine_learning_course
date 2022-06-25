@@ -97,32 +97,6 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
     terms_field="sku"
 
     """
-    """
-    This part works
-    query_obj = {
-        'size':size,
-        'query': {
-            'bool': {
-                "filter": [  # use a filter so that we don't actually score anything
-                    {
-                        "terms": {
-                            terms_field: doc_ids,
-                        }
-                    },
-                ],
-            }
-        },
-        "ext": {
-                "ltr_log": {
-                    "log_specs": {
-                        "name": "log_entry",
-                        "named_query": "logged_featureset"
-                    }
-                }
-            }
-    }
-    response = client.search(body=query_obj, index=index_name)
-    """
     # SLTR query
     query_obj = {
         'size':size,
