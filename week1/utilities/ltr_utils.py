@@ -68,7 +68,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                 "filter": [  # use a filter so that we don't actually score anything
                     {
                         "terms": {
-                            "_id": str(doc_ids)
+                            "_id": doc_ids
                         }
                     },
                     {  # use the LTR query bring in the LTR feature set

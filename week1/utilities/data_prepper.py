@@ -9,6 +9,23 @@ import os
 
 # from importlib import reload
 
+class Judgment:
+
+    def __init__(self, query, doc_id, display_name, grade=0, features=[], query_str=None):
+        self.query = query
+        self.query_str = query_str
+        self.doc_id = doc_id
+        self.display_name = display_name
+        self.grade = grade
+        self.features = features
+
+    # Modified from https://github.com/o19s/elasticsearch-ltr-demo/blob/master/train/judgments.py
+    def toXGBFormat(self):
+        featuresAsStrs = ["%s:%s" % (idx + 1, feature.get('value', 0)) for idx, feature in enumerate(self.features)]
+        comment = "# %s\t%s" % (self.doc_id, self.query_str)
+        return "%s\tqid:%s\t%s %s" % (self.grade, self.query, "\t".join(featuresAsStrs), comment)
+
+
 class DataPrepper:
     opensearch = None
     index_name = "bbuy_products"
@@ -235,17 +252,37 @@ class DataPrepper:
         print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
+
         feature_results = {}
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
         feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  
-            feature_results["name_match"].append(rng.random())
+
+        # Run the query just like any other search
+        response = self.opensearch.search(body=log_query, index=self.index_name)
+        print(response)
+        # For each response, extract out the features and build our training features
+        # We are going to do this by iterating through the hits, which should be in doc_ids order and put the
+        # values back onto the Judgment object, which has a place to store these.
+        # judgment = Judgment(query, hit['_id'], hit['_source']['title'], int(grade)) 
+        if response and len(response['hits']) > 0 and len(response['hits']['hits']) == 1:
+            hits = response['hits']['hits']
+            # # there should only be one hit
+            score = hits[0]['fields']['_ltrlog'][0]['log_entry']
+            sku = response['hits']['hits'][0]['_source']['sku'][0]
+            # xgb_format = "%s\tqid:%s\t%s %s" % (self.grade, self.query, "\t".join(featuresAsStrs), comment)
+            # # 		<grade> qid:<query_id> <feature_number>:<weight>... # <doc_id> <comments>
+            # # see https://xgboost.readthedocs.io/en/latest/tutorials/input_format.html
+            # xgb_format = judgment.toXGBFormat() + "\n"
+            # print(xgb_format)
+            # train_file.write(bytes(xgb_format, 'utf-8')
+
+            for doc_id in query_doc_ids:
+                feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
+                feature_results["query_id"].append(key)
+                feature_results["sku"].append(sku)  
+                feature_results["name_match"].append(score)
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
