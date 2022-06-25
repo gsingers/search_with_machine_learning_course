@@ -22,7 +22,7 @@ def create_prior_queries_from_group(click_group): # total impressions isn't curr
                 click_prior_query += "%s^%.3f  " % (item.doc_id, impressions)
             except KeyError as ke:
                 pass # nothing to do in this case, it just means we can't find priors for this doc
-    return click_prior_query
+    return click_prior_query 
 
 
 # expects clicks from the raw click logs, so value_counts() are being passed in

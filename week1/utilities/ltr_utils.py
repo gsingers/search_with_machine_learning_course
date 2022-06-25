@@ -18,6 +18,7 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                 "sltr": {
                     "params":{
                         "keywords": user_query,
+                        "click_prior_query": click_prior_query,
                     },
                 "model": ltr_model_name,
                 "store": ltr_store_name,
@@ -88,6 +89,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
 
     -See ltr_testing.dev for some examples of using the SLTR query in the Dev Tools UI.
 
+    values for testing
     featureset_name = "bbuy_main_featureset"
     index_name="bbuy_products"
     ltr_store_name="week1"
@@ -114,7 +116,8 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                             "featureset": featureset_name,
                             "store": ltr_store_name,
                             "params": {
-                                "keywords": query
+                                "keywords": query,
+                                "click_prior_query": click_prior_query
                             }
                         }
                     }
@@ -131,7 +134,6 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
             }
         }
     }
-    # print(response)
     return query_obj
 
 
