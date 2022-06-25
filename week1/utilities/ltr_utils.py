@@ -16,12 +16,14 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
             "rescore_query": {
                 "sltr": {
                     "params": {
-                        "keywords": user_query
+                        "keywords": user_query,
+                        "click_prior_query": click_prior_query
                     },
                     "model": ltr_model_name,
                     "store": ltr_store_name
                 }
             },
+            "score_mode": "total",
             "query_weight": main_query_weight,
             "rescore_query_weight": rescore_query_weight
         }
