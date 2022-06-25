@@ -12,6 +12,108 @@
             "name": "{{keywords}}"
           }
         }
+      },
+      {
+        "name": "name_slop_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+
+          }
+        }
+      },
+      {
+        "name": "artistName",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+
+          }
+        }
+      },
+      {
+        "name": "shortDescription",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+
+          }
+        }
+      },
+      {
+        "name": "longDescription",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+
+          }
+        }
+      },
+      {
+        "name": "customerReviewCount",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "customerReviewCount",
+                  "missing": 0
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "customerReviewAverage",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "customerReviewAverage",
+                  "missing": 10
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
       }
     ]
   }
