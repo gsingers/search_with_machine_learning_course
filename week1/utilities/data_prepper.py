@@ -240,13 +240,29 @@ class DataPrepper:
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
         feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  
-            feature_results["name_match"].append(rng.random())
-        frame = pd.DataFrame(feature_results)
+        # Run the query just like any other search
+        response = self.opensearch.search(body=log_query, index=self.index_name)
+
+        feature_results = {}
+        feature_results["doc_id"] = []  # capture the doc id so we can join later
+        feature_results["query_id"] = []  # ^^^
+        feature_results["sku"] = []
+
+        if response and len(response['hits']) > 0:
+            for hit in response['hits']['hits']:
+                feature_results["doc_id"].append(hit['_id'])
+                feature_results["query_id"].append(query_id)
+                feature_results["sku"].append(hit['_source']['sku'][0])
+
+                log_entries = hit['fields']['_ltrlog'][0]['log_entry']
+                for entry in log_entries:
+                    if not feature_results.get(entry['name']):
+                        feature_results[entry['name']] = [ entry.get('value', 0) ]
+                    else:
+                        feature_results[entry['name']].append(entry.get('value', 0))
+
+
+        frame = pd.DataFrame.from_dict(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
 
