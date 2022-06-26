@@ -36,34 +36,10 @@ def train(xgb_train_data, num_rounds=5, xgb_conf=None ):
     ##### Step 3.a
     print("IMPLEMENT ME: train()")
 
-    # We need to tell XGB what are features are called so that we can properly write out a model after training
-    feat_map_file = tempfile.NamedTemporaryFile(delete=False)
-    feat_map_file.write(bytes("0\tna\tq\n", "utf-8"))
-    feat_map_file.write(bytes('1\t{}\tq\n'.format('name_match'), 'utf-8'))
-    feat_map_file.close()
     dtrain = xgb.DMatrix(xgb_train_data)
-    # param = {'max_depth': 5,  'silent': 1, 'objective': 'reg:linear'}
-    num_round = 5
     print("Training XG Boost")
     bst = xgb.train(xgb_params, 
                     dtrain,
-                    num_round)  # Do the training.  NOTE: in this toy example we did not use any hold out data
-    model = bst.get_dump(fmap=feat_map_file.name, dump_format='json')
-
-    # We need to escape entries for uploading to OpenSearch, per the docs
-    model_str = '[' + ','.join(list(model)) + ']'
-
-    # Create our metadata for uploading the model
-    model_name = "ltr_xgb_model"
-
-    os_model = {
-        "model": {
-            "name": model_name,
-            "model": {
-                "type": "model/xgboost+json",
-                "definition": '{"objective":"reg:linear", "splits":' + model_str + '}'
-            }
-        }
-    }
+                    num_rounds)
 
     return bst, xgb_params
