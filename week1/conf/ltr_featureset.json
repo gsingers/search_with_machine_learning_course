@@ -103,6 +103,23 @@
         }
       },
       {
+        "name": "customer_review_avg",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [{
+                "field_value_factor": {
+                    "field": "customerReviewAverage",
+                    "missing": 0
+                }
+            }],
+            "query": {
+                "match_all": {}
+            }
+          }
+        }
+      },
+      {
         "name": "sales_rank_long_recipro",
         "template_language": "mustache",
         "template": {
