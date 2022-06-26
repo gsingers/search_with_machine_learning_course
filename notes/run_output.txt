@@ -1,0 +1,11 @@
+Simple MRR is 0.251
+LTR Simple MRR is 0.673
+Hand tuned MRR is 0.440
+LTR Hand Tuned MRR is 0.732
+
+Simple p@10 is 0.085
+LTR simple p@10 is 0.270
+Hand tuned p@10 is 0.174
+LTR hand tuned p@10 is 0.279
+Simple better: 528      LTR_Simple Better: 383  Equal: 21
+HT better: 658  LTR_HT Better: 378      Equal: 22
