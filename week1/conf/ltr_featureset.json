@@ -11,7 +11,7 @@
           "match": {
             "name": "{{keywords}}"
           }
-        },
+        }
       },
       {
         "name": "name_match_phrase",

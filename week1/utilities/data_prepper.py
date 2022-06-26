@@ -242,12 +242,11 @@ class DataPrepper:
         feature_results["name_match"] = []
         # Run the query just like any other search
         response = self.opensearch.search(body=log_query, index=self.index_name)
-
         feature_results = {}
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
-
+        
         if response and len(response['hits']) > 0:
             for hit in response['hits']['hits']:
                 feature_results["doc_id"].append(hit['_id'])
