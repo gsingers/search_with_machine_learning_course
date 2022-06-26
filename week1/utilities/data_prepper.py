@@ -257,7 +257,7 @@ class DataPrepper:
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
-        feature_results["name_match"] = []
+        # feature_results["name_match"] = []
 
         # Run the query just like any other search
         response = self.opensearch.search(body=log_query, index=self.index_name)
@@ -284,7 +284,14 @@ class DataPrepper:
                 for feat_values_dict in feat_values_dicts:
                     #NOTE: Why is the value sometimes empty for this? One case I logged the
                     # query was a sku was the doc was that doc_id
-                    feature_results[feat_values_dict["name"]].append(feat_values_dict.get("value", 0)) 
+                    # So far this is just name_match 
+                    # Get the existing list if exists, if it doesn't then create new list
+                    # containing the score value
+                    feature_results_feat = feature_results.get(feat_values_dict["name"], False)
+                    if feature_results_feat:
+                        feature_results_feat.append(feat_values_dict.get("value", 0)) 
+                    else:
+                        feature_results[feat_values_dict["name"]] = [feat_values_dict.get("value", 0)]
                     # q = __import__("functools").partial(__import__("os")._exit, 0)  # FIXME
                     # __import__("IPython").embed()  # FIXME 
                         
