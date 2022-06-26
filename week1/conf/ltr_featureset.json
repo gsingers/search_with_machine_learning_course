@@ -27,6 +27,42 @@
             }
           }
         }
+      },
+      {
+        "name": "customer_review_average",
+        "params": [],
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [{
+              "field_value_factor": {
+                "field": "customerReviewAverage",
+                "missing": 3.0
+              }
+            }],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "customer_review_count",
+        "params": [],
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [{
+              "field_value_factor": {
+                "field": "customerReviewCount",
+                "missing": 0
+              }
+            }],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
       }
     ]
   }

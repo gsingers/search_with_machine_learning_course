@@ -256,6 +256,8 @@ class DataPrepper:
         feature_results["sku"] = []
         feature_results["name_match"] = []
         feature_results["name_phrase_match"] = []
+        feature_results["customer_review_average"] = []
+        feature_results["customer_review_count"] = []
 
         for hit in hits:
             feature_results["doc_id"].append(hit["_id"])
@@ -265,7 +267,10 @@ class DataPrepper:
                 try:
                     feature_results[feature["name"]].append(feature["value"])
                 except:
-                    feature_results[feature["name"]].append(0)
+                    if feature["name"] == "customer_review_average":
+                        feature_results[feature["name"]].append(3)
+                    else:
+                        feature_results[feature["name"]].append(0)
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
