@@ -255,6 +255,7 @@ class DataPrepper:
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
         feature_results["name_match"] = []
+        feature_results["name_phrase_match"] = []
 
         for hit in hits:
             feature_results["doc_id"].append(hit["_id"])

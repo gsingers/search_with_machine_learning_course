@@ -12,6 +12,21 @@
             "name": "{{keywords}}"
           }
         }
+      },
+      {
+        "name": "name_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
       }
     ]
   }
