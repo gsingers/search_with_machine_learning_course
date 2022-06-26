@@ -261,6 +261,7 @@ class DataPrepper:
         feature_results["artist_name_phrase_match"] = []
         feature_results["short_description_phrase_match"] = []
         feature_results["long_description_phrase_match"] = []
+        feature_results["salesRankShortTerm"] = []
 
         for hit in hits:
             feature_results["doc_id"].append(hit["_id"])
