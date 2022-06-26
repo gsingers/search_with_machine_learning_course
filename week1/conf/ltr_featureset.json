@@ -12,6 +12,124 @@
             "name": "{{keywords}}"
           }
         }
+      },
+      {
+        "name": "sku_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "sku": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "name_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name.hyphens": {
+                "query": "{{keywords}}",
+                "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "artist_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "artistName": {
+                "query": "{{keywords}}",
+                "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "shortdesc_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "shortDescription": {
+                "query": "{{keywords}}",
+                "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "longdesc_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "longDescription": {
+                "query": "{{keywords}}",
+                "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "customer_review_count",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [{
+                "field_value_factor": {
+                    "field": "customerReviewCount",
+                    "missing": 0
+                }
+            }],
+            "query": {
+                "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "sales_rank_long_recipro",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "query": {
+              "match_all": {}
+            },
+            "field_value_factor": {
+              "field": "salesRankLongTerm",
+              "modifier": "reciprocal",
+              "missing": 1000000
+            }
+          }
+        }
+      },
+      {
+        "name": "click_prior",
+        "params": [
+          "click_prior_query"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "query_string": {
+            "query": "{{click_prior_query}}",
+            "fields": ["_id"]
+          }
+        }
       }
     ]
   }
