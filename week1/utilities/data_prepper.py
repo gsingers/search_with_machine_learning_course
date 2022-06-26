@@ -232,7 +232,6 @@ class DataPrepper:
                                                 size=len(query_doc_ids), terms_field=terms_field)
 
         # # debugging:
-        # response = client.search(body=log_query, index="bbuy_products")
         # log_query = lu.create_feature_log_query(
         #     query=query,
         #     doc_ids=doc_ids,
@@ -242,6 +241,7 @@ class DataPrepper:
         #     size=size,
         #     terms_field=terms_field
         # )
+        # response = client.search(body=log_query, index="bbuy_products")
 
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
@@ -262,7 +262,10 @@ class DataPrepper:
             feature_results["query_id"].append(query_id)
             feature_results["sku"].append(hit["_id"])
             for feature in hit["fields"]["_ltrlog"][0]["log_entry"]:
-                feature_results[feature["name"]].append(feature["value"])
+                try:
+                    feature_results[feature["name"]].append(feature["value"])
+                except:
+                    feature_results[feature["name"]].append(0)
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
