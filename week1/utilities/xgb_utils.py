@@ -3,6 +3,7 @@ import xgboost as xgb
 from xgboost import plot_importance, plot_tree
 from matplotlib import pyplot as plt
 import json
+import pandas as pd
 
 # Plots useful things like the tree and importance for display
 def plots(xgb_model, xgb_model_name, xgb_feat_map, xgb_plot):
@@ -33,6 +34,7 @@ def train(xgb_traindata_uri, num_rounds=5, xgb_conf=None ):
             xgb_params = json.load(json_file)
     print("Training XG Boost on %s for %s rounds with params: %s" % (xgb_traindata_uri, num_rounds, xgb_params))
     train_data = xgb.DMatrix(xgb_traindata_uri)
+    train_df = pd.read_csv(xgb_traindata_uri + ".csv")
     print("Training XG Boost")
     bst = xgb.train(xgb_params, train_data,
                     num_rounds) 

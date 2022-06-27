@@ -322,10 +322,13 @@ if __name__ == "__main__":
                 # Now write out in XGB/SVM Rank format
                 print("NAN counts: %s" % train_features_df.isna().any().count())
                 train_features_df = train_features_df.fillna(0)
-                train_features_df = train_features_df.sample(frac=1)  # shuffle
+                # train_features_df = train_features_df.sample(frac=1)  # shuffle
+                train_features_df.sort_values(by=['query_id', 'grade'], inplace=True)
                 train_features_df.to_csv("%s/training.xgb.csv" % output_dir)
                 ltr.write_training_file(train_features_df, "%s/training.xgb" % output_dir,
                                         "%s/%s" % (output_dir, args.xgb_feat_map))
+                groups = train_features_df.groupby('query_id').size().to_frame('size') # from https://xgboost.readthedocs.io/en/latest/tutorials/input_format.html
+                groups.to_csv("%s/training.xgb.group" % output_dir, index=False, header=False)
         else:
             print("Unable to create training file, no ranks/features data available.")
 
