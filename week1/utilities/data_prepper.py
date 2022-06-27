@@ -233,14 +233,13 @@ class DataPrepper:
 
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
-     
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
         feature_results = {}
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
-        response = self.opensearch.search(log_query, self.index_name)
+        response = self.opensearch.search(body=log_query, index=self.index_name)
         searched_documents = { hit["_source"][terms_field][0]: hit for hit in response["hits"]["hits"] }
 
         for doc_id, doc_stats in searched_documents.items():

@@ -22,6 +22,7 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                     "store": ltr_store_name,
                 }
             },
+            "score_mode": "total",
             "rescore_query_weight": rescore_query_weight,
             "query_weight": main_query_weight
         }
@@ -84,9 +85,9 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                         }
                     },
                     {
-                        'stlr': {
-                            '_name': "log_feature_set",
-                            'feature_set': featureset_name,
+                        'sltr': {
+                            '_name': "logged_featureset",
+                            'featureset': featureset_name,
                             'store': ltr_store_name,
                             'params': {
                                 'keywords': query
@@ -100,7 +101,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
             'ltr_log': {
                 'log_specs': {
                     'name': 'log_entry',
-                    'named_query': ltr_store_name,
+                    'named_query': "logged_featureset",
                 }
             }
         }
