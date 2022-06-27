@@ -12,6 +12,244 @@
             "name": "{{keywords}}"
           }
         }
+      },
+      {
+        "name": "name_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{ keywords }}",
+              "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "name_fuzzy_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "name": {
+              "query": "{{keywords}}",
+              "fuzziness": "AUTO"
+            }
+          }
+        }
+      },
+      {
+        "name": "artist_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "artistName": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "category_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "categoryPath": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "customer_review_average",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "customerReviewAverage",
+                  "missing": 4
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "customer_review_count",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "customerReviewCount",
+                  "missing": 10
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "long_desc",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "longDescription": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "short_desc",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "shortDescription": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "sales_rank_short_term",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "filter": {
+                  "exists": {
+                    "field": "salesRankShortTerm"
+                  }
+                },
+                "gauss": {
+                  "salesRankShortTerm": {
+                    "origin": "1.0",
+                    "offset": "100",
+                    "scale": "10000",
+                    "decay": "0.1"
+                  }
+                }
+              },
+              {
+                "filter": {
+                  "bool": {
+                    "must_not": {
+                      "exists": {
+                        "field": "salesRankShortTerm"
+                      }
+                    }
+                  }
+                },
+                "script_score": {
+                  "script": "if (doc['salesRankShortTerm'] == null || doc['salesRankShortTerm'].size() == 0  ){return 0.0}"
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "has_image",
+        "template_language": "mustache",
+        "template": {
+          "bool": {
+            "should": [
+              {
+                "script_score": {
+                  "query": {
+                    "match_all": {}
+                  },
+                  "script": {
+                    "source": "if ((doc['image'].size()==0  || doc['image'][0] == 'http://images.bestbuy.com/BestBuy_US/images/products/nonsku/default_music_l.jpg' || doc['image'][0] == 'http://images.bestbuy.com/BestBuy_US/images/products/nonsku/default_movies_l.jpg')) {return 0} else {return 1.0}"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "is_not_music",
+        "template_language": "mustache",
+        "template": {
+          "bool": {
+            "should": [
+              {
+                "script_score": {
+                  "query": {
+                    "match_all": {}
+                  },
+                  "script": {
+                    "source": "if (doc['type.keyword'][0] == 'Music'){return 0} else {if (doc['name.keyword'].size() > 0 && doc['name.keyword'][0].length() < 20){return 1.1} else{return 1.0}}"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "has_online",
+        "template_language": "mustache",
+        "template": {
+          "bool": {
+            "should": [
+              {
+                "script_score": {
+                  "query": {
+                    "match_all": {}
+                  },
+                  "script": {
+                    "source": "if (doc['onlineAvailability'][0] == true) {return 1;} else {return 0;}"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "has_instore",
+        "template_language": "mustache",
+        "template": {
+          "bool": {
+            "should": [
+              {
+                "script_score": {
+                  "query": {
+                    "match_all": {}
+                  },
+                  "script": {
+                    "source": "if (doc['inStoreAvailability'][0] == true) {return 1;} else {return 0;}"
+                  }
+                }
+              }
+            ]
+          }
+        }
       }
     ]
   }
