@@ -9,8 +9,24 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                              rescore_size=500, main_query_weight=1, rescore_query_weight=2):
     # Create the base query, use a much bigger window
     #add on the rescore
-    ##### Step 4.e:
-    print("IMPLEMENT ME: create_rescore_ltr_query")
+    ##### Step 4.e:        
+    query_obj["rescore"] = {
+        "window_size": rescore_size,
+        "query": {
+            "rescore_query": {
+                "sltr": {
+                    "params": {
+                        "keywords": user_query
+                    },
+                    "model": ltr_model_name,
+                    "store": ltr_store_name,
+                }
+            },
+            "rescore_query_weight": rescore_query_weight,
+            "query_weight": main_query_weight
+        }
+    }
+
     if active_features is not None and len(active_features) > 0:
         query_obj["rescore"]["query"]["rescore_query"]["sltr"]["active_features"] =  active_features
 
@@ -27,10 +43,10 @@ def create_sltr_simple_query(user_query, query_obj, click_prior_query, ltr_model
                 "click_prior_query": click_prior_query
             },
             "model": ltr_model_name,
-            # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
             "store": ltr_store_name,
         }
     }
+
     if active_features is not None and len(active_features) > 0:
         sltr["active_features"] =  active_features
     query_obj["query"]["bool"]["should"].append(sltr)
@@ -57,8 +73,40 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     ##### Step 3.b:
-    print("IMPLEMENT ME: create_feature_log_query")
-    return None
+    query_obj = {
+        'size': size,
+        'query': {
+            'bool': {
+                'filter': [
+                    {
+                        'terms': {
+                            terms_field: doc_ids
+                        }
+                    },
+                    {
+                        'stlr': {
+                            '_name': "log_feature_set",
+                            'feature_set': featureset_name,
+                            'store': ltr_store_name,
+                            'params': {
+                                'keywords': query
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        'ext': {
+            'ltr_log': {
+                'log_specs': {
+                    'name': 'log_entry',
+                    'named_query': ltr_store_name,
+                }
+            }
+        }
+    }
+    
+    return query_obj
 
 
 # Item is a Pandas namedtuple
