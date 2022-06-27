@@ -9,22 +9,6 @@ import os
 
 # from importlib import reload
 
-class Judgment:
-
-    def __init__(self, query, doc_id, display_name, grade=0, features=[], query_str=None):
-        self.query = query
-        self.query_str = query_str
-        self.doc_id = doc_id
-        self.display_name = display_name
-        self.grade = grade
-        self.features = features
-
-    # Modified from https://github.com/o19s/elasticsearch-ltr-demo/blob/master/train/judgments.py
-    def toXGBFormat(self):
-        featuresAsStrs = ["%s:%s" % (idx + 1, feature.get('value', 0)) for idx, feature in enumerate(self.features)]
-        comment = "# %s\t%s" % (self.doc_id, self.query_str)
-        return "%s\tqid:%s\t%s %s" % (self.grade, self.query, "\t".join(featuresAsStrs), comment)
-
 
 class DataPrepper:
     opensearch = None
