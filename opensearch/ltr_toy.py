@@ -266,7 +266,7 @@ for query in queries:
             for input in sys.stdin.readline():
                 grade = input.rstrip()
                 if grade == "0" or grade == "1":
-                    judgment = Judgment(query, hit['_id'], hit['_source']['title'], int(grade))
+                    judgment = Judgment(query, hit['_id'], hit['_source']['title'], int(grade), query_str=hit['_source']['title'])
                     judge_vals.append(judgment)
                     break
                 elif grade == "skip" or grade == "s":
@@ -362,7 +362,7 @@ feat_map_file.write(bytes('2\t{}\tq\n'.format(body_query_feature_name), 'utf-8')
 feat_map_file.write(bytes('3\t{}\tq\n'.format(price_func_feature_name), 'utf-8'))
 feat_map_file.close()
 dtrain = xgb.DMatrix(train_file.name)
-param = {'max_depth': 5,  'silent': 1, 'objective': 'reg:linear'}
+param = {'max_depth': 5,  'silent': 1, 'objective': 'reg:linear', 'verbosity': 0}
 num_round = 5
 print("Training XG Boost")
 bst = xgb.train(param, dtrain,
