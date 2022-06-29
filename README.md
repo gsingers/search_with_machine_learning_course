@@ -22,8 +22,6 @@ You will find these four projects in the directories below them organized in the
 
 Our instructor annotated results for each project will be provided during the class.  Please note, these represent our way of doing the assignment and may differ from your results, as there is often more than one way of doing things in search.
 
-You will also find several supporting directories and files for [Logstash](https://opensearch.org/docs/latest/clients/logstash/), Docker and Gitpod.
-
 # Prerequisites
 
 1. For this class, you will need a Kaggle account and a [Kaggle API token](https://www.kaggle.com/docs/api).
@@ -67,12 +65,6 @@ At the command line, do the following steps to run the example.
 
 1. Activate your Python Virtual Environment.  We use `pyenv` (Pyenv website)[https://github.com/pyenv/pyenv] and `pyenv-virtualenv` (Pyenv Virtualenv)[https://github.com/pyenv/pyenv-virtualenv].
     1. `pyenv activate search_with_ml` -- Activate the Virtualenv. 
-1. Run Flask: 
-    1. `export FLASK_ENV=development`
-    1.  *_IMPORTANT_* Set the Flask App Environment Variable: `export FLASK_APP=week2`
-    1. For week2, you may also choose to set `export PRIOR_CLICKS_LOC=/workspace/ltr_output/train.csv` after running the LTR end-to-end script. 
-    1. `flask run --port 3000` (The default port of 5000 is already in use) 
-    1. Open the Flask APP at `https://3000-<$GITPOD_URL>/`
 1. Or run `ipython`
     
 # Working locally (Not supported, but may work for you. YMMV)
