@@ -4,11 +4,23 @@ import glob
 from tqdm import tqdm
 import os
 import random
+import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from nltk.stem import SnowballStemmer
 
-def transform_name(product_name):
-    # IMPLEMENT
+stemmer = SnowballStemmer("english")
+
+def transform_name(product_name: str):
+    if args.normalize:
+        # Remove all non-alphanumeric characters other than underscore
+        product_name = re.sub(r'[^\w_ ]', ' ', product_name)
+        # Trim excess space characters so that tokens are separated by a single space.
+        product_name = re.sub(r'\s{2,}', ' ', product_name)
+        # Convert all letters to lowercase and remove surround whitespace
+        product_name = product_name.lower().strip()
+        # Stem
+        product_name = ' '.join([stemmer.stem(word) for word in product_name.split()])
     return product_name
 
 # Directory for product data
@@ -19,6 +31,7 @@ general = parser.add_argument_group("general")
 general.add_argument("--input", default=directory,  help="The directory containing product data")
 general.add_argument("--output", default="/workspace/datasets/fasttext/output.fasttext", help="the file to output to")
 general.add_argument("--label", default="id", help="id is default and needed for downsteam use, but name is helpful for debugging")
+general.add_argument("--normalize", action=argparse.BooleanOptionalAction,  help="Normalize the product names by stripping symbols, applying lowercase and stemming")
 
 # Consuming all of the product data, even excluding music and movies,
 # takes a few minutes. We can speed that up by taking a representative
