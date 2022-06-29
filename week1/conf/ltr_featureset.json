@@ -13,6 +13,73 @@
           }
         }
       }
+
+      ,{
+        "name": "shortDescription_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "shortDescription": "{{keywords}}"
+          }
+        }
+      }
+
+      ,{
+        "name": "longDescription_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "longDescription": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      }
+
+      ,{
+        "name": "cust_review_count",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [{
+                "field_value_factor": {
+                    "field": "customerReviewCount",
+                    "missing": 0
+                }
+            }]
+        }
+        }
+      }
+
+      ,{
+        "name": "cust_review_avg",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [{
+                "field_value_factor": {
+                    "field": "customerReviewAverage",
+                    "missing": 0
+                }
+            }]
+        }
+        }
+      }
+
+
     ]
   }
 }
