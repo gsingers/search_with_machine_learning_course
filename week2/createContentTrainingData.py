@@ -5,11 +5,13 @@ from tqdm import tqdm
 import os
 import random
 import xml.etree.ElementTree as ET
+from nltk import stem
 from pathlib import Path
 
+stemmer = stem.SnowballStemmer("english")
+
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+    return stemmer.stem(product_name)
 
 # Directory for product data
 DIR = '/Users/tholland/search_with_machine_learning_course/workspace/datasets'
