@@ -1,8 +1,11 @@
 OUTPUT_DIR=../workspace/datasets/fasttext
 
+MIN_PRODUCTS=0
+MAX_LABEL_DEPTH=99
+
 
 $(OUTPUT_DIR)/%.fasttext:
-	python ./createContentTrainingData.py --output /dev/stdout | shuf > $@
+	python ./createContentTrainingData.py --min_products=$(MIN_PRODUCTS) --max_label_depth=$(MAX_LABEL_DEPTH) --output /dev/stdout | shuf > $@
 
 
 $(OUTPUT_DIR)/%_training.txt: $(OUTPUT_DIR)/%_shuffled.fasttext

@@ -1,5 +1,6 @@
 import argparse
 import multiprocessing
+from collections import defaultdict
 import glob
 from tqdm import tqdm
 import os
@@ -31,6 +32,8 @@ general.add_argument("--sample_rate", default=1.0, type=float, help="The rate at
 # IMPLEMENT: Setting min_products removes infrequent categories and makes the classifier's task easier.
 general.add_argument("--min_products", default=0, type=int, help="The minimum number of products per category (default is 0).")
 
+general.add_argument("--max_label_depth", default="99", help="how deep in the category path tree to search for the label")
+
 args = parser.parse_args()
 output_file = args.output
 path = Path(output_file)
@@ -46,6 +49,7 @@ sample_rate = args.sample_rate
 names_as_labels = False
 if args.label == 'name':
     names_as_labels = True
+max_label_depth = int(args.max_label_depth)
 
 
 def _label_filename(filename):
@@ -62,10 +66,12 @@ def _label_filename(filename):
             child.find('categoryPath')[0][0].text == 'cat00000' and
             child.find('categoryPath')[1][0].text != 'abcat0600000'):
               # Choose last element in categoryPath as the leaf categoryId or name
+              cat_path = child.find('categoryPath')
+              path_idx = min(len(cat_path) -1, max_label_depth)
               if names_as_labels:
-                  cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][1].text.replace(' ', '_')
+                  cat = cat_path[path_idx][1].text.replace(' ', '_')
               else:
-                  cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
+                  cat = cat_path[path_idx][0].text
               # Replace newline chars with spaces so fastText doesn't complain
               name = child.find('name').text.replace('\n', ' ')
               labels.append((cat, transform_name(name)))
@@ -80,6 +86,15 @@ if __name__ == '__main__':
 
 
         with open(output_file, 'w') as output:
+            label_lists = defaultdict(list)
             for label_list in all_labels:
                 for (cat, name) in label_list:
+                    label_lists[cat].append(name)
+            for cat, name_list in label_lists.items():
+                if len(name_list) < min_products:
+                    continue
+                for name in name_list:
                     output.write(f'__label__{cat} {name}\n')
+
+
+
