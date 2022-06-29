@@ -1,3 +1,4 @@
+echo Level 1: Product category classifier
 # Create training data from BestBuy product data and shuffle
 # Label is the category, data is the product name
 python week2/createContentTrainingData.py --output /workspace/datasets/fasttext/labeled_products.txt
@@ -8,18 +9,18 @@ head -n 9000 /workspace/datasets/fasttext/shuffled_labeled_products.txt > /works
 tail -1000 /workspace/datasets/fasttext/shuffled_labeled_products.txt > /workspace/datasets/fasttext/test_data.txt
 
 # Train model
-~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/training_data.txt -output bbuy_prod_cat_clf_model
+~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/training_data.txt -output /workspace/datasets/fasttext/bbuy_prod_cat_clf_model
 # Test model for P@1 and R@1, P@5 and R@5 and P@10 and R@10
-~/fastText-0.9.2/fasttext test bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/test_data.txt
-~/fastText-0.9.2/fasttext test bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/test_data.txt 5
-~/fastText-0.9.2/fasttext test bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/test_data.txt 10
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/test_data.txt
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/test_data.txt 5
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/test_data.txt 10
 
 # Train improved model, set learning rate to 1, epochs to 25 and word ngrams to 2 to learn from bigrams
-~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/training_data.txt -output bbuy_prod_cat_clf_improved_model -lr 1.0 -epoch 25 -wordNgrams 2
+~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/training_data.txt -output /workspace/datasets/fasttext/bbuy_prod_cat_clf_improved_model -lr 1.0 -epoch 25 -wordNgrams 2
 # Test model for P@1 and R@1, P@5 and R@5 and P@10 and R@10
-~/fastText-0.9.2/fasttext test bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/test_data.txt
-~/fastText-0.9.2/fasttext test bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/test_data.txt 5
-~/fastText-0.9.2/fasttext test bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/test_data.txt 10
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/test_data.txt
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/test_data.txt 5
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/test_data.txt 10
 
 
 echo Normalize the dataset
@@ -37,18 +38,18 @@ shuf /workspace/datasets/fasttext/normalized_labeled_products.txt > /workspace/d
 head -n 9000 /workspace/datasets/fasttext/shuffled_normalized_labeled_products.txt > /workspace/datasets/fasttext/normalized_training_data.txt
 tail -1000 /workspace/datasets/fasttext/shuffled_normalized_labeled_products.txt > /workspace/datasets/fasttext/normalized_test_data.txt
 # Train model on normalized data
-~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/normalized_training_data.txt -output normalized_bbuy_prod_cat_clf_model
+~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/normalized_training_data.txt -output /workspace/datasets/fasttext/normalized_bbuy_prod_cat_clf_model
 # Test normalized model for P@1 and R@1, P@5 and R@5 and P@10 and R@10
-~/fastText-0.9.2/fasttext test normalized_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/normalized_test_data.txt
-~/fastText-0.9.2/fasttext test normalized_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/normalized_test_data.txt 5
-~/fastText-0.9.2/fasttext test normalized_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/normalized_test_data.txt 10
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/normalized_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/normalized_test_data.txt
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/normalized_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/normalized_test_data.txt 5
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/normalized_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/normalized_test_data.txt 10
 
 # Train improved model, set learning rate to 1, epochs to 25 and word ngrams to 2 to learn from bigrams
-~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/normalized_training_data.txt -output normalized_bbuy_prod_cat_clf_improved_model -lr 1.0 -epoch 25 -wordNgrams 2
+~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/normalized_training_data.txt -output /workspace/datasets/fasttext/normalized_bbuy_prod_cat_clf_improved_model -lr 1.0 -epoch 25 -wordNgrams 2
 # Test model for P@1 and R@1, P@5 and R@5 and P@10 and R@10
-~/fastText-0.9.2/fasttext test normalized_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/normalized_test_data.txt
-~/fastText-0.9.2/fasttext test normalized_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/normalized_test_data.txt 5
-~/fastText-0.9.2/fasttext test normalized_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/normalized_test_data.txt 10
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/normalized_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/normalized_test_data.txt
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/normalized_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/normalized_test_data.txt 5
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/normalized_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/normalized_test_data.txt 10
 
 
 echo Filter out categories with too few products
@@ -59,15 +60,29 @@ shuf /workspace/datasets/fasttext/pruned_labeled_products.txt > /workspace/datas
 head -n 9000 /workspace/datasets/fasttext/shuffled_pruned_labeled_products.txt > /workspace/datasets/fasttext/pruned_training_data.txt
 tail -1000 /workspace/datasets/fasttext/shuffled_pruned_labeled_products.txt > /workspace/datasets/fasttext/pruned_test_data.txt
 # Train model on pruned data
-~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/pruned_training_data.txt -output pruned_bbuy_prod_cat_clf_model
+~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/pruned_training_data.txt -output /workspace/datasets/fasttext/pruned_bbuy_prod_cat_clf_model
 # Test pruned model for P@1 and R@1, P@5 and R@5 and P@10 and R@10
-~/fastText-0.9.2/fasttext test pruned_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/pruned_test_data.txt
-~/fastText-0.9.2/fasttext test pruned_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/pruned_test_data.txt 5
-~/fastText-0.9.2/fasttext test pruned_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/pruned_test_data.txt 10
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/pruned_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/pruned_test_data.txt
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/pruned_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/pruned_test_data.txt 5
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/pruned_bbuy_prod_cat_clf_model.bin /workspace/datasets/fasttext/pruned_test_data.txt 10
 
 # Train improved model, set learning rate to 1, epochs to 25 and word ngrams to 2 to learn from bigrams
-~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/pruned_training_data.txt -output pruned_bbuy_prod_cat_clf_improved_model -lr 1.0 -epoch 25 -wordNgrams 2
+~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/pruned_training_data.txt -output /workspace/datasets/fasttext/pruned_bbuy_prod_cat_clf_improved_model -lr 1.0 -epoch 25 -wordNgrams 2
 # Test model for P@1 and R@1, P@5 and R@5 and P@10 and R@10
-~/fastText-0.9.2/fasttext test pruned_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/pruned_test_data.txt
-~/fastText-0.9.2/fasttext test pruned_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/pruned_test_data.txt 5
-~/fastText-0.9.2/fasttext test pruned_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/pruned_test_data.txt 10
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/pruned_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/pruned_test_data.txt
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/pruned_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/pruned_test_data.txt 5
+~/fastText-0.9.2/fasttext test /workspace/datasets/fasttext/pruned_bbuy_prod_cat_clf_improved_model.bin /workspace/datasets/fasttext/pruned_test_data.txt 10
+
+
+echo Level 2: Synonyms
+# Lets use the model to try and find synonyms
+# First lets training it on the raw titles
+cut -d' ' -f2- /workspace/datasets/fasttext/shuffled_labeled_products.txt > /workspace/datasets/fasttext/titles.txt
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/title_model
+
+# Lets improve it by normalizing the titles
+cut -d' ' -f2- /workspace/datasets/fasttext/shuffled_normalized_labeled_products.txt > /workspace/datasets/fasttext/normalized_titles.txt
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model
+
+# Lets improve it by further by tuning the model
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model_improved -epoch 20
