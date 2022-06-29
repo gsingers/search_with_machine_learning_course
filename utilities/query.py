@@ -187,6 +187,9 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
 
 
 def search(client, user_query, index="bbuy_products", sort=None, sortDir="desc"):
+    #### W3: classify the query
+    #### W3: create filters and boosts
+    # Note: you may also want to modify the `create_query` method above
     query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
@@ -242,7 +245,6 @@ if __name__ == "__main__":
         query = line.rstrip()
         if query == "Exit":
             break
-        #### W3: classify the query
         search(client=opensearch, user_query=query, index=index_name)
 
         print(query_prompt)
