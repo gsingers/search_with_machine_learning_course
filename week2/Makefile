@@ -17,20 +17,41 @@ $(OUTPUT_DIR)/%_test.txt: $(OUTPUT_DIR)/%_shuffled.fasttext
 $(OUTPUT_DIR)/%_normalized.txt: $(OUTPUT_DIR)/%.txt
 	cat $< | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" | sed "s/[^[:alnum:]_]/ /g" | tr -s ' ' > $@
 
-$(OUTPUT_DIR)/%.bin: $(OUTPUT_DIR)/%_training_normalized.txt
+$(OUTPUT_DIR)/%_supervised.bin: $(OUTPUT_DIR)/%_training_normalized.txt
 	fasttext supervised -input $< -output $(basename $@) -lr 1 -epoch 25 -wordNgrams 2
 
 
-%.test: $(OUTPUT_DIR)/%.bin $(OUTPUT_DIR)/%_test_normalized.txt
+%.test: $(OUTPUT_DIR)/%_supervised.bin $(OUTPUT_DIR)/%_test_normalized.txt
 	fasttext test $^ 1
 	fasttext test $^ 5
 	fasttext test $^ 10
 
+$(OUTPUT_DIR)/%_titles.txt: $(OUTPUT_DIR)/%.fasttext
+	cut -d' ' -f2- $< | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" | sed "s/[^[:alnum:]]/ /g" | tr -s ' ' > $@
+
+$(OUTPUT_DIR)/%_skipgram.bin: $(OUTPUT_DIR)/%_titles.txt
+	fasttext skipgram -input $< -output $(basename $@)
+
+%.nn_prompt: $(OUTPUT_DIR)/%_skipgram.bin
+	fasttext nn $<
+
+$(OUTPUT_DIR)/%_top_words.txt: $(OUTPUT_DIR)/%_titles.txt
+	cat $< | tr ' ' '\n' | grep "...." | sort | uniq -c | sort -nr | head -1000 | grep -oE '[^ ]+$$' > $@
+
+$(OUTPUT_DIR)/%_synonyms.csv: $(OUTPUT_DIR)/%_skipgram.bin $(OUTPUT_DIR)/%_top_words.txt
+	python ./find_synonyms.py --threshold=0.75 $(subst bin,bin <, $^) > $@
+
+
+
 %.clean:
 	$(eval v := $(basename $@))
-	rm -f $(OUTPUT_DIR)/${v}.bin
-	rm -f $(OUTPUT_DIR)/${v}.vec
+	rm -f $(OUTPUT_DIR)/${v}*.bin
+	rm -f $(OUTPUT_DIR)/${v}*.vec
 	rm -f $(OUTPUT_DIR)/${v}*.txt
 	rm -f $(OUTPUT_DIR)/${v}*.fasttext
 
-.PHONY: %.test %.clean
+clean:
+	rm -f $(OUTPUT_DIR)
+
+.PHONY: %.test %.clean %.nn_prompt
+.SECONDARY:
