@@ -18,6 +18,8 @@ Today there are many different use cases for search (web, e-commerce, enterprise
 - **Results**
 - **Query refinement and faceting** - summarize or aggregate the search results
 
+![Ecosia](./imgs/ecosia_search.png "screen shot of Ecosia search")
+
 
 There are three key subsystems: 
 - an index subsystem to represent content for efficient search and aggregation
@@ -26,7 +28,6 @@ There are three key subsystems:
 
 ![search architecture diagram](./imgs/search_architecture.png "search architecture diagram")
 
-
 ## Components of search system
 
 - **Content understanding** represents each piece of content in the index.
@@ -34,13 +35,78 @@ There are three key subsystems:
 - **Relevance of content** is a function of query and content understanding.
 - **Ranking orders the relevant**, retrieved content by its desirability.
 
+---
 
 ## Ranking & Relevance
  
+*“how well a retrieved document or set of documents meets the information need of the user”.*
 
+We need to infer what the user wants through collecting judgments, either by manually assigning labels and classifying results or through implicit behavior (ie clicks). It's therefore very important to have logs that we can then mine for information.
 
+A simple approach to ranking would be to assign a score to each document using the sum of the tf-idf (term frequency - inverse document frequency).
 
- ## Appendix
+Improving relevance is mostly about better representing the signals from documents, queries, and users
+
+**Index:** improve the way the content is represented, including by making better use of external resources. Includes content understanding.
+
+**Query:** improve the way the query is represented, rewriting it or otherwise transforming it before using it for scoring. Includes query understanding.
+
+**Retrieval:** since retrieval determines which results will be scored, make sure it’s doing a good job of balancing precision and recall before the ranker scores its results.
+
+**Scoring:** this is what most people think of as the core of relevance. And indeed it’s important, especially after you’ve done what you can with the index, query, and retrieval.
+
+**Think about how to solicit the best input from your users.**
+
+We can also use analyzers to process our queries and documents in our index, a simple example here would be the use of stemming where we remove common endings from a word. **Remember** it is very important to use the same analyzer for training your data as you will for the user inputs.
+
+### Metrics for measuring relevancy
+
+- Precision
+	- true positive / true positive + false positive
+	- we value precision when it's important to us the results returned are definitely of the correct class (little false positives)
+- Recall
+	- true positive / false negatives + true positives
+	- we value it when we want to collect more results and are willing to risk some of them not be the of the right class.
+*There is normally a compromise between these two (when precision is high recall might be lower)*
+I highly recommend this [video](https://www.youtube.com/watch?v=BYQQlCVt4aE&ab_channel=CassieKozyrkov) on precision and recall by Cassie Kozyrkov.
+- Mean Reciprocal Rank (MRR)
+	- for each query, take the reciprocal (the reciprocal of x is 1/x) of the position of the first relevant or clicked document and then take the mean across all queries.
+
+We can also use vectors and token weight to determine document similarity. A cosine of 1 means that two vectors are pointing in the same direction, so cosines between two documents that are close to 1 mean the documents are similar.
+
+### LTR (Learning To Rank)
+
+LTR is the application of machine learning (ML) to construct a ranking model for our search system. It usually relies on supervised learning approach and promotes relevant or desirable content over other results. Libraries for implementing it include [XGBoost](https://xgboost.readthedocs.io/) and [Ranklib](https://sourceforge.net/p/lemur/wiki/RankLib/)
+
+We first create a training data set and add judgments to it, either explicit human judgments or implicit judgments gained from behavior such as when a user has clicked on something).
+
+⚠️ Beware
+
+- clicks don't always tell us whether the user found something relevant, think about snippets that a user might read but not click or presentation bias: you can only learn about results users see
+
+We can now train and test our model, we might want to visualize the output of model to better understand how it is making decisions. How to do this will depend on the tech we have chosen to use.
+
+![learning to rank diagram](./imgs/learn_to_rank.png "learning to rank diagram")
+
+---
+
+## Appendix
+### Query dependant/ independent signals
+
+Query-dependent signals are good for determining relevance. Query-independent signals are good for determining desirability.
+
+| Query dependent                 | Query Independent (document boosts)  |
+|---------------------------------|--------------------------------------|
+|  # of matching tokens           | popularity                           |
+|  tokens matching specific field | recency                              |
+|  tf-idf, BM25 scores            | price                                |
+|  synonyms                       | sale rank                            |
+
+ ### tf (term frequency)
+ A token that is repeated in a document is more important to the document.
+
+### idf (inverse document frequency
+A token that occurs in fewer documents in the index is more important to the documents in which it occurs.  
 
  ### Known Search versus exploratory search
  - known search is where the user already has an idea what they are looking for
