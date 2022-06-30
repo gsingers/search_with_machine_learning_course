@@ -86,3 +86,15 @@ cut -d' ' -f2- /workspace/datasets/fasttext/shuffled_normalized_labeled_products
 
 # Lets improve it by further by tuning the model
 ~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model_improved -epoch 20
+
+
+echo Level 3: Applying synonyms
+# Get top words
+cat /workspace/datasets/fasttext/normalized_titles.txt |\
+tr " " "\n" |\
+grep "...." |\
+sort |\
+uniq -c |\
+sort -nr |\
+head -1000 |\
+grep -oE '[^ ]+$' > /workspace/datasets/fasttext/top_words.txt
