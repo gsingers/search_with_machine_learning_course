@@ -100,6 +100,3 @@ if [ "$ANNOTATE" == "--annotate" ]; then
     fi
   fi
 fi
-
-
-
