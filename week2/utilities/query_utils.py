@@ -75,6 +75,15 @@ def create_simple_baseline(user_query, click_prior_query, filters, sort="_score"
                        }
                     },
                     {
+                      "match_phrase": { # near exact phrase match
+                            "name.synonyms": {
+                                "query": user_query,
+                                "slop": 1,
+                                "boost": 50
+                            }
+                       }
+                    },
+                    {
                       "multi_match": {
                             "query": user_query,
                             "type": "phrase",
@@ -158,6 +167,15 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                         "fuzziness": "1",
                                         "prefix_length": 2, # short words are often acronyms or usually not misspelled, so don't edit
                                         "boost": 0.01
+                                    }
+                               }
+                            },
+                            {
+                              "match": {
+                                    "name.synonyms": {
+                                        "query": user_query,
+                                        "slop": 1,
+                                        "boost": 50
                                     }
                                }
                             },

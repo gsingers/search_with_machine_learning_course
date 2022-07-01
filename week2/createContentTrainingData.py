@@ -65,4 +65,4 @@ with open(output_file, 'w') as output:
                           cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
                       # Replace newline chars with spaces so fastText doesn't complain
                       name = child.find('name').text.replace('\n', ' ')
-                      output.write("__label__%s %s\n" % (cat, transform_name(name)))
+                      output.write("%s\n" % (transform_name(name)))

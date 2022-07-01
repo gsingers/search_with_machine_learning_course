@@ -10,6 +10,20 @@
           ]
         }
       },
+      "analyzer": {
+        "synonyms": {
+          "tokenizer": "whitespace",
+          "filter": ["my_synonyms"]
+        }
+      },
+      "filter": {
+        "my_synonyms": {
+          "type": "synonym",
+          "synonyms_path": "synonyms.csv",
+          "updateable": true
+        }
+      },
+  
       "tokenizer": {
         "smarter_hyphens_tokenizer": {
           "type": "char_group",
@@ -248,8 +262,11 @@
           },
           "suggest": {
             "type": "completion"
+          },
+          "synonyms": {
+            "type": "keyword",
+            "analyzer": "synonyms"
           }
-
         }
       },
       "onSale": {
