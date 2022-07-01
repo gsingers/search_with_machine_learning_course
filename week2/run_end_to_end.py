@@ -1,14 +1,21 @@
 import subprocess
 import fasttext
+import requests
 
+import os
 from pathlib import Path
 import pandas as pd
 import csv
 
 from sklearn.model_selection import train_test_split
 
-DIR = Path(".", "week2")
+ROOT = Path.cwd()
+DIR = Path(ROOT, "week2")
 DATA_DIR = Path(DIR, "data") 
+MODEL_DIR = Path(DIR, "model") 
+CONF_DIR = Path(DIR, "conf")
+USER = os.environ["USER"]
+PASS = os.environ["PASS"]
 
 import sys
 sys.path.append(DIR)
@@ -64,7 +71,7 @@ def train_synonyms():
         minCount=20,
     )
 
-    synonym_model.save_model(str(Path(DIR, "title_model.bin")))
+    synonym_model.save_model(str(Path(MODEL_DIR, "title_model.bin")))
     return None
 
 def generate_synonyms():
@@ -121,6 +128,23 @@ def generate_synonyms():
         writer.writerows(synonyms)
     f.close()
 
+    # mount in docker
+    command = f"docker cp {DATA_DIR}/synonyms.csv opensearch-node1:/usr/share/opensearch/config/synonyms.csv"
+    subprocess.run(command, shell=True)
+
+    return None
+
+def index_data():
+    # delete first 
+    res = requests.delete("https://localhost:9200/bbuy_products", verify=False, auth=(USER, PASS))
+    res = requests.delete("https://localhost:9200/bbuy_queries", verify=False, auth=(USER, PASS))
+
+    # index
+    products_file_path = Path(CONF_DIR, "bbuy_products.json")
+    queries_file_path = Path(CONF_DIR, "bbuy_queries.json")
+
+    command = f"./index-data.sh -r -p {products_file_path} -q {queries_file_path}"
+    subprocess.run(command, shell=True)
     return None
 
 def search_model():
@@ -162,12 +186,15 @@ def search_model():
     print_results(*model.test("week2/data/pruned_test.txt"))
 
 def main():
-    logger.info("Preparing data")
-    prepare_data()
-    logger.info("Fitting synonyms model")
-    train_synonyms()
-    logger.info("Generating synonyms")
-    generate_synonyms()
+    # logger.info("Preparing data")
+    # prepare_data()
+    # logger.info("Fitting synonyms model")
+    # train_synonyms()
+    # logger.info("Generating synonyms")
+    # generate_synonyms()
+    logger.info("Indexing data")
+    index_data()
+
 
 
 if __name__ == "__main__":

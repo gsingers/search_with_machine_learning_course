@@ -1,9 +1,12 @@
 from pathlib import Path
+import logging
 
 import pandas as pd
 
 DATA_DIR = Path(".", "week2", "data") 
 
+pplogger = logging.getLogger(__name__)
+pplogger.setLevel(logging.INFO)
 
 def split_xml(full_string):
     space_idx = full_string.find(" ")
@@ -13,22 +16,22 @@ def split_xml(full_string):
 
 
 def main(min_n):
-    print("reading data")
+    pplogger.info("reading data")
     data = pd.read_csv(
         Path(DATA_DIR, "labeled_products.txt"),
         sep="\t",
         header=None,
         names=["xml_str"],
     )
-    print(f"original nrows: {data.shape[0]}")
+    pplogger.info(f"original nrows: {data.shape[0]}")
 
-    print("splitting labels and titles")
+    pplogger.info("splitting labels and titles")
     labels_titles = data["xml_str"].apply(split_xml)
     data["label"] = [lt[0] for lt in labels_titles]
     data["title"] = [lt[1] for lt in labels_titles]
 
     # get counts of each label
-    print("counting labels")
+    pplogger.info("counting labels")
     counter = (
         data.groupby("label")
         .agg({"label": "count"})
@@ -37,13 +40,13 @@ def main(min_n):
     counter = counter.reset_index()
 
     # filter out labels with fewer than min_n examples
-    print("filtering data")
+    pplogger.info("filtering data")
     keep_labels = counter[counter["incidence"] >= min_n]
     filtered_data = data.merge(keep_labels, how="inner", on="label")
-    print(f"filtered nrows: {filtered_data.shape[0]}")
+    pplogger.info(f"filtered nrows: {filtered_data.shape[0]}")
 
     # output data
-    print("outputting labeled products")
+    pplogger.info("outputting labeled products")
     filtered_data[["xml_str"]].to_csv(
         Path(DATA_DIR, "pruned_labeled_products.txt"),
         header=False,
@@ -51,7 +54,7 @@ def main(min_n):
         sep="\t",
     )
 
-    print("outputting titles")
+    pplogger.info("outputting titles")
     data[["title"]].to_csv(
         Path(DATA_DIR, "titles.txt"),
         header=False,
