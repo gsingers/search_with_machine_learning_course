@@ -1,17 +1,18 @@
-from pathlib import Path
 import logging
+from pathlib import Path
 
 import pandas as pd
 
-DATA_DIR = Path(".", "week2", "data") 
+DATA_DIR = Path(".", "week2", "data")
 
 pplogger = logging.getLogger(__name__)
 pplogger.setLevel(logging.INFO)
 
+
 def split_xml(full_string):
     space_idx = full_string.find(" ")
-    label = full_string[: space_idx]
-    title = full_string[space_idx+1:]
+    label = full_string[:space_idx]
+    title = full_string[space_idx + 1 :]
     return (label, title)
 
 
@@ -61,7 +62,7 @@ def main(min_n):
         index=False,
         sep="\t",
     )
-    
+
     return None
 
 
