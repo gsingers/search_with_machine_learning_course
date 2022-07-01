@@ -246,7 +246,6 @@ if __name__ == "__main__":
 
     )
     index_name = args.index
-    print(args.synonyms)
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
     import sys 

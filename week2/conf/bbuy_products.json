@@ -10,8 +10,12 @@
           ]
         },
         "synonym": {
-          "tokenizer": "whitespace",
-          "filter": [ "stemmer", "synonym_filter" ]
+          "tokenizer": "smarter_hyphens_tokenizer",
+          "filter": [ 
+            "lowercase",
+            "stemmer",
+            "synonym_filter"
+          ]
         }
       },
       "tokenizer": {

@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 ROOT = Path.cwd()
 DIR = Path(ROOT, "week2")
 DATA_DIR = Path(DIR, "data") 
-MODEL_DIR = Path(DIR, "model") 
+MODEL_DIR = Path(DIR, "models") 
 CONF_DIR = Path(DIR, "conf")
 USER = os.environ["USER"]
 PASS = os.environ["PASS"]
@@ -24,14 +24,10 @@ import pruneProducts as prune_products
 from createContentTrainingData import transform_name
 
 import logging
+FORMAT = "%(name)s -- %(asctime)s -- %(message)s"
 logger = logging.getLogger(__name__)
-logging.basicConfig()
+logging.basicConfig(format=FORMAT)
 logger.setLevel(logging.INFO)
-
-def print_results(N, p, r):
-    print("N\t" + str(N))
-    print("P@{}\t{:.3f}".format(1, p))
-    print("R@{}\t{:.3f}".format(1, r))
 
 def normalize_titles():
     titles = pd.read_csv(
@@ -49,14 +45,14 @@ def normalize_titles():
     )
     return None
 
-def prepare_data():
+def prepare_data(prune_n):
     logger.info("Base data pull")
     output_loc = Path(DATA_DIR, "labeled_products.txt")
     bash_command = f"python week2/createContentTrainingData.py --output {output_loc}"
-    # subprocess.run(bash_command, shell=True)
+    subprocess.run(bash_command, shell=True)
 
     logger.info("Extracting titles and pruning data")
-    prune_products.main(500)
+    prune_products.main(prune_n)
 
     logger.info("Normalizing titles")
     normalize_titles()
@@ -110,7 +106,7 @@ def generate_synonyms():
     top_words_doc.close()
 
     # load synonym model
-    synonym_model = fasttext.load_model(str(Path(DIR, "title_model.bin")))
+    synonym_model = fasttext.load_model(str(Path(MODEL_DIR, "title_model.bin")))
     
     # get synonyms
     synonyms = []
@@ -137,20 +133,21 @@ def generate_synonyms():
 def index_data():
     # delete first 
     res = requests.delete("https://localhost:9200/bbuy_products", verify=False, auth=(USER, PASS))
+    logger.info(f"Delete bbuy_products returned {res.status_code}")
     res = requests.delete("https://localhost:9200/bbuy_queries", verify=False, auth=(USER, PASS))
+    logger.info(f"Delete bbuy_queries returned {res.status_code}")
 
-    # index
-    products_file_path = Path(CONF_DIR, "bbuy_products.json")
+    # index data
     queries_file_path = Path(CONF_DIR, "bbuy_queries.json")
-
+    products_file_path = Path(CONF_DIR, "bbuy_products.json")
     command = f"./index-data.sh -r -p {products_file_path} -q {queries_file_path}"
     subprocess.run(command, shell=True)
+
     return None
 
-def search_model():
-
+def train_products(learning_rate, epochs):
     # shuffle, create train-test split
-    logger.info("Shuffling and splitting")
+    logger.info("Shuffling and splitting data")
     data = pd.read_csv(
         Path(DATA_DIR, "pruned_labeled_products.txt"),
         sep="\t",
@@ -175,27 +172,47 @@ def search_model():
     # train model
     logger.info("Training")
     model = fasttext.train_supervised(
-        input="week2/data/pruned_train.txt",
-        lr=0.8,
-        epoch=25,
+        input=str(Path(DATA_DIR, "pruned_train.txt")),
+        lr=learning_rate,
+        epoch=epochs,
         wordNgrams=2,
     )
 
     # evaluate
     logger.info("Evaluating")
-    print_results(*model.test("week2/data/pruned_test.txt"))
+    for n in [1, 5, 10]:
+        metrics = model.test(
+            str(Path(DATA_DIR, "pruned_test.txt")),
+            n
+        )
 
-def main():
-    # logger.info("Preparing data")
-    # prepare_data()
-    # logger.info("Fitting synonyms model")
-    # train_synonyms()
-    # logger.info("Generating synonyms")
-    # generate_synonyms()
-    logger.info("Indexing data")
+        logger.info(" P@{} {:.3f}".format(n, metrics[1]))
+        logger.info(" R@{} {:.3f}".format(n, metrics[2]))
+
+    # save model
+    model.save_model(str(Path(MODEL_DIR, "product_classifier.bin")))
+
+def main(**kwargs):
+    logger.info("Preparing data")
+    prepare_data(kwargs["prune_n"])
+    logger.info("Training product classifier")
+    train_products(kwargs["product_lr"], kwargs["product_epochs"])
+    logger.info("Fitting synonyms model")
+    train_synonyms()
+    logger.info("Generating synonyms")
+    generate_synonyms()
+    logger.info("Indexing data -- you will prompted to enter the password")
     index_data()
+    logger.info("All done here")
 
 
 
 if __name__ == "__main__":
-    main()
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument("--prune_n", help="Min n examples to prune to", default=500, type=int)
+    parser.add_argument("--product_lr", help="Learning rate for product classifier", default=0.6, type=float)
+    parser.add_argument("--product_epochs", help="Number of epochs for product classifier", default=10, type=int)
+    args = parser.parse_args()
+    
+    main(**vars(args))
