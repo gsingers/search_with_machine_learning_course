@@ -3,8 +3,7 @@ import os
 
 def filter():
     #dataset = pd.read_csv('/workspace/datasets/fasttext/training_data.txt', on_bad_lines='skip', delimiter='\t')
-    #print(dataset.iloc[1])    
-    #print(os.listdir('.././'))
+    #print(dataset.iloc[1])
     with open('/workspace/datasets/fasttext/training_data.txt', 'r') as f:
         index = 0
         dataset = pd.DataFrame(columns=['label', 'name'])
