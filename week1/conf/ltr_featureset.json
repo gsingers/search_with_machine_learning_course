@@ -12,7 +12,19 @@
             "name": "{{keywords}}"
           }
         }
-      }
+      },
+      {
+        "name": "l_desc_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "longDescription": "{{keywords}}"
+          }
+        }
+    }
     ]
   }
 }

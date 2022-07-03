@@ -202,7 +202,7 @@ if __name__ == "__main__":
             print(e)
             exit(2)
 
-    # uplaod the LTR featureset
+    # upload the LTR featureset
     if args.upload_featureset:
         featureset_path = urljoin(ltr_model_path + "/", "_featureset/{}".format(feat_name))
         print("Installing %s featureset at %s" % (args.featureset, featureset_path))
