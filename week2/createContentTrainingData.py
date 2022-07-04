@@ -6,10 +6,27 @@ import os
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from nltk.stem import SnowballStemmer
+from nltk import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+import pandas as pd
+import nltk
+import csv
+
+nltk.download('punkt')
+nltk.download('stopwords')
 
 def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+    stemmer = SnowballStemmer("english")
+    special_tokens = ['\'','"','\u00A9','\u2122','\u00AE', '-', '.']
+    tokens = word_tokenize(product_name)
+    tokens = [token.lower() for token in tokens]
+    tokens = [token for token in tokens if not token in stopwords.words("english")]
+    tokens = [stemmer.stem(token) for token in tokens]
+    final_str = ' '.join(tokens)
+    for special_token in special_tokens:
+        final_str = final_str.replace(special_token, '')
+    return final_str
 
 # Directory for product data
 directory = r'/workspace/datasets/product_data/products/'
@@ -26,7 +43,7 @@ general.add_argument("--label", default="id", help="id is default and needed for
 general.add_argument("--sample_rate", default=1.0, type=float, help="The rate at which to sample input (default is 1.0)")
 
 # IMPLEMENT: Setting min_products removes infrequent categories and makes the classifier's task easier.
-general.add_argument("--min_products", default=0, type=int, help="The minimum number of products per category (default is 0).")
+general.add_argument("--min_products", default=500, type=int, help="The minimum number of products per category (default is 0).")
 
 args = parser.parse_args()
 output_file = args.output
@@ -71,12 +88,25 @@ def _label_filename(filename):
 if __name__ == '__main__':
     files = glob.glob(f'{directory}/*.xml')
 
-    print("Writing results to %s" % output_file)
-    with multiprocessing.Pool() as p:
-        all_labels = tqdm(p.imap_unordered(_label_filename, files), total=len(files))
+    if False:
+        print("Writing results to %s" % output_file)
+        with multiprocessing.Pool() as p:
+            all_labels = tqdm(p.imap_unordered(_label_filename, files), total=len(files))
 
 
-        with open(output_file, 'w') as output:
-            for label_list in all_labels:
-                for (cat, name) in label_list:
-                    output.write(f'__label__{cat} {name}\n')
+            with open(output_file, 'w') as output:
+                for label_list in all_labels:
+                    for (cat, name) in label_list:
+                        output.write(f'__label__{cat}∏{name}\n')
+    
+    df = pd.read_csv(output_file, error_bad_lines=False, header=None, sep='∏')
+    df = df[df[0].map(df[0].value_counts()) >= min_products]
+    df = df.sample(frac=1).reset_index(drop=True)
+    df_train = df.head(10000)
+    df_test = df.tail(10000)
+
+    df.to_csv('train.tsv', sep='\t', quoting = csv.QUOTE_NONE, index=False, header=False)
+    df.to_csv('test.tsv', sep='\t', quoting = csv.QUOTE_NONE, index=False, header=False)
+
+
+    df[1].to_csv('titles.tsv', sep='\t', quoting = csv.QUOTE_NONE, index=False, header=False)
