@@ -1,13 +1,21 @@
 import argparse
 import os
 import random
+import re
 import xml.etree.ElementTree as ET
+from nltk.stem.snowball import EnglishStemmer
 from pathlib import Path
 
-def transform_name(product_name):
-    # IMPLEMENT
-    return product_name
+stemmer = EnglishStemmer()
 
+def transform_name(product_name):
+    # Converting product name to lower
+    product_name = product_name.lower()
+    # Removing non alpha characteres
+    product_name=re.sub(r'[\W_]+', '', product_name)
+    # Removing whitespaces 
+    product_name = re.sub(r"(?a:^\s+|\s+$)",'', product_name) 
+    return " ".join(map(stemmer.stem, product_name.split(" ")))
 # Directory for product data
 directory = r'/workspace/datasets/product_data/products/'
 
