@@ -1,14 +1,18 @@
 import argparse
+import argparse
 import multiprocessing
 import glob
 from tqdm import tqdm
 import os
+import re
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 def transform_name(product_name):
-    # IMPLEMENT
+    product_name = product_name.lower()
+    product_name = re.sub(r'[^a-zA-Z0-9_ ]', '', product_name) 
+    product_name = " ".join(product_name.split())
     return product_name
 
 # Directory for product data
