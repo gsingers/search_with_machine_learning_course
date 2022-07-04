@@ -44,6 +44,22 @@
       }
 
       ,{
+        "name": "name_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      }
+
+      ,{
         "name": "cust_review_count",
         "params": [
           "keywords"
@@ -55,11 +71,14 @@
                 "field_value_factor": {
                     "field": "customerReviewCount",
                     "missing": 0
+                  }
+                  }],
+                  "query": {
+                      "match_all": {}
+                  }
                 }
-            }]
-        }
-        }
-      }
+              }
+            }
 
       ,{
         "name": "cust_review_avg",
@@ -73,11 +92,14 @@
                 "field_value_factor": {
                     "field": "customerReviewAverage",
                     "missing": 0
+                  }
+                  }],
+                  "query": {
+                      "match_all": {}
+                  }
                 }
-            }]
-        }
-        }
-      }
+              }
+            }
 
 
     ]

@@ -238,7 +238,7 @@ class DataPrepper:
 
         res = self.opensearch.search(body=log_query, index=self.index_name)
 
-        features_list = ["name_match", "shortDescription_match", "longDescription_match_phrase", "cust_review_count", "cust_review_avg"]
+        features_list = ["name_match_phrase","name_match", "shortDescription_match", "longDescription_match_phrase", "cust_review_count", "cust_review_avg"]
         frame = pd.DataFrame(columns = features_list)
 
         for doc in res['hits']['hits']:
