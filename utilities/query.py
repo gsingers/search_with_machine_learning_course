@@ -49,11 +49,11 @@ def create_prior_queries(doc_ids, doc_id_weights,
 
 
 # Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None, synonym=False):
     query_obj = {
         'size': size,
         "sort": [
-            {sort: {"order": sortDir}}
+            # {sort: {"order": sortDir}}
         ],
         "query": {
             "function_score": {
@@ -65,7 +65,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                         "should": [  #
                             {
                                 "match": {
-                                    "name": {
+                                    "name.synonyms": {
                                         "query": user_query,
                                         "fuzziness": "1",
                                         "prefix_length": 2,
@@ -186,12 +186,13 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort=None, sortDir="desc"):
+def search(client, user_query, index="bbuy_products", sort=None, sortDir="desc", synonym=False):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], synonym=synonym)
     logging.info(query_obj)
+    print(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
@@ -212,6 +213,7 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    general.add_argument('--synonym', default=True)
 
     args = parser.parse_args()
 
@@ -245,8 +247,8 @@ if __name__ == "__main__":
         query = line.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, index=index_name, synonym=args.synonym)
 
         print(query_prompt)
 
-    
+

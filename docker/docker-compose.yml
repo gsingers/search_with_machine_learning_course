@@ -10,12 +10,13 @@ services:
 
     volumes:
       - opensearch-data1:/usr/share/opensearch/data  #todo: figure this out so we can have persistent storage
+      - ../workspace/datasets/fasttext/level3_synonyms.csv:/usr/share/opensearch/data/level3_synonyms.csv
     ports:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
     networks:
       - opensearch-net
-  
+
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:1.2.0
     container_name: opensearch-dashboards

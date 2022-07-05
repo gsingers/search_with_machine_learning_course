@@ -2,6 +2,8 @@
 import opensearchpy
 import requests
 from lxml import etree
+import multiprocessing.dummy
+from tqdm import tqdm
 
 import os
 import click
@@ -124,7 +126,7 @@ def annotate_document(doc, doc_url):
 def index_file(file, index_name, synonyms=False, documents_url="http://localhost:5000/documents/annotate", reduced=False):
     docs_indexed = 0
     client = get_opensearch()
-    logger.info(f'Processing file : {file}')
+    # logger.info(f'Processing file : {file}')
     tree = etree.parse(file)
     root = tree.getroot()
     children = root.findall("./product")
@@ -152,13 +154,13 @@ def index_file(file, index_name, synonyms=False, documents_url="http://localhost
             docs = []
     if len(docs) > 0:
         bulk(client, docs, request_timeout=60)
-        logger.info(f'{docs_indexed} documents indexed')
+        # logger.info(f'{docs_indexed} documents indexed')
     return docs_indexed
 
 @click.command()
 @click.option('--source_dir', '-s', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
-@click.option('--workers', '-w', default=8, help="The name of the index to write to")
+@click.option('--workers', '-w', default=1, help="The name of the index to write to")
 @click.option('--documents_url', '-d', default="http://localhost:5000/documents/annotate", help="The location of the Flask App endpoint, something like http://localhost:5000/documents/annotate")
 @click.option('--synonyms', is_flag=True, show_default=True, default=False, help="If true, add synonyms to the document using the --documents_url endpoint.")
 @click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
@@ -167,10 +169,13 @@ def main(source_dir: str, index_name: str, reduced: bool, workers: int, synonyms
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
     start = perf_counter()
-    with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(index_file, file, index_name, synonyms, documents_url, reduced) for file in files]
-        for future in concurrent.futures.as_completed(futures):
-            docs_indexed += future.result()
+    with multiprocessing.dummy.Pool(workers) as p:
+        for result in tqdm(p.imap_unordered(lambda file: index_file(file, index_name, synonyms, documents_url, reduced), files), total=len(files)):
+            docs_indexed += result
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+    #     futures = [executor.submit(index_file, file, index_name, synonyms, documents_url, reduced) for file in files]
+    #     for future in concurrent.futures.as_completed(futures):
+    #         docs_indexed += future.result()
 
     finish = perf_counter()
     logger.info(f'Done. Total docs: {docs_indexed} in {(finish - start)/60} minutes')
