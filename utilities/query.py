@@ -49,7 +49,12 @@ def create_prior_queries(doc_ids, doc_id_weights,
 
 
 # Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None, use_synonyms=False):
+
+    match_name = "name"
+    if use_synonyms:
+        match_name = "name.synonyms"
+
     query_obj = {
         'size': size,
         "sort": [
@@ -65,7 +70,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                         "should": [  #
                             {
                                 "match": {
-                                    "name": {
+                                    match_name: {
                                         "query": user_query,
                                         "fuzziness": "1",
                                         "prefix_length": 2,
@@ -187,7 +192,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
 
 
 def search(client, user_query, index="bbuy_products", sort=None, sortDir="desc"):
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"],use_synonyms=use_synonyms)
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -209,6 +214,12 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+
+    general.add_argument('--synonyms',
+                         help='Adds synonyms to your search'
+                         ,dest='use_synonyms', default=False
+                         ,action='store_true'
+                         )
 
     args = parser.parse_args()
 
