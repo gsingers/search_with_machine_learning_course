@@ -31,14 +31,25 @@ LOGGER.setLevel(logging.INFO)
 def main(**kwargs):
     # create labeled queries / pruning as needed
     create_labeled_queries(kwargs["min_queries"], kwargs["labeled_data_fpath"])
+
+    # get train test split
+
+    # train model
+
+    # test model
+
     return None
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    parser.add_argument("--min_queries", default=1, type=int)
-    parser.add_argument("--labeled_data_fpath", default="/workspace/datasets/labeled_query_data.txt", type=str)
+
+    create_queries = parser.add_argument_group("create_queries")
+    create_queries.add_argument("--min_queries", default=1, type=int)
+    create_queries.add_argument("--labeled_data_fpath", default="/workspace/datasets/labeled_query_data.txt", type=str)
+    create_queries.add_argument("--normalize_queries", default=False, action="store_true", help="whether to normalize queries")
 
     args = parser.parse_args()
+    print(args)
 
     main(**vars(args))
