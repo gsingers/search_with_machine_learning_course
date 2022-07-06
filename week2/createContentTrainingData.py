@@ -3,12 +3,19 @@ import multiprocessing
 import glob
 from tqdm import tqdm
 import os
+import re
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 def transform_name(product_name):
     # IMPLEMENT
+    # remove nonalphanumeric characters except for spaces and underscores
+    product_name = "".join([x for x in product_name if ((x.isalnum()) or (x == "_") or (x == " "))])
+    # lowercase
+    product_name = product_name.lower()
+    # trim excess space
+    product_name = re.sub(' +', " ", product_name)
     return product_name
 
 # Directory for product data

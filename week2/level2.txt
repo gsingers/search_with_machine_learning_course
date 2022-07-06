@@ -1,0 +1,29 @@
+### step 1
+python week2/createContentTrainingData.py --output /workspace/datasets/fasttext/labeled_products.txt
+
+shuf /workspace/datasets/fasttext/labeled_products.txt > /workspace/datasets/fasttext/shuffled_labeled_products.txt
+
+cut -d' ' -f2- /workspace/datasets/fasttext/shuffled_labeled_products.txt > /workspace/datasets/fasttext/titles.txt
+
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/title_model
+
+~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+
+#### normalize titles
+cat /workspace/datasets/fasttext/titles.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" | sed "s/[^[:alnum:]]/ /g" | tr -s ' ' > /workspace/datasets/fasttext/normalized_titles.txt
+
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model
+
+~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+
+
+####  increase the number of epochs
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model -epoch 25
+
+~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+
+#### be more conservative, use minCount 20
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model -epoch 25 -minCount 20
+
+# check outputs
+~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
