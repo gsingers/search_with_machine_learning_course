@@ -192,11 +192,6 @@ def search(client, user_query, index="bbuy_products", sort="_score", sortDir="de
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
     query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], synonyms=synonyms)
-    logging.info(query_obj)
-    response = client.search(query_obj, index=index)
-    if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
-        hits = response['hits']['hits']
-        print(json.dumps(response, indent=2))
 
 
 if __name__ == "__main__":
