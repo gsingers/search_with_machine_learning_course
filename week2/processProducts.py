@@ -1,5 +1,6 @@
 import pandas as pd
 import csv
+from sklearn.utils import shuffle
 
 # Read input file
 pdf = pd.read_csv("/workspace/datasets/fasttext/labeled_products.txt"
@@ -22,6 +23,7 @@ pdf_cnt = pdf_cnt[pdf_cnt.cnt1 >= min_cnt]
 # Merge with main dataset
 pdf_new = pdf.merge(pdf_cnt, on='cat_code').drop(columns='cnt1')
 pdf_new['output'] = "__label__"+pdf['cat_code'] +" "+ pdf['prod_desc']
+pdf_new = shuffle(pdf_new)
 print(pdf_new[['output']])
 
 # output the pruned products

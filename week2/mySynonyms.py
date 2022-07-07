@@ -13,7 +13,7 @@ for word in pdf['words']:
     out = word
     nn_arr = model.get_nearest_neighbors(word)
     for tuple in nn_arr:
-        if tuple[0] > 0.6:
+        if tuple[0] > 0.7:
             out = out+","+tuple[1]
     myfile.write(out+"\n")
 myfile.close()
