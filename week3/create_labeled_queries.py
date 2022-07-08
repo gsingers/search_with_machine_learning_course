@@ -21,6 +21,8 @@ categories_file_name = r'/workspace/datasets/product_data/categories/categories_
 queries_file_name = r'/workspace/datasets/train.csv'
 output_file_name = r'/workspace/datasets/labeled_query_data.txt'
 
+global parent_map
+
 def normalize_query(query):
         # remove nonalphanumeric characters and lowercase except for spaces and underscores
         norm_query = " ".join([x.lower() for x in query.split(" ") if x.isalnum()])
@@ -55,6 +57,8 @@ def main(min_queries, output_file_name, normalize_queries):
             categories.append(leaf_id)
             parents.append(cat_path_ids[-2])
     parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 'parent'])
+    
+    global parent_map
     parent_map = dict(zip(parents_df["category"], parents_df["parent"]))
 
     # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
@@ -68,6 +72,8 @@ def main(min_queries, output_file_name, normalize_queries):
     if normalize_queries:
         LOGGER.info("Normalizing queries")
         df["normalized_query"] = df["query"].apply(normalize_query)
+    else:
+        df["normalized_query"] = df["query"].copy()
 
     # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
     if min_queries > 1:
@@ -89,9 +95,9 @@ def main(min_queries, output_file_name, normalize_queries):
                 LOGGER.info(f"{len(low_count_categories)} categories with fewer than {min_queries} unique queries")
                 df["rolled_category"] = df["rolled_category"].apply(remap_categories, remap_list=low_count_categories)
 
-        # replace old category column with rolled up category column
-        df = df.drop(columns=["category"])
-        df = df.rename(columns={"rolled_category": "category"})
+    # replace old category column with rolled up category column
+    df = df.drop(columns=["category", "query"])
+    df = df.rename(columns={"rolled_category": "category", "normalized_query": "query"})
 
     # Create labels in fastText format.
     LOGGER.info("Creating labels")
@@ -103,7 +109,8 @@ def main(min_queries, output_file_name, normalize_queries):
 
     LOGGER.info("Outputting data")
     df['output'] = df['label'] + ' ' + df['query']
-    df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
+    # df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
+    df[["output","category"]].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process arguments.')
