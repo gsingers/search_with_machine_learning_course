@@ -11,11 +11,16 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
+import fasttext
+from pathlib import Path
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
+
+MODEL_FPATH = Path(Path.cwd(), "week3", "models", "query_classifier.bin")
+QC_MODEL = fasttext.load_model(str(MODEL_FPATH))
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -189,9 +194,34 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
 
 def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", synonyms=False):
     #### W3: classify the query
+    query_pred = QC_MODEL.predict(user_query, k=3)
     #### W3: create filters and boosts
+    filters = None
+    use_filters = []
+    for l, p in zip(query_pred[0], query_pred[1]):
+        if p > 0.3:
+            use_filters.append(l[9:])
+
+    if len(use_filters) > 0:
+        new_filter = {
+            "terms": {
+                "categoryLeaf": use_filters
+            }
+        }
+        if filters is None:
+            filters = [new_filter]
+        else:
+            filters.append(new_filter)
+
+    print(filters)
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], synonyms=synonyms)
+    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], synonyms=synonyms)
+    print(query_obj)
+    # logger.info(query_obj)
+    response = client.search(query_obj, index=index)
+    if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
+        hits = response['hits']['hits']
+        print(json.dumps(response, indent=2))
 
 
 if __name__ == "__main__":
@@ -248,7 +278,8 @@ if __name__ == "__main__":
         query = line.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name, synonyms=args.synonyms)
+        # search(client=opensearch, user_query=query, index=index_name, synonyms=args.synonyms)
+        search(client=opensearch, user_query=query, index=index_name, synonyms=False)
 
         print(query_prompt)
 
