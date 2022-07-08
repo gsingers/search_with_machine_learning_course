@@ -115,14 +115,10 @@ def main(min_queries, output_file_name, normalize_queries):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process arguments.')
     general = parser.add_argument_group("general")
-    general.add_argument("--min_queries", default=1,  help="The minimum number of queries per category label (default is 1)")
+    general.add_argument("--min_queries", default=1,  help="The minimum number of queries per category label (default is 1)", type=int)
     general.add_argument("--output", default=output_file_name, help="the file to output to")
     general.add_argument("--normalize_queries", default=False, action="store_true", help="whether to normalize queries")
 
     args = parser.parse_args()
-    output_file_name = args.output
 
-    if args.min_queries:
-        min_queries = int(args.min_queries)
-
-    main(min_queries, output_file_name, normalize_queries)
+    main(args.min_queries, args.output, args.normalize_queries)

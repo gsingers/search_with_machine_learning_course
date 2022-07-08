@@ -54,8 +54,8 @@ def create_prior_queries(doc_ids, doc_id_weights,
 
 
 # Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None, synonyms=False):
-    match_field = "name" if not synonyms else "name.synonyms"
+def create_query(user_query, click_prior_query, filters, term_boost={}, sort="_score", sortDir="desc", size=10, source=None, use_synonyms=False):
+    match_field = "name" if not use_synonyms else "name.synonyms"
     query_obj = {
         'size': size,
         "sort": [
@@ -115,7 +115,13 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                         "minimum_should_match": "2<75%"
                                     }
                                 }
-                            }
+                            },
+                            {
+                                "terms": {
+                                    term_boost["field"]: term_boost["values"],
+                                    "boost": term_boost["boost"]
+                                }
+                        }
                         ],
                         "minimum_should_match": 1,
                         "filter": filters  #
@@ -192,20 +198,20 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", synonyms=False):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", use_synonyms=False, use_filters=False):
     #### W3: classify the query
     query_pred = QC_MODEL.predict(user_query, k=3)
     #### W3: create filters and boosts
     filters = None
-    use_filters = []
+    filter_labels = []
     for l, p in zip(query_pred[0], query_pred[1]):
         if p > 0.3:
-            use_filters.append(l[9:])
+            filter_labels.append(l[9:])
 
-    if len(use_filters) > 0:
+    if (len(filter_labels) > 0) & (use_filters):
         new_filter = {
             "terms": {
-                "categoryLeaf": use_filters
+                "categoryLeaf": filter_labels
             }
         }
         if filters is None:
@@ -213,15 +219,21 @@ def search(client, user_query, index="bbuy_products", sort="_score", sortDir="de
         else:
             filters.append(new_filter)
 
-    print(filters)
+    term_boost = {
+        "field": "category",
+        "values": filter_labels,
+        "boost": 0.01,
+    }
+
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], synonyms=synonyms)
-    print(query_obj)
+    query_obj = create_query(user_query, click_prior_query=None, filters=filters, term_boost=term_boost, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], use_synonyms=use_synonyms)
+
     # logger.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
-        print(json.dumps(response, indent=2))
+        # print(json.dumps(response, indent=2))
+        print(response["hits"]["total"])
 
 
 if __name__ == "__main__":
@@ -239,8 +251,14 @@ if __name__ == "__main__":
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
     general.add_argument(
-        '--synonyms',
+        '--use_synonyms',
         help='If true, query name.synonyms field instead of name',
+        action="store_true",
+        default=False,
+    )
+    general.add_argument(
+        '--use_filters',
+        help='If true, use categoryLeaf filters in addition to boosts',
         action="store_true",
         default=False,
     )
@@ -278,8 +296,8 @@ if __name__ == "__main__":
         query = line.rstrip()
         if query == "Exit":
             break
-        # search(client=opensearch, user_query=query, index=index_name, synonyms=args.synonyms)
-        search(client=opensearch, user_query=query, index=index_name, synonyms=False)
+        search(client=opensearch, user_query=query, index=index_name, use_synonyms=args.use_synonyms, use_filters=args.use_filters)
+        # search(client=opensearch, user_query=query, index=index_name, use_synonyms=False, use_filters=True)
 
         print(query_prompt)
 
