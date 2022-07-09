@@ -15,6 +15,14 @@ PYTHON_LOC="/workspace/search_with_machine_learning_course/utilities"
 
 LOGS_DIR="/workspace/logs"
 ANNOTATE=""
+
+if ["$VIRTUAL_ENV" == ""]
+then
+  echo "Ensure your virtual environment is activated!"
+  echo "    'pyenv activate <env name>'"
+  exit 1
+fi
+
 while getopts ':p:a:q:g:y:d:hrn' c
 do
   case $c in
