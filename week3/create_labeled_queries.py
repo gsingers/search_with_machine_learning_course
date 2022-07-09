@@ -44,13 +44,45 @@ for child in root:
         parents.append(cat_path_ids[-2])
 parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 'parent'])
 
+def stem(query: str):
+    query_split = query.split(' ')
+    stemmed = [stemmer.stem(w) for w in query_split]
+    sentence = " ".join(stemmed)
+    return sentence
+
 # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
-df = pd.read_csv(queries_file_name)[['category', 'query']]
-df = df[df['category'].isin(categories)]
+#df = pd.read_csv(queries_file_name)[['category', 'query']]
+#df = df[df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+#df['query'] = df['query'].apply(lambda x: x.lower())
+#df['query'] = df['query'].apply(lambda x: stem(x))
+#print(df.head(20))
+#df.to_csv('final_queries.csv')
 
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+df = pd.read_csv('final_queries.csv')
+#print(df.head())
+
+leaf_counts = df.groupby('category').count().reset_index().sort_values(by='query').reset_index(drop=True)
+print(leaf_counts)
+smallest_n_queries = leaf_counts.loc[0, 'query']
+while smallest_n_queries <= min_queries:
+    smallest_category = leaf_counts.loc[0, 'category']
+    smallest_n_queries = leaf_counts.loc[0, 'query']
+    print("smallest category: ", smallest_category)
+    print("smallest n queries: ", smallest_n_queries)
+    # rolled_up_dict[leaf_counts.loc[0, 'category']] = parents_dict[row['category']]
+    # df = df.where(df[df.category==smallest_category], parents_dict[leaf_counts.loc[0, 'category']])
+    df['category'].replace(smallest_category, parents_df[parents_df['category'] == smallest_category]['parent'].values[0], inplace=True)
+    leaf_counts = df.groupby('category').count().reset_index().sort_values(by='query').reset_index(drop=True)
+    print(leaf_counts)
+
+
+print("NUM CATEGORIES: ", len(set(df.category)))
+
+
+#rollback_ancestors(df)
+
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']

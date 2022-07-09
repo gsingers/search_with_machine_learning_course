@@ -11,11 +11,19 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
-
+import fasttext
+import nltk
+stemmer = nltk.stem.PorterStemmer()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
+
+def stem(query: str):
+    query_split = query.split(' ')
+    stemmed = [stemmer.stem(w) for w in query_split]
+    sentence = " ".join(stemmed)
+    return sentence
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -187,7 +195,22 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
 
 
 def search(client, user_query, index="bbuy_products"):
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, source=["name", "shortDescription"])
+    model = fasttext.load_model("/workspace/datasets/fasttext/query_model2.bin")
+    user_query = user_query.lower()
+    user_query = stem(user_query)
+    prediction = model.predict(user_query)
+    categ = prediction[0][0]
+    score = prediction[1][0]
+    print(prediction)
+    if score < 0.4:
+        categ = None
+        filters = None
+    if categ:
+        print(categ)
+        categ = categ.replace("__label__", "")
+        filters = [{"term":  { "categoryPathIds.keyword": categ },}]
+
+    query_obj = create_query(user_query, click_prior_query=None, filters=filters, source=["name", "shortDescription"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
