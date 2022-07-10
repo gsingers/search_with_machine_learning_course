@@ -98,3 +98,11 @@ uniq -c |\
 sort -nr |\
 head -1000 |\
 grep -oE '[^ ]+$' > /workspace/datasets/fasttext/top_words.txt
+
+# Generate the synonyms and copy into opensearch container
+python generate_synonyms.py --model_path /workspace/datasets/fasttext/normalized_title_model_improved --output /workspace/datasets/fasttext/synonyms.csv
+docker cp /workspace/datasets/fasttext/synonyms.csv opensearch-node1:/usr/share/opensearch/config/synonyms.csv
+
+# re-index
+curl -X DELETE "https://localhost:9200/bbuy_products?pretty" -u admin:admin --insecure
+./index-data.sh -r -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json
