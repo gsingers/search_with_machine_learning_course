@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
-
+import fasttext
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -52,15 +52,12 @@ def create_prior_queries(doc_ids, doc_id_weights,
 def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
     query_obj = {
         'size': size,
-        "sort": [
-            {sort: {"order": sortDir}}
-        ],
         "query": {
             "function_score": {
                 "query": {
                     "bool": {
                         "must": [
-
+                            
                         ],
                         "should": [  #
                             {
@@ -186,11 +183,41 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
+model = fasttext.load_model("/workspace/datasets/fasttext/model_queries.bin")
 def search(client, user_query, index="bbuy_products", sort=None, sortDir="desc"):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+
+    cats = model.predict(user_query, k=5)
+    print(cats)
+    predicted_filters = []
+    total_score = 0
+    for cat, prob in zip(cats[0], cats[1]):
+        if prob < 0.2:
+            break
+        predicted_filters.append({
+                            "term": {
+                            "categoryPathIds": cat.replace('__label__', '')
+                            }
+                        })
+        total_score += prob
+        if prob > 0.8:
+            break
+    filters = {
+                "bool": {
+                    "should": predicted_filters
+                }
+            }
+    query_obj = create_query(
+        user_query=user_query, 
+        click_prior_query=None, 
+        filters=filters, 
+        sort=sort, 
+        sortDir=sortDir,
+        source=["name", "shortDescription"]
+    )
+    print(query_obj)
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -230,10 +257,8 @@ if __name__ == "__main__":
         hosts=[{'host': host, 'port': port}],
         http_compress=True,  # enables gzip compression for request bodies
         http_auth=auth,
-        # client_cert = client_cert_path,
-        # client_key = client_key_path,
         use_ssl=True,
-        verify_certs=False,  # set to true if you have certs
+        verify_certs=False,
         ssl_assert_hostname=False,
         ssl_show_warn=False,
 
