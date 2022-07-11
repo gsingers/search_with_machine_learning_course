@@ -90,7 +90,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                     "type": "phrase",
                                     "slop": "6",
                                     "minimum_should_match": "2<75%",
-                                    "fields": [f"{'name.synonyms' if use_synonyms else 'name'}^10", 
+                                    "fields": [f"{'name^10, name.synonyms^10' if use_synonyms else 'name^10'}", 
                                                "name.hyphens^10",
                                                "shortDescription^5",
                                                "longDescription^5", 
