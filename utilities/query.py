@@ -12,6 +12,7 @@ from urllib.parse import urljoin
 
 import pandas as pd
 from opensearchpy import OpenSearch
+import fasttext
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -65,11 +66,13 @@ def create_query(
     user_query,
     click_prior_query,
     filters,
+    query_category,
     sort="_score",
     sortDir="desc",
     size=10,
     source=None,
     use_synonyms: bool = False,
+    
 ):
 
     if use_synonyms:
@@ -146,7 +149,8 @@ def create_query(
                             },
                         ],
                         "minimum_should_match": 1,
-                        "filter": filters,  #
+                        "filter": [{ "term":  {"categoryPathIds": query_category}}],  #
+                        # "filter": filters
                     }
                 },
                 "boost_mode": "multiply",  # how _score and functions are combined
@@ -179,6 +183,17 @@ def create_query(
                             }
                         },
                     },
+
+                     {
+                        "filter": {"exists": {"field": "salesRankLongTerm"}},
+                        "gauss": {
+                            "salesRankLongTerm": {
+                                "origin": "1.0",
+                                "scale": "1000",
+                            }
+                        },
+                    },
+
                     {"script_score": {"script": "0.0001"}},
                 ],
             }
@@ -214,13 +229,20 @@ def search(
     sortDir="desc",
     use_synonyms: bool = False,
 ):
+    
     #### W3: classify the query
+    model = fasttext.load_model("/workspace/datasets/fasttext/query_classifier.bin")
+    query_category = model.predict("hp touchpad")[0][0].split("__")[2]
+
+    print(query_category)
+
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
     query_obj = create_query(
         user_query,
         click_prior_query=None,
         filters=None,
+        query_category=query_category,
         sort=sort,
         sortDir=sortDir,
         source=["name", "shortDescription"],
