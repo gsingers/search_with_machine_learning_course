@@ -232,7 +232,7 @@ def search(
     
     #### W3: classify the query
     model = fasttext.load_model("/workspace/datasets/fasttext/query_classifier.bin")
-    query_category = model.predict("hp touchpad")[0][0].split("__")[2]
+    query_category = model.predict(user_query)[0][0].split("__")[2]
 
     print(query_category)
 
