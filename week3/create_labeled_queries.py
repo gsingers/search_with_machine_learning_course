@@ -12,11 +12,11 @@ stemmer = nltk.stem.PorterStemmer()
 categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 
 queries_file_name = r'/workspace/datasets/train.csv'
-output_file_name = r'/workspace/datasets/labeled_query_data.txt'
+output_file_name = r'/workspace/datasets/fasttext/labeled_queries.txt'
 
 parser = argparse.ArgumentParser(description='Process arguments.')
 general = parser.add_argument_group("general")
-general.add_argument("--min_queries", default=1,  help="The minimum number of queries per category label (default is 1)")
+general.add_argument("--min_queries", default=10000,  help="The minimum number of queries per category label (default is 1)")
 general.add_argument("--output", default=output_file_name, help="the file to output to")
 
 args = parser.parse_args()
@@ -48,9 +48,24 @@ parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 
 df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
+
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+df['query'] = df['query'].str.lower()
+df['query'] = df['query'].str.strip()
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+
+# NOTE: I copied the implementation from @gabrielwomark, since i think it's very clean and concise!
+query_counts = df.groupby("category").size().reset_index(name='count').sort_values("count").reset_index(drop=True)
+smallest_query_count = query_counts.loc[0, "count"]
+
+while smallest_query_count < min_queries:
+    counts_with_parents = query_counts.merge(parents_df, on=["category"], how="inner")
+    df = df.merge(counts_with_parents, on=["category"], how="inner")
+    df["category"][df["count"] < min_queries] = df[df["count"] < min_queries]["parent"]
+    df = df.drop(["count", "parent"], axis=1)
+    query_counts = df.groupby("category").size().reset_index(name='count').sort_values("count").reset_index(drop=True)
+    smallest_query_count = query_counts.loc[0, "count"]
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']
