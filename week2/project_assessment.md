@@ -58,7 +58,242 @@ Raw titles were used, only extra spaces were removed.
 
 - How did you transform the product names (if different than previously)?
 
-TODO
+```json
+...
+      "name": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 2048
+          },
+          "hyphens": {
+            "type": "text",
+            "analyzer": "smarter_hyphens"
+          },
+          "suggest": {
+            "type": "completion"
+          },
+          "synonyms": {
+              "type": "text",
+              "analyzer": "synonym"
+          }
+        }
+      }
+...
+```
+
+Call to test the synonym analyzer:
+
+- Request:
+```json
+GET /bbuy_products/_analyze
+{
+  "analyzer": "synonym",
+  "explain": "true",
+  "text": ["earbuds"]
+}
+
+{
+  "detail" : {
+    "custom_analyzer" : true,
+    "charfilters" : [ ],
+    "tokenizer" : {
+      "name" : "whitespace",
+      "tokens" : [
+        {
+          "token" : "earbuds",
+          "start_offset" : 0,
+          "end_offset" : 7,
+          "type" : "word",
+          "position" : 0,
+          "bytes" : "[65 61 72 62 75 64 73]",
+          "positionLength" : 1,
+          "termFrequency" : 1
+        }
+      ]
+    },
+    "tokenfilters" : [
+      {
+        "name" : "stemmer",
+        "tokens" : [
+          {
+            "token" : "earbud",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "word",
+            "position" : 0,
+            "bytes" : "[65 61 72 62 75 64]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          }
+        ]
+      },
+      {
+        "name" : "synonym",
+        "tokens" : [
+          {
+            "token" : "earbud",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "word",
+            "position" : 0,
+            "bytes" : "[65 61 72 62 75 64]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "headphon",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[68 65 61 64 70 68 6f 6e]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "ear",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[65 61 72]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "yurbud",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[79 75 72 62 75 64]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "earphon",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[65 61 72 70 68 6f 6e]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "stereophon",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[73 74 65 72 65 6f 70 68 6f 6e]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "earpollut",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[65 61 72 70 6f 6c 6c 75 74]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "bud",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[62 75 64]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "2xl",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[32 78 6c]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "skullcandi",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[73 6b 75 6c 6c 63 61 6e 64 69]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "skullcrush",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[73 6b 75 6c 6c 63 72 75 73 68]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "skull",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[73 6b 75 6c 6c]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "hesh",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[68 65 73 68]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          },
+          {
+            "token" : "smokin",
+            "start_offset" : 0,
+            "end_offset" : 7,
+            "type" : "SYNONYM",
+            "position" : 0,
+            "bytes" : "[73 6d 6f 6b 69 6e]",
+            "keyword" : false,
+            "positionLength" : 1,
+            "termFrequency" : 1
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
 - What threshold score did you use?
 
@@ -66,9 +301,15 @@ TODO
 
 - Were you able to find the additional results by matching synonyms?
 
-
+| Query | # Results w/o synonyms | # Results w/ synonyms
+|---:|---|
+earbuds | 1205 | 1217
+nespresso | 8 | 8
+dslr | 2837 | 2793
 
 4. For classifying reviews:
+
+TODO
 
 - What precision (P@1) were you able to achieve?
 
