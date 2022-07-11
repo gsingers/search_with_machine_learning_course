@@ -84,4 +84,9 @@ df['label'] = '__label__' + df['category']
 df = df[df['category'].isin(categories)]
 df['output'] = df['label'] + ' ' + df['query']
 df = shuffle(df)
+# print(df['category'].drop_duplicates().count())
+# x = df.merge(df.groupby('category')['query'].count().reset_index(name='query_cnt'),on="category").drop(columns=['output']).sort_values('query_cnt')
+# print(x.head(10))
+# print(x.tail(10))
+
 df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
