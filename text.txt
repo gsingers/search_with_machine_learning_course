@@ -1,0 +1,3 @@
+test
+
+pyenv activate search_with_ml
