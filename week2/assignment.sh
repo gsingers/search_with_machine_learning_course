@@ -54,11 +54,11 @@ tail -1000 /workspace/datasets/fasttext/shuffled_normalized_labeled_products.txt
 
 echo Filter out categories with too few products
 
-python week2/createContentTrainingData.py --normalize --min_products 500 --output /workspace/datasets/fasttext/pruned_labeled_products.txt
-shuf /workspace/datasets/fasttext/pruned_labeled_products.txt > /workspace/datasets/fasttext/shuffled_pruned_labeled_products.txt
+python week2/createContentTrainingData.py --normalize --min_products 500 --output /workspace/datasets/fasttext/normalized_labeled_products.txt
+shuf /workspace/datasets/fasttext/pruned_normalized_labeled_products.txt > /workspace/datasets/fasttext/shuffled_pruned_normalized_labeled_products.txt
 # Split pruned labeled data into training and test.
-head -n 9000 /workspace/datasets/fasttext/shuffled_pruned_labeled_products.txt > /workspace/datasets/fasttext/pruned_training_data.txt
-tail -1000 /workspace/datasets/fasttext/shuffled_pruned_labeled_products.txt > /workspace/datasets/fasttext/pruned_test_data.txt
+head -n 9000 /workspace/datasets/fasttext/shuffled_pruned_normalized_labeled_products.txt > /workspace/datasets/fasttext/pruned_training_data.txt
+tail -1000 /workspace/datasets/fasttext/shuffled_pruned_normalized_labeled_products.txt > /workspace/datasets/fasttext/pruned_test_data.txt
 # Train model on pruned data
 ~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/pruned_training_data.txt -output /workspace/datasets/fasttext/pruned_bbuy_prod_cat_clf_model
 # Test pruned model for P@1 and R@1, P@5 and R@5 and P@10 and R@10
@@ -85,7 +85,7 @@ cut -d' ' -f2- /workspace/datasets/fasttext/shuffled_normalized_labeled_products
 ~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model
 
 # Lets improve it by further by tuning the model
-~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model_improved -epoch 20
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model_improved -epoch 20 -wordNgrams 2
 
 
 echo Level 3: Applying synonyms
@@ -99,10 +99,13 @@ sort -nr |\
 head -1000 |\
 grep -oE '[^ ]+$' > /workspace/datasets/fasttext/top_words.txt
 
+# Can test them out with the following:
+# ~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/normalized_bbuy_prod_cat_clf_improved_model.bin
+
 # Generate the synonyms and copy into opensearch container
-python generate_synonyms.py --model_path /workspace/datasets/fasttext/normalized_title_model_improved --output /workspace/datasets/fasttext/synonyms.csv
+python week2/generate_synonyms.py --model_path /workspace/datasets/fasttext/normalized_title_model.bin --output /workspace/datasets/fasttext/synonyms.csv
 docker cp /workspace/datasets/fasttext/synonyms.csv opensearch-node1:/usr/share/opensearch/config/synonyms.csv
 
 # re-index
-curl -X DELETE "https://localhost:9200/bbuy_products?pretty" -u admin:admin --insecure
+./delete-indexes.sh
 ./index-data.sh -r -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json
