@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 import csv
+import re
 
 # Useful if you want to perform stemming.
 import nltk
@@ -29,10 +30,10 @@ def agg_queries_by_category(query_df: pd.DataFrame, category_map: dict, min_prod
     count = 0
     while True:
         count += 1
-        queries_to_agg = query_df[query_df.groupby(['category'])['query'].transform('count') < min_queries]
+        queries_to_agg = query_df[query_df.groupby(['category'])['cleaned_query'].transform('count') < min_queries]
         if len(queries_to_agg) == 0 or count >= 10:
             break
-        df_pruned = query_df[query_df.groupby(['category'])['query'].transform('count') >= min_queries]
+        df_pruned = query_df[query_df.groupby(['category'])['cleaned_query'].transform('count') >= min_queries]
         # Some categories are not present int the categories file, drop them ie. pcmcat33400050027
         queries_to_agg['category'] = queries_to_agg['category'].apply(lambda cat: category_map.get(cat, np.nan))
         queries_to_agg = queries_to_agg.dropna()
@@ -93,5 +94,5 @@ df['label'] = '__label__' + df['category']
 
 # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
 df = df[df['category'].isin(categories)]
-df['output'] = df['label'] + ' ' + df['query']
+df['output'] = df['label'] + ' ' + df['cleaned_query']
 df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
