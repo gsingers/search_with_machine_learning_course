@@ -55,10 +55,12 @@ def create_prior_queries(doc_ids, doc_id_weights,
 def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
     cat, prob = query_classifier.predict(user_query)
     if prob[0] > 0.5:
+        if not filters:
+            filters = []
         print(f'classifier category: [{user_query}] {cat[0]}')
-        filters = (filters or []).append({
+        filters.append({
             'term': {
-                'categoryPathIds': cat[0],
+                'categoryPathIds': cat[0][len('__label__'):],
             }
         })
 
