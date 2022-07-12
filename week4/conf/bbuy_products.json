@@ -1,5 +1,6 @@
 {
   "settings": {
+    "index.knn": true,
     "analysis": {
       "analyzer": {
         "smarter_hyphens": {
@@ -8,8 +9,7 @@
             "smarter_hyphens_filter",
             "lowercase"
           ]
-        }
-      },
+        },
       "tokenizer": {
         "smarter_hyphens_tokenizer": {
           "type": "char_group",
@@ -249,7 +249,6 @@
           "suggest": {
             "type": "completion"
           }
-
         }
       },
       "onSale": {

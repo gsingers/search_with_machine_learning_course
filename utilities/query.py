@@ -91,7 +91,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                     "minimum_should_match": "2<75%",
                                     "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
                                                "longDescription^5", "department^0.5", "sku", "manufacturer", "features",
-                                               "categoryPath", "name_synonyms"]
+                                               "categoryPath"]
                                 }
                             },
                             {
@@ -186,7 +186,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort=None, sortDir="desc"):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
