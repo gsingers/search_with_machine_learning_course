@@ -4,8 +4,8 @@ import xml.etree.ElementTree as ET
 import argparse
 from pathlib import Path
 
-# Location for category data                                                                                                                                                               
-categoriesFilename = '/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
+# Location for category data
+categoriesFilename = './workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 parser = argparse.ArgumentParser(description='Leaves to paths.')
 general = parser.add_argument_group("general")
 general.add_argument("--input", default=categoriesFilename,  help="The full path to the filename containing the categories")

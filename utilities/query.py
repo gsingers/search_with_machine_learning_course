@@ -11,6 +11,9 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
+import fasttext
+
+query_classifier = fasttext.FastText.load_model('./workspace/datasets/week3_fasttext/lq_supervised_0.5_26_1_True_1000.bin')
 
 
 logger = logging.getLogger(__name__)
@@ -50,6 +53,17 @@ def create_prior_queries(doc_ids, doc_id_weights,
 
 # Hardcoded query here.  Better to use search templates or other query config.
 def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
+    cat, prob = query_classifier.predict(user_query)
+    if prob[0] > 0.5:
+        if not filters:
+            filters = []
+        print(f'classifier category: [{user_query}] {cat[0]}')
+        filters.append({
+            'term': {
+                'categoryPathIds': cat[0][len('__label__'):],
+            }
+        })
+
     query_obj = {
         'size': size,
         "sort": [
@@ -249,4 +263,4 @@ if __name__ == "__main__":
 
         print(query_prompt)
 
-    
+
