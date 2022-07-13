@@ -1,3 +1,9 @@
+#! /usr/bin/env zsh
+
+set -e
+set -o
+set -x
+
 usage()
 {
   echo "Usage: $0 [-y /path/to/python/indexing/code] [-d /path/to/kaggle/best/buy/datasets] [-p /path/to/bbuy/products/field/mappings] [-n ] [-a /path/to/bbuy/product annotations/field/mappings] [ -q /path/to/bbuy/queries/field/mappings ] [ -g /path/to/write/logs/to ]"
@@ -7,13 +13,13 @@ usage()
   exit 2
 }
 
-ANNOTATIONS_JSON_FILE="week4/conf/bbuy_annotations.json"
-PRODUCTS_JSON_FILE="week4/conf/bbuy_products.json"
-QUERIES_JSON_FILE="week4/conf/bbuy_queries.json"
-DATASETS_DIR="workspace/datasets"
-PYTHON_LOC="week4/utilities"
+ANNOTATIONS_JSON_FILE="conf/bbuy_annotations.json"
+PRODUCTS_JSON_FILE="conf/bbuy_products.json"
+QUERIES_JSON_FILE="conf/bbuy_queries.json"
+DATASETS_DIR="../workspace/datasets"
+PYTHON_LOC="week4"
 
-LOGS_DIR="/workspace/logs"
+LOGS_DIR="../workspace/logs"
 ANNOTATE=""
 while getopts ':p:a:q:g:y:d:hrn' c
 do
@@ -34,7 +40,6 @@ do
 done
 shift $((OPTIND -1))
 
-mkdir $LOGS_DIR
 
 cd $PYTHON_LOC || exit
 echo "Running python scripts from $PYTHON_LOC"
@@ -51,9 +56,9 @@ if [ "$ANNOTATE" != "--annotate" ]; then
       exit 2
     fi
 
-    if [ -f index_products.py ]; then
-      echo "Indexing product data in $DATASETS_DIR/product_data/products and writing logs to $LOGS_DIR/index_products.log"
-      python index_products.py --reduced -s "$DATASETS_DIR/product_data/products"
+    if [ -f utilities/index_products.py ]; then
+      echo "Indexing product data in $DATASETS_DIR/product_data/products"
+      python ./utilities/index_products.py --reduced -s "$DATASETS_DIR/product_data/products"
       if [ $? -ne 0 ] ; then
         echo "Failed to index products"
         exit 2
@@ -69,9 +74,9 @@ if [ "$ANNOTATE" != "--annotate" ]; then
       echo "Failed to create index with settings of $QUERIES_JSON_FILE"
       exit 2
     fi
-    if [ -f index_queries.py ]; then
-      echo "Indexing queries data and writing logs to $LOGS_DIR/index_queries.log"
-      python index_queries.py -s "$DATASETS_DIR/train.csv"
+    if [ -f ../utilities/index_queries.py ]; then
+      echo "Indexing queries"
+      python ../utilities/index_queries.py -s "$DATASETS_DIR/train.csv"
       if [ $? -ne 0 ] ; then
         echo "Failed to index queries"
         exit 2
@@ -91,7 +96,7 @@ if [ "$ANNOTATE" == "--annotate" ]; then
     fi
     echo ""
     if [ -f index_products.py ]; then
-      echo "Indexing product annotations data in $DATASETS_DIR/product_data/products and writing logs to $LOGS_DIR/index_annotations.log"
+      echo "Indexing product annotations data in $DATASETS_DIR/product_data/products"
       python index_products.py "--synonyms" "--reduced" --index_name "bbuy_annotations" -s "$DATASETS_DIR/product_data/products"
       if [ $? -ne 0 ] ; then
         echo "Failed to index product annotations"
