@@ -23,7 +23,7 @@ def transform_query(query: str):
         query = ' '.join([stemmer.stem(word) for word in query.split()])
     return query
 
-def agg_queries_by_category(query_df: pd.DataFrame, category_map: dict, min_products: int):
+def agg_queries_by_category(query_df: pd.DataFrame, category_map: dict, min_queries: int):
     # This takes a df of queries and their categories and aggregates the queries in each
     # category until there are at least min_queries in each category
     # They are aggregated up to the parent category until the parent has min_queries in it
@@ -87,7 +87,7 @@ df = df[df['category'].isin(categories)]
 df['cleaned_query'] = df['query'].apply(lambda query: transform_query(query))
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
-df = agg_queries_by_category(df, parents_dict, min_queries)
+df_1000 = agg_queries_by_category(df, parents_dict, min_queries)
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']
