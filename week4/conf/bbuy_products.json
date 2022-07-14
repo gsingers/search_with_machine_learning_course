@@ -1,6 +1,10 @@
 {
   "settings": {
     "analysis": {
+      "index": {
+        "knn": true,
+        "knn.algo_param.ef_search": 100
+      },
       "analyzer": {
         "smarter_hyphens": {
           "tokenizer": "smarter_hyphens_tokenizer",
@@ -63,6 +67,19 @@
       },
       "bestSellingRank": {
         "type": "long"
+      },
+      "embed": {
+        "type": "knn_vector",
+        "dimension": 384,
+        "method": {
+          "name": "hnsw",
+          "space_type": "cosinesimil",
+          "engine": "nmslib",
+          "parameters": {
+            "ef_construction": 128,
+            "m": 24
+          }
+          }
       },
       "categoryPath": {
         "type": "text",
