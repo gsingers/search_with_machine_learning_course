@@ -107,6 +107,7 @@ def get_opensearch():
         ssl_show_warn=False,
         #ca_certs=ca_certs_path
     )
+    print(client)
     return client
 
 
@@ -136,17 +137,12 @@ def index_file(file, index_name, reduced=False):
 
     for child in children:
         doc = {}
-        name = child.find('name')
-        embed = model.encode(name.text)
+        #name = child.find('name')
+        #embed = model.encode(name.text)
         for idx in range(0, len(mappings), 2):
             xpath_expr = mappings[idx]
-
             key = mappings[idx + 1]
             doc[key] = child.xpath(xpath_expr)
-            print(child.xpath(xpath_expr))
-
-        doc['embed'] = embed
-        print(doc)
 
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
@@ -157,6 +153,11 @@ def index_file(file, index_name, reduced=False):
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
         docs_indexed += 1
+        if docs_indexed % 200 == 0:
+            names = np.concatenate([doc['_source']['name'] for doc in docs])
+            embed = model.encode(names)
+            for doc, embed in zip(docs, embed):
+                doc['_source']['embed'] = embed
         if docs_indexed % 200 == 0:
             logger.info("Indexing")
             bulk(client, docs, request_timeout=60)

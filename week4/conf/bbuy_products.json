@@ -74,11 +74,7 @@
         "method": {
           "name": "hnsw",
           "space_type": "cosinesimil",
-          "engine": "nmslib",
-          "parameters": {
-            "ef_construction": 128,
-            "m": 24
-          }
+          "engine": "nmslib"
           }
       },
       "categoryPath": {
