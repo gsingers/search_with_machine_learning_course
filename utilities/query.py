@@ -38,7 +38,7 @@ def create_vector_query(query: str, nb_result: int):
     embed = model.encode([query])
     query_obj = {
         "size": nb_result,
-        "query": {"knn": {"name_vector": 
+        "query": {"knn": {"embed": 
             {"vector": embed[0], 
              "k": 5}
              }
@@ -226,7 +226,7 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
-    general.add_argument('-v', '--vector_search', type=bool, default=Flase,
+    general.add_argument('-v', '--vector_search', type=bool, default=True,
                          help='use vector search or not')
 
     args = parser.parse_args()

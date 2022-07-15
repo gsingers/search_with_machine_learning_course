@@ -22,6 +22,7 @@ logging.basicConfig(format='%(levelname)s:%(message)s')
 
 # IMPLEMENT ME: import the sentence transformers module!
 from sentence_transformers import SentenceTransformer
+
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 
@@ -132,8 +133,7 @@ def index_file(file, index_name, reduced=False):
     # and then embed them in bulk and add them to each doc,
     # in the '_source' part of each docs entry, before calling bulk
     # to index them 200 at a time. Make sure to clear the names array
-    # when you clear the docs array!
-    #embeb_name = model.encode()
+
 
     for child in children:
         doc = {}
@@ -176,9 +176,10 @@ def index_file(file, index_name, reduced=False):
 def main(source_dir: str, index_name: str, reduced: bool):
     logger.info(f"Indexing {source_dir} to {index_name}, the reduced flag set to {reduced}.")
     files = glob.glob(source_dir + "/*.xml")
+    logger.info(f'looking for xml files in {source_dir + "/*.xml"}')
     docs_indexed = 0
     start = perf_counter()
-
+    logger.info(f'{len(files)} files found')
     for file in files:
         docs_indexed += index_file(file, index_name, reduced)
 
