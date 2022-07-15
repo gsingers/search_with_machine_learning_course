@@ -91,7 +91,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                     "type": "phrase",
                                     "slop": "6",
                                     "minimum_should_match": "2<75%",
-                                    "fields": [f"{'name^10, name.synonyms^10' if use_synonyms else 'name^10'}", 
+                                    "fields": ["name^10", 
                                                "name.hyphens^10",
                                                "shortDescription^5",
                                                "longDescription^5", 
@@ -283,6 +283,7 @@ if __name__ == "__main__":
                 if score[0] < 0.4 or not args.category_filter:
                     top_cat = False
                 else:
+                    print(top_cat, score)
                     top_cat = top_cat[0].replace('__label__', '')
 
                 search(
