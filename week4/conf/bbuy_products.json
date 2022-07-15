@@ -1,5 +1,6 @@
 {
   "settings": {
+    "index.knn": true,
     "analysis": {
       "analyzer": {
         "smarter_hyphens": {
@@ -249,7 +250,6 @@
           "suggest": {
             "type": "completion"
           }
-
         }
       },
       "onSale": {

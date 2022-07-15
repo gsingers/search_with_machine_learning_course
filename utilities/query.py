@@ -101,6 +101,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                                "features",
                                                "categoryPath", 
                                                "name_synonyms"]
+
                                 }
                             },
                             {
@@ -193,6 +194,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     if source is not None:  # otherwise use the default and retrieve all source
         query_obj["_source"] = source
     return query_obj
+
 
 
 def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", use_synonyms=False, category=False):

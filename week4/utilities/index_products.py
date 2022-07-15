@@ -14,16 +14,13 @@ from pathlib import Path
 import requests
 import json
 
-### W4: S1: Import the sentence transformer library.  Note: you may need to pip install it as we've noticed it doesn't always get installed properly despite being in our requirements.txt
-
 from time import perf_counter
-import concurrent.futures
-
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
+
+# IMPLEMENT ME: import the sentence transformers module!
 
 # NOTE: this is not a complete list of fields.  If you wish to add more, put in the appropriate XPath expression.
 #TODO: is there a way to do this using XPath/XSL Functions so that we don't have to maintain a big list?
@@ -108,14 +105,24 @@ def get_opensearch():
 
 
 def index_file(file, index_name, reduced=False):
+    logger.info("Creating Model")
+    # IMPLEMENT ME: instantiate the sentence transformer model!
+    
+    logger.info("Ready to index")
+
     docs_indexed = 0
-    ### W4: S1: Load the model.  # We do this here to avoid threading issues
     client = get_opensearch()
     logger.info(f'Processing file : {file}')
     tree = etree.parse(file)
     root = tree.getroot()
     children = root.findall("./product")
     docs = []
+    names = []
+    # IMPLEMENT ME: maintain the names array parallel to docs,
+    # and then embed them in bulk and add them to each doc,
+    # in the '_source' part of each docs entry, before calling bulk
+    # to index them 200 at a time. Make sure to clear the names array
+    # when you clear the docs array!
     for child in children:
         doc = {}
         for idx in range(0, len(mappings), 2):
@@ -125,16 +132,19 @@ def index_file(file, index_name, reduced=False):
         #print(doc)
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
+        if 'name' not in doc or len(doc['name']) == 0:
+            continue
         if reduced and ('categoryPath' not in doc or 'Best Buy' not in doc['categoryPath'] or 'Movies & Music' in doc['categoryPath']):
             continue
-        ### W4: S2: Encode the names
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
         docs_indexed += 1
         if docs_indexed % 200 == 0:
+            logger.info("Indexing")
             bulk(client, docs, request_timeout=60)
-            #logger.info(f'{docs_indexed} documents indexed')
+            logger.info(f'{docs_indexed} documents indexed')
             docs = []
+            names = []
     if len(docs) > 0:
         bulk(client, docs, request_timeout=60)
         logger.info(f'{docs_indexed} documents indexed')
@@ -143,17 +153,15 @@ def index_file(file, index_name, reduced=False):
 @click.command()
 @click.option('--source_dir', '-s', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
-@click.option('--workers', '-w', default=8, help="The name of the index to write to")
 @click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
-def main(source_dir: str, index_name: str, reduced: bool, workers: int, documents_url: str):
-    logger.info(f"Indexing {source_dir} to {index_name} with {workers} workers, the reduced flag set to {reduced}.")
+def main(source_dir: str, index_name: str, reduced: bool):
+    logger.info(f"Indexing {source_dir} to {index_name}, the reduced flag set to {reduced}.")
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
     start = perf_counter()
-    with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(index_file, file, index_name, reduced) for file in files]
-        for future in concurrent.futures.as_completed(futures):
-            docs_indexed += future.result()
+
+    for file in files:
+        docs_indexed += index_file(file, index_name, reduced)
 
     finish = perf_counter()
     logger.info(f'Done. Total docs: {docs_indexed} in {(finish - start)/60} minutes')
