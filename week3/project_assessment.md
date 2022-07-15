@@ -78,6 +78,22 @@ R@5 | 0.953
 
 2. For integrating query classification with search:
 
+**Query used**
+```
+{"size": 10, "sort": [{"_score": {"order": "desc"}}], "query": {"function_score": {"query": {"bool": {"must": [], "should": [{"match": {"name": {"query": "tv", "fuzziness": "1", "prefix_length": 2, "boost": 0.01}}}, {"match_phrase": {"name.hyphens": {"query": "tv", "slop": 1, "boost": 50}}}, {"multi_match": {"query": "tv", "type": "phrase", "slop": "6", "minimum_should_match": "2<75%", "fields": ["name^10", "name.hyphens^10", "shortDescription^5", "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath", "name_synonyms"]}}, {"terms": {"sku": ["tv"], "boost": 50.0}}, {"match": {"name.hyphens": {"query": "tv", "operator": "OR", "minimum_should_match": "2<75%"}}}], "minimum_should_match": 1, "filter": {"match": {"categoryPathIds": "abcat0101001"}}}}, "boost_mode": "multiply", "score_mode": "sum", "functions": [{"filter": {"exists": {"field": "salesRankShortTerm"}}, "gauss": {"salesRankShortTerm": {"origin": "1.0", "scale": "100"}}}, {"filter": {"exists": {"field": "salesRankMediumTerm"}}, "gauss": {"salesRankMediumTerm": {"origin": "1.0", "scale": "1000"}}}, {"filter": {"exists": {"field": "salesRankLongTerm"}}, "gauss": {"salesRankLongTerm": {"origin": "1.0", "scale": "1000"}}}, {"script_score": {"script": "0.0001"}}]}}, "_source": ["name", "shortDescription"]}
+```
+
 - Give 2 or 3 examples of queries where you saw a dramatic positive change in the results because of filtering. Make sure to include the classifier output for those queries.
 
+| Query | # Results w/o category filter | # Results w/ category filter | Classifier output
+|---:|---|---|
+tv | 10000 | 2143 | abcat0101001 - All Flat-Panel TVs
+phone | 9966 | 478 | pcmcat209400050001 - All Mobile Phones with Plans
+
 - Give 2 or 3 examples of queries where filtering hurt the results, either because the classifier was wrong or for some other reason. Again, include the classifier output for those queries.
+
+| Query | # Results w/o category filter | # Results w/ category filter | Classifier output
+|---:|---|---|
+earbuds | 1205 | 0 | cat02015 - Movies & TV Shows
+nespresso | 8 | 0 | cat02015 - Movies & TV Shows
+nintendo | 4568 | 4568 | null
