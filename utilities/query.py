@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # A simple client for querying driven by user input on the command line.  Has hooks for the various
 # weeks (e.g. query understanding).  See the main section at the bottom of the file
 from opensearchpy import OpenSearch
@@ -11,6 +12,10 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
+
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 
 logger = logging.getLogger(__name__)
@@ -46,6 +51,24 @@ def create_prior_queries(doc_ids, doc_id_weights,
             except KeyError as ke:
                 pass  # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query
+
+def create_vector_query(user_query, size=10, source=None):
+    user_query_vector = model.encode(user_query)
+    query_obj = {
+        'size': size,
+        'query': {
+            'knn': {
+                'embedding': {
+                    'vector': user_query_vector.tolist(),
+                    'k': size,
+                }
+            }
+        }
+    }
+    if source is not None:  # otherwise use the default and retrieve all source
+        query_obj["_source"] = source
+    return query_obj
+
 
 
 # Hardcoded query here.  Better to use search templates or other query config.
@@ -186,12 +209,16 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", vector=False):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    if vector:
+        query_obj = create_vector_query(user_query, source=['name', 'shortDescription'])
+    else:
+        query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
     logging.info(query_obj)
+    print(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
@@ -212,6 +239,8 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    general.add_argument('-v', '--vector', type=bool, default=True,
+                         help='whether to use vector search or the inverted index')
 
     args = parser.parse_args()
 
@@ -245,8 +274,8 @@ if __name__ == "__main__":
         query = line.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, index=index_name, vector=args.vector)
 
         print(query_prompt)
 
-    
+

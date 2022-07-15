@@ -6,6 +6,7 @@ from lxml import etree
 import os
 import click
 import glob
+import numpy as np
 from opensearchpy import OpenSearch
 from opensearchpy.helpers import bulk
 import logging
@@ -13,12 +14,26 @@ import fasttext
 from pathlib import Path
 import requests
 import json
+import sqlite3
+from tqdm import tqdm
 
 from time import perf_counter
+from multiprocessing.pool import ThreadPool
+
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
+
+cx = sqlite3.connect("indexed_products.db")
+cu = cx.cursor()
+cu.execute("create table if not exists indexed_products(sku)")
+
+finished_products = {t[0] for t in cu.execute("select sku from indexed_products")}
+print(f'skipping {len(finished_products)} from checkpoint')
 
 # IMPLEMENT ME: import the sentence transformers module!
 
@@ -104,15 +119,15 @@ def get_opensearch():
     return client
 
 
-def index_file(file, index_name, reduced=False):
-    logger.info("Creating Model")
+def index_file(file, index_name, reduced=False, pbar=None):
+    # logger.info("Creating Model")
     # IMPLEMENT ME: instantiate the sentence transformer model!
-    
-    logger.info("Ready to index")
+
+    # logger.info("Ready to index")
 
     docs_indexed = 0
     client = get_opensearch()
-    logger.info(f'Processing file : {file}')
+    # logger.info(f'Processing file : {file}')
     tree = etree.parse(file)
     root = tree.getroot()
     children = root.findall("./product")
@@ -136,18 +151,33 @@ def index_file(file, index_name, reduced=False):
             continue
         if reduced and ('categoryPath' not in doc or 'Best Buy' not in doc['categoryPath'] or 'Movies & Music' in doc['categoryPath']):
             continue
+        if doc['sku'][0] in finished_products:
+            continue
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
         docs_indexed += 1
-        if docs_indexed % 200 == 0:
-            logger.info("Indexing")
+        if pbar is not None:
+            pbar.update(1)
+        if docs_indexed % 50 == 0:
+            # logger.info('Encoding')
+            names = np.concatenate([doc['_source']['name'] for doc in docs])
+            embeddings = model.encode(names)
+            for doc, embedding in zip(docs, embeddings):
+                doc['_source']['embedding'] = embedding
+            # logger.info("Indexing")
             bulk(client, docs, request_timeout=60)
-            logger.info(f'{docs_indexed} documents indexed')
+            for doc in docs:
+                cu.execute("insert into indexed_products values(?)", (doc['_id'],))
+            cx.commit()
+            # logger.info(f'{docs_indexed} documents indexed')
             docs = []
             names = []
     if len(docs) > 0:
         bulk(client, docs, request_timeout=60)
-        logger.info(f'{docs_indexed} documents indexed')
+        for doc in docs:
+            cu.execute("insert into indexed_products values(?)", (doc['_id'],))
+        cx.commit()
+        # logger.info(f'{docs_indexed} documents indexed')
     return docs_indexed
 
 @click.command()
@@ -159,9 +189,10 @@ def main(source_dir: str, index_name: str, reduced: bool):
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
     start = perf_counter()
-
-    for file in files:
-        docs_indexed += index_file(file, index_name, reduced)
+    with tqdm(total=113050) as pbar:
+        def _index_file(f):
+            return index_file(f, index_name, reduced, pbar)
+        docs_indexed = sum([_index_file(f) for f in files])
 
     finish = perf_counter()
     logger.info(f'Done. Total docs: {docs_indexed} in {(finish - start)/60} minutes')
