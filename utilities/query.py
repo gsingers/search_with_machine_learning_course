@@ -12,6 +12,7 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
+import fasttext
 
 
 logger = logging.getLogger(__name__)
@@ -194,11 +195,21 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", use_synonyms=False):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", use_synonyms=False, category=False):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], use_synonyms=use_synonyms)
+    query_filter = None
+    if category:
+        query_filter = {"match": {"categoryPathIds": category}}
+        
+    query_obj = create_query(user_query,
+        click_prior_query=None,
+        filters=query_filter,
+        sort=sort,
+        sortDir=sortDir,
+        source=["name", "shortDescription"],
+        use_synonyms=use_synonyms)
     logger.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -219,8 +230,10 @@ if __name__ == "__main__":
     general.add_argument("-p", '--port', type=int, default=9200,
                          help='The OpenSearch port')
     general.add_argument("--synonyms", action=argparse.BooleanOptionalAction, default=False, help="Whether to query the product title or synonyms")
+    general.add_argument("--category_filter", action=argparse.BooleanOptionalAction, default=False, help="Whether to fitler results to one category")
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    general.add_argument("--model_path", default="/workspace/datasets/fasttext/bbuy_query_cat_clf_model.bin",  help="The path to the model")
 
     args = parser.parse_args()
 
@@ -230,6 +243,7 @@ if __name__ == "__main__":
 
     host = args.host
     port = args.port
+    model_path = args.model_path
     if args.user:
         password = getpass()
         auth = (args.user, password)
@@ -250,6 +264,10 @@ if __name__ == "__main__":
 
     )
     index_name = args.index
+
+    model = fasttext.load_model(model_path)
+
+
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
 
     while True:
@@ -261,11 +279,18 @@ if __name__ == "__main__":
             if query.lower() == "exit":
                 break
             else:
+                top_cat, score = model.predict(query)
+                if score[0] < 0.4 or not args.category_filter:
+                    top_cat = False
+                else:
+                    top_cat = top_cat[0].replace('__label__', '')
+
                 search(
                     client=opensearch,
                     user_query=query,
                     index=index_name,
-                    use_synonyms=use_synonyms
+                    use_synonyms=use_synonyms,
+                    category=top_cat
                 )
 
     # print(query_prompt)
