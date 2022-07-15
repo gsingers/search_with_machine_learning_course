@@ -303,9 +303,9 @@ GET /bbuy_products/_analyze
 
 | Query | # Results w/o synonyms | # Results w/ synonyms
 |---:|---|
-earbuds | 1205 | 1217
-nespresso | 8 | 8
-dslr | 2837 | 2793
+earbuds | 1205 | 3668
+nespresso | 8 | 495
+dslr | 2837 | 2813
 
 4. For classifying reviews:
 
