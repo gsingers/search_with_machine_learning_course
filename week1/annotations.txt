@@ -1,0 +1,63 @@
+pyenv activate search_with_ml
+./ltr-end-to-end.sh -y
+
+./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+mv ltr* ../search_with_machine_learning_course/images/feature2
+
+
+************ STEP 3 **************
+python week1/utilities/build_ltr.py --ltr_terms_field sku --output_dir /workspace/ltr_output --create_xgb_training -f week1/conf/ltr_featureset.json --click_model heuristic
+
+************ STEP 4 **************
+python week1/utilities/build_ltr.py --output_dir /workspace/ltr_output -x /workspace/ltr_output/training.xgb --xgb_conf week1/conf/xgb-conf.json
+
+
+Feature Logging
+
+GET _search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "terms": {
+            "_id": [
+              9448216,
+              9448234,
+              9956028
+            ]
+          }
+        },
+        {
+          "sltr": {
+            "_name": "logged_featureset",
+            "featureset": "bbuy_main_featureset",
+            "store": "week1",
+            "params": {
+              "keywords": "zune"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "ext": {
+    "ltr_log": {
+      "log_specs": {
+        "name": "log_entry",
+        "named_query": "logged_featureset"
+      }
+    }
+  }
+}
+
+
+
+{"query": {"bool": {"filter": [{"terms": {"_id": [9448216, 9448234, 9956028]}}, {"sltr": {"_name": "logged_featureset", "featureset": "bbuy_main_featureset", "store": "week1", "params": {"keywords": "zune"}}}]}}, "ext": {"ltr_log": {"log_specs": {"name": "log_entry", "named_query": "logged_featureset"}}}}
+
+
+
+query = @Guido - Getting embedding for a sentence is an active research topic today BERT provides 4 different ways - using the [CLS] token or averaging last two layers or last four layers etc., Jay Alammar blog posts are the best to learn about current trends for embedding generation
+
+it is the BM25 score between query and name field of the document

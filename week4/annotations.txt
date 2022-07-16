@@ -1,0 +1,4 @@
+pip install sentence-transformers
+
+./index-data.sh
+

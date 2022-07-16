@@ -162,6 +162,8 @@ def index_file(file, index_name, synonyms=False, documents_url="http://localhost
 @click.option('--documents_url', '-d', default="http://localhost:5000/documents/annotate", help="The location of the Flask App endpoint, something like http://localhost:5000/documents/annotate")
 @click.option('--synonyms', is_flag=True, show_default=True, default=False, help="If true, add synonyms to the document using the --documents_url endpoint.")
 @click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
+
+
 def main(source_dir: str, index_name: str, reduced: bool, workers: int, synonyms: bool, documents_url: str):
     logger.info(f"Indexing {source_dir} to {index_name} with {workers} workers, synonyms is {synonyms} and the reduced flag set to {reduced}.  Documents URL is {documents_url}")
     files = glob.glob(source_dir + "/*.xml")
