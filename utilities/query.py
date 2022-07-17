@@ -12,12 +12,14 @@ import pandas as pd
 import fileinput
 import logging
 import fasttext
+from sentence_transformers import SentenceTransformer
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
 category_model = fasttext.load_model('/workspace/datasets/week3/modelfastext_1m_proc25.bin')
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -224,8 +226,22 @@ def create_query(user_query,
         query_obj["_source"] = source
     return query_obj
 
-
-def search(client, user_query, index="bbuy_products", use_syn=False, min_score=0.5):
+def create_vector_query(user_query, size=10, k=5):
+    query_embedding = model.encode([user_query])[0].tolist()
+    query_obj = {"size": size,
+                "query": {
+                    "knn": {
+                    "embedding": {
+                        "vector": query_embedding,
+                        "k": k
+                    }
+                    }
+                }
+                }
+    print(query_obj)
+    return query_obj
+                
+def search(client, user_query, index="bbuy_products", use_syn=False, min_score=0.5, vector_query=False):
     candidate_k = 5
     print("'{}'".format(user_query))
     cats, scores = category_model.predict(user_query, k=candidate_k)
@@ -233,21 +249,26 @@ def search(client, user_query, index="bbuy_products", use_syn=False, min_score=0
     #filter categories with score higher than min
     categories = [cat.replace('__label__','') for cat, score in zip(cats, scores) if score > min_score]
 
-    print(categories)
-
-    query_obj = create_query(user_query, 
-                            click_prior_query=None, 
-                            filters = None,
-                            source=["name", "shortDescription"], 
-                            use_syn=use_syn,
-                            categories = categories[0] if len(categories) > 0 else None, 
-                            )
+    if vector_query:
+        query_obj = create_vector_query(user_query)
+    else:
+        query_obj = create_query(user_query, 
+                                click_prior_query=None, 
+                                filters = None,
+                                source=["name", "shortDescription"], 
+                                use_syn=use_syn,
+                                categories = categories[0] if len(categories) > 0 else None, 
+                                )
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
+    names = []
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
-        #print(json.dumps(response, indent=2))
+        print(json.dumps(response, indent=2))
+        
 
+    for hit in response['hits']['hits']:
+        print(hit['_source']['name'])
 
 if __name__ == "__main__":
     host = 'localhost'
@@ -265,6 +286,8 @@ if __name__ == "__main__":
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
     general.add_argument('--synonyms', default=False, action='store_true',
                          help='If True use synonyms in name')
+    general.add_argument('--vector_query', default=False, action='store_true',
+                         help='If True use approx KNN to search')                         
     args = parser.parse_args()
     output_file = "output.txt"
     featureset_file = "featureset.json"
@@ -275,7 +298,7 @@ if __name__ == "__main__":
     host = args.host
     port = args.port
     synonyms = args.synonyms
-    print(synonyms)
+    vector_query = args.vector_query
     if args.user:
         password = getpass()
         auth = (args.user, password)
@@ -303,7 +326,7 @@ if __name__ == "__main__":
         
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name, use_syn=synonyms)
+        search(client=opensearch, user_query=query, index=index_name, use_syn=synonyms, vector_query=vector_query)
 
         
 

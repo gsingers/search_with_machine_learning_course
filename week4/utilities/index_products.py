@@ -15,6 +15,7 @@ import requests
 import json
 
 from time import perf_counter
+from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -81,7 +82,6 @@ mappings =  [
             "longDescription/text()", "longDescription",
             "longDescriptionHtml/text()", "longDescriptionHtml",
             "features/*/text()", "features" # Note the match all here to get the subfields
-
         ]
 
 def get_opensearch():
@@ -103,10 +103,17 @@ def get_opensearch():
     )
     return client
 
+def add_embedding(docs, names, model):
+    embs = model.encode(names)
+    for doc, emb in zip(docs, embs):
+        doc['_source']['embedding'] = emb.tolist()
+    return docs 
 
 def index_file(file, index_name, reduced=False):
     logger.info("Creating Model")
     # IMPLEMENT ME: instantiate the sentence transformer model!
+    #model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     
     logger.info("Ready to index")
 
@@ -123,6 +130,9 @@ def index_file(file, index_name, reduced=False):
     # in the '_source' part of each docs entry, before calling bulk
     # to index them 200 at a time. Make sure to clear the names array
     # when you clear the docs array!
+    #for child in children: 
+    #    print
+
     for child in children:
         doc = {}
         for idx in range(0, len(mappings), 2):
@@ -137,14 +147,20 @@ def index_file(file, index_name, reduced=False):
         if reduced and ('categoryPath' not in doc or 'Best Buy' not in doc['categoryPath'] or 'Movies & Music' in doc['categoryPath']):
             continue
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
+        names.append(doc['name'][0])
+
         #docs.append({'_index': index_name, '_source': doc})
         docs_indexed += 1
+
         if docs_indexed % 200 == 0:
+            docs = add_embedding(docs, names, model)
             logger.info("Indexing")
             bulk(client, docs, request_timeout=60)
             logger.info(f'{docs_indexed} documents indexed')
             docs = []
             names = []
+
+
     if len(docs) > 0:
         bulk(client, docs, request_timeout=60)
         logger.info(f'{docs_indexed} documents indexed')

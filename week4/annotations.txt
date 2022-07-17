@@ -1,4 +1,23 @@
+pyenv activate search_with_ml
 pip install sentence-transformers
 
-./index-data.sh
+./index-data.sh -r -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json
 
+python3 week4/utilities/index_products.py -s /workspace/datasets/product_data/products
+
+./index-data.sh -r -p /workspace/search_with_machine_learning_course/week4/conf/bbuy_products.json
+
+,
+      "embedding": {
+        "type": "knn_vector",
+        "dimension":384,
+        "method": {
+          "name": "hnsw",
+          "space_type": "cosinesimil",
+          "engine": "nmslib",
+          "parameters": {
+            "ef_construction": 128,
+            "m": 24
+          }
+        } 
+      }
