@@ -1,6 +1,6 @@
 {
   "settings": {
-    "analysis": {
+    "analysis": { 
       "analyzer": {
         "smarter_hyphens": {
           "tokenizer": "smarter_hyphens_tokenizer",
@@ -250,6 +250,29 @@
             "type": "completion"
           }
 
+        }
+      },
+      "name.synonyms": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 2048
+          },
+          "hyphens": {
+            "type": "text",
+            "analyzer": "smarter_hyphens"
+          },
+          "suggest": {
+            "type": "completion"
+          },
+          "filter": {
+            "synonym": {
+              "type": "synonym",
+              "synonyms_path": "/workspace/datasets/fasttext/synonyms.csv"
+            }
+          }
         }
       },
       "onSale": {

@@ -56,6 +56,7 @@ python $WEEK/utilities/build_ltr.py -f $WEEK/conf/ltr_featureset.json --upload_f
 if [ $? -ne 0 ] ; then
   exit 2
 fi
+echo "************ STEP 1 **************"
 echo "Creating training and test data sets from impressions by splitting on dates"
 # Split the impressions into training and test
 python $WEEK/utilities/build_ltr.py --output_dir "$OUTPUT_DIR" --split_input "$ALL_CLICKS_FILE"  --split_train_rows $SPLIT_TRAIN_ROWS --split_test_rows $SPLIT_TEST_ROWS
@@ -64,35 +65,44 @@ if [ $? -ne 0 ] ; then
 fi
 
 # Create our impressions (positive/negative) data set, e.g. all sessions (with LTR features added in already)
+echo "************ STEP 2 **************"
 echo "Creating impressions data set" # outputs to $OUTPUT_DIR/impressions.csv by default
 python $WEEK/utilities/build_ltr.py --generate_impressions  --output_dir "$OUTPUT_DIR" --train_file "$OUTPUT_DIR/train.csv" $SYNTHESIZE
 if [ $? -ne 0 ] ; then
   exit 2
 fi
+
+
 # Create the actual training set from the impressions set
+echo "************ STEP 3 **************"
 python $WEEK/utilities/build_ltr.py --ltr_terms_field sku --output_dir "$OUTPUT_DIR" --create_xgb_training -f $WEEK/conf/ltr_featureset.json --click_model $CLICK_MODEL $DOWNSAMPLE
 if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Given a training set in SVMRank format, train an XGB model
+echo "************ STEP 4 **************"
 python $WEEK/utilities/build_ltr.py  --output_dir "$OUTPUT_DIR" -x "$OUTPUT_DIR/training.xgb" --xgb_conf $WEEK/conf/xgb-conf.json
 if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Given an XGB model, upload it to the LTR store
+echo "************ STEP 5 **************"
 python $WEEK/utilities/build_ltr.py --upload_ltr_model --xgb_model "$OUTPUT_DIR/xgb_model.model"
 if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Dump out some useful plots for visualizing our model
+echo "************ STEP 6 **************"
 python $WEEK/utilities/build_ltr.py --xgb_plot --output_dir "$OUTPUT_DIR"
 if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Run our test queries through
+echo "************ STEP 7 **************"
 python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --train_file "$OUTPUT_DIR/train.csv" --output_dir "$OUTPUT_DIR" --xgb_test_num_queries $NUM_TEST_QUERIES  --xgb_main_query $MAIN_QUERY_WEIGHT --xgb_rescore_query_weight $RESCORE_WEIGHT
 if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Analyze the results
+echo "************ STEP 8 **************"
 python $WEEK/utilities/build_ltr.py --analyze --output_dir "$OUTPUT_DIR" 

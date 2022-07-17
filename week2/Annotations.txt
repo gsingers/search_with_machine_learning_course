@@ -1,0 +1,61 @@
+
+FASTEXT COMMANDS
+
+
+################################
+#### Fasttext Supervised   #####
+################################
+
+shuf /workspace/datasets/fasttext/labeled_products.txt > /workspace/datasets/fasttext/shuffled_labeled_products.txt
+
+head shuffled_labeled_products.txt -n 10000 > train.txt
+tail shuffled_labeled_products.txt -n 10000 > test.txt
+
+~/fastText-0.9.2/fasttext
+
+~/fastText-0.9.2/fasttext supervised -input ./datasets/fasttext/train.txt -output ./models/modelfastext
+
+~/fastText-0.9.2/fasttext predict ./models/modelfastext.bin - 
+
+~/fastText-0.9.2/fasttext test ./models/modelfastext.bin ./datasets/fasttext/test.txt
+
+# for precision at5 
+~/fastText-0.9.2/fasttext test ./models/modelfastext.bin ./datasets/fasttext/test.txt 5
+
+cat ./datasets/fasttext/train.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]"  > ./datasets/fasttext/train_processed.txt
+cat ./datasets/fasttext/test.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" > ./datasets/fasttext/test_processed.txt
+
+~/fastText-0.9.2/fasttext supervised -input ./datasets/fasttext/train_processed.txt -output ./models/modelfastext_proc
+~/fastText-0.9.2/fasttext test ./models/modelfastext_proc.bin ./datasets/fasttext/test_processed.txt
+
+~/fastText-0.9.2/fasttext supervised -input ./datasets/fasttext/train_processed.txt -output ./models/modelfastext_proc25 -epoch 25
+~/fastText-0.9.2/fasttext test ./models/modelfastext_proc25.bin ./datasets/fasttext/test_processed.txt
+
+~/fastText-0.9.2/fasttext supervised -input ./datasets/fasttext/train_processed.txt -output ./models/modelfastext_proc25ng2 -epoch 25 -wordNgrams 2
+~/fastText-0.9.2/fasttext test ./models/modelfastext_proc25ng2.bin ./datasets/fasttext/test_processed.txt
+
+
+cat /workspace/datasets/fasttext/training_lite.txt |sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" | sed "s/[^[:alnum:]_]/ /g" | tr -s ' ' > /workspace/datasets/fasttext/normalized_training_lite.txt
+
+################################
+#### Fasttext Unsupervised #####
+################################
+
+create data from labeled data 
+this remove labels
+
+cut -d' ' -f2- /workspace/datasets/fasttext/shuffled_labeled_products.txt > /workspace/datasets/fasttext/titles.txt
+
+#train the model
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/title_model
+
+$manual testing
+~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+
+# Normalizing titles
+cat /workspace/datasets/fasttext/titles.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" | sed "s/[^[:alnum:]]/ /g" | tr -s ' ' > /workspace/datasets/fasttext/normalized_titles.txt
+
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model -epoch 25
+~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+
+cat /workspace/datasets/fasttext/normalized_titles.txt | tr " " "\n" | grep "...." | sort | uniq -c | sort -nr | head -1000 | grep -oE '[^ ]+$' > /workspace/datasets/fasttext/top_words.txt

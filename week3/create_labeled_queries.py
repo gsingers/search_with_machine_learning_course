@@ -4,6 +4,8 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 import csv
+from functools import partial
+from tqdm import tqdm
 
 # Useful if you want to perform stemming.
 import nltk
@@ -49,8 +51,47 @@ df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+def normalize_text(text):
+    # convert to lower case
+    text = text.lower()
+
+    #get the stemm part
+    text = ' '.join([stemmer.stem(word) for word in text.split(' ')])
+    
+    return text
+
+df.loc[:, 'query'] = df['query'].apply(normalize_text)
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+
+#dictionary to help find the parent of a category
+parent_mapper = parents_df.set_index('category').parent.to_dict()
+
+#funtion to help replace target_category with its parent
+def replace_with_parent(category, target_categories):
+    if category in target_categories:
+        return parent_mapper[category]
+    else:
+        return category
+
+
+#iterate until there is no category with less of min_queries observations
+category_ranking = df[df.category!='cat00000'].category.value_counts()
+categories_to_change = category_ranking[category_ranking < min_queries].index.to_list()
+
+
+#if there is any category with less than min_queries it will replaced with its parent
+while len(categories_to_change) > 0:
+    print('Changing {} categories'.format(str(len(categories_to_change))))
+
+    df.loc[:, 'category'] = df.category.apply(  partial(replace_with_parent, 
+                                                target_categories=set(categories_to_change))
+                                            )
+
+    category_ranking = df[df.category!='cat00000'].category.value_counts()
+    categories_to_change = category_ranking[category_ranking < min_queries].index.to_list()
+        
+print(category_ranking)
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']

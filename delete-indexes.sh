@@ -5,7 +5,7 @@ if [ $? -ne 0 ] ; then
   echo "Failed to delete products index"
   exit 2
 fi
-echo ""
+echo ""./index-data.sh -r -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json
 echo "Deleting Queries"
 curl -k -X DELETE -u admin  "https://localhost:9200/bbuy_queries"
 if [ $? -ne 0 ] ; then

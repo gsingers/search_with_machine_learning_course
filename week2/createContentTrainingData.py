@@ -11,7 +11,8 @@ def transform_name(product_name):
     # IMPLEMENT
     return product_name
 
-# Directory for product data
+# Directory for product data~/fastText-0.9.2/fasttext test ./models/modelfastext_proc25ng2.bin ./datasets/fasttext/test_processed.txt
+
 directory = r'/workspace/datasets/product_data/products/'
 
 parser = argparse.ArgumentParser(description='Process some integers.')
