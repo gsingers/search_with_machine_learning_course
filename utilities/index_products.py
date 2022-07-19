@@ -145,7 +145,7 @@ def index_file(file, index_name, reduced=False):
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--workers', '-w', default=8, help="The name of the index to write to")
 @click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
-def main(source_dir: str, index_name: str, reduced: bool, workers: int, documents_url: str):
+def main(source_dir: str, index_name: str, reduced: bool, workers: int):
     logger.info(f"Indexing {source_dir} to {index_name} with {workers} workers, the reduced flag set to {reduced}.")
     files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
