@@ -34,4 +34,9 @@ def train(xgb_train_data, num_rounds=5, xgb_conf=None ):
     print("Training XG Boost on %s for %s rounds with params: %s" % (xgb_train_data, num_rounds, xgb_params))
     ##### Step 3.a
     print("IMPLEMENT ME: train()")
+    #num_round = 10
+    #bst = xgb.train(param, dtrain, num_round, evallist)
+    dtrain = xgb.DMatrix(xgb_train_data)
+    bst = xgb.train(xgb_params, dtrain, num_rounds)
     return bst, xgb_params
+
