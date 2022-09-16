@@ -45,17 +45,17 @@ for child in root:
 parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 'parent'])
 
 # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
-df = pd.read_csv(queries_file_name)[['category', 'query']]
-df = df[df['category'].isin(categories)]
+queries_df = pd.read_csv(queries_file_name)[['category', 'query']]
+queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
 
 # Create labels in fastText format.
-df['label'] = '__label__' + df['category']
+queries_df['label'] = '__label__' + queries_df['category']
 
 # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
-df = df[df['category'].isin(categories)]
-df['output'] = df['label'] + ' ' + df['query']
-df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
+queries_df = queries_df[queries_df['category'].isin(categories)]
+queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
+queries_df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
