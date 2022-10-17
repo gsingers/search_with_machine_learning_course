@@ -2,6 +2,7 @@
 
 import ltr_utils as lu
 import numpy as np
+from numpy.random import RandomState
 import pandas as pd
 import query_utils as qu
 from opensearchpy import RequestError
@@ -13,14 +14,17 @@ class DataPrepper:
     opensearch = None
     index_name = "bbuy_products"
     ltr_store_name = "week1"
-
+    train_random_state = RandomState(256)
+    test_random_state = RandomState(17)
 
     def __init__(self, opensearch_client, featureset_name="bbuy_product_featureset", index_name="bbuy_products",
-                 ltr_store_name="week1") -> None:
+                 ltr_store_name="week1", train_random_seed=256, test_random_seed=17) -> None:
         self.opensearch = opensearch_client
         self.featureset_name = featureset_name
         self.index_name = index_name
         self.ltr_store_name = ltr_store_name
+        self.train_random_state = RandomState(train_random_seed)
+        self.test_random_state = RandomState(test_random_seed)
 
     def __get_query_id(self, query, query_ids_map, query_counter):
         qid = query_ids_map.get(query, None)
@@ -58,11 +62,11 @@ class DataPrepper:
         # for testing, we should still allow for splitting into less rows
         if train_rows > 0:
             # if we are using less than the full set, then shuffle them
-            first = first.sample(frac=1).reset_index(drop=True)  # shuffle things
+            first = first.sample(frac=1, random_state=self.train_random_state).reset_index(drop=True)  # shuffle things
             first = first[:min(len(first), train_rows)]
         if test_rows > 0:
             # if we are using less than the full set, then shuffle them
-            second = second.sample(frac=1).reset_index(drop=True)  # shuffle things
+            second = second.sample(frac=1, random_state=self.test_random_state).reset_index(drop=True)  # shuffle things
             second = second[:min(len(second), test_rows)]
         #train, test = model_selection.train_test_split(input_df, test_size=args.split_test_size)
         #input_df = input_df.sample(frac=1).reset_index(drop=True)  # shuffle things

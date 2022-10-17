@@ -129,6 +129,11 @@ if __name__ == "__main__":
                              help="The total number of rows from the input file to put in the train split.  Limiting the rows can be helpful for testing code, but likely won't produce good models.")
     split_group.add_argument("--split_test_rows", type=int,
                              help="The total number of rows from the input file to put in the test split.  Helpful for testing code, but likely won't produce good results since it won't have insights into clicks.  See --xgb_test_num_queries.")
+    split_group.add_argument("--split_train_seed", type=int, default=256,
+                             help="The seed to use to initialize the training split random sampler.  See DataPrepper for more details on it's use.  Changing this value will change your results")
+    split_group.add_argument("--split_test_seed", type=int, default=17,
+                             help="The seed to use to initialize the testing split random sampler.  See DataPrepper for more details on it's use.  Changing this value will change your results")
+
 
     # Some handy utilities
     util_group = parser.add_argument_group("Utilities")
@@ -178,7 +183,7 @@ if __name__ == "__main__":
     feat_name = args.featureset_name
     index_name = args.index
     # Prep our data
-    data_prepper = dp.DataPrepper(opensearch, feat_name, index_name, ltr_store_name)
+    data_prepper = dp.DataPrepper(opensearch, feat_name, index_name, ltr_store_name, args.split_train_seed, args.split_test_seed)
     if args.split_input:
         # Split based on date.  All of our train data will be before a given date, and all test data will be after.
         # This simulates the real world and allows us to safely use prior clicks in our baseline retrieval and models
