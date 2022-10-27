@@ -10,7 +10,6 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
     # Create the base query, use a much bigger window
     #add on the rescore
     ##### Step 4.e:
-    print("IMPLEMENT ME: create_rescore_ltr_query")
     query_obj["rescore"] = {
         "window_size": rescore_size,
         "query": {
@@ -81,7 +80,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                     "filter": [  # use a filter so that we don't actually score anything
                         {
                             "terms": {
-                                "_id": doc_ids
+                               terms_field: doc_ids
                             }
                         },
                         {  # use the LTR query bring in the LTR feature set
@@ -109,7 +108,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
         }
     
 
-    return None
+    return query_obj
 
 
 # Item is a Pandas namedtuple
