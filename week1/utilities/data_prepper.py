@@ -217,6 +217,25 @@ class DataPrepper:
         print("The following queries produced no results: %s" % no_results)
         return features_df
 
+    @staticmethod
+    def _features_from_es_resp(resp: dict):
+        "Accepts an ES `ltr_log` response dict, and fishes out a dict of doc_id: { feature_name: value ...} "
+        hits = resp['hits']['hits']
+
+        rv = {} # doc_id=> features dict
+        for h in hits:
+            d_id = int(h['_id'])
+            ltr_log_entry = h["fields"]["_ltrlog"][0]['log_entry']
+            features = {}
+            for e in ltr_log_entry:
+                name = e['name']
+                val = e.get('value', 0)
+                features[name] = val
+            # add features dict under the doc id
+            rv[d_id] = features
+        
+        return rv
+
     # Features look like:
     # {'log_entry': [{'name': 'title_match',
     #          'value': 7.221403},
@@ -236,9 +255,13 @@ class DataPrepper:
                                                 size=len(query_doc_ids), terms_field=terms_field)
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+        #print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
+        resp = self.opensearch.search(body=log_query, index=self.index_name, _source=False, size=len(query_doc_ids))
+        # Get a dict of document_id => features_dict
+        doc_features = self._features_from_es_resp(resp)
+
         feature_results = {}
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
@@ -246,10 +269,14 @@ class DataPrepper:
         feature_results["name_match"] = []
         rng = np.random.default_rng(12345)
         for doc_id in query_doc_ids:
+            # fetch the features dict for this document id
+            features = doc_features[doc_id]
+
             feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  
-            feature_results["name_match"].append(rng.random())
+            feature_results["sku"].append(doc_id)
+            # TODO: more features here at some point?
+            feature_results["name_match"].append(features["name_match"])
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
