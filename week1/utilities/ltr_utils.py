@@ -25,6 +25,7 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
             "rescore_query": sltr_q,
             "query_weight": main_query_weight,
             "rescore_query_weight": rescore_query_weight,
+            "score_mode": "total",
         }
     }
 
