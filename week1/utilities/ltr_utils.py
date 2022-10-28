@@ -10,7 +10,26 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
     # Create the base query, use a much bigger window
     #add on the rescore
     ##### Step 4.e:
-    print("IMPLEMENT ME: create_rescore_ltr_query")
+    #print("IMPLEMENT ME: create_rescore_ltr_query")
+    
+    sltr_q = {
+        "sltr": {
+            "params": { "keywords": user_query },
+                "model": ltr_model_name,
+                "store": ltr_store_name,
+            }
+    }
+    rescore_q = {
+        "window_size": rescore_size,
+        "query": {
+            "rescore_query": sltr_q,
+            "query_weight": main_query_weight,
+            "rescore_query_weight": rescore_query_weight,
+        }
+    }
+
+    query_obj["rescore"] = rescore_q
+
     if active_features is not None and len(active_features) > 0:
         query_obj["rescore"]["query"]["rescore_query"]["sltr"]["active_features"] =  active_features
 
@@ -62,10 +81,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
         "_name": "logged_featureset",
         "featureset": featureset_name,
         "store": ltr_store_name,
-        "params": {
-            "keywords": query  
-        }
-                            
+        "params": { "keywords": query }       
     }
 
     ext_q = {
