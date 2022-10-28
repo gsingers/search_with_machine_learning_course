@@ -235,6 +235,7 @@ class DataPrepper:
             rv[d_id] = features
         
         return rv
+    
 
     # Features look like:
     # {'log_entry': [{'name': 'title_match',
@@ -266,8 +267,7 @@ class DataPrepper:
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
+
         for doc_id in query_doc_ids:
             # fetch the features dict for this document id
             features = doc_features[doc_id]
@@ -275,8 +275,13 @@ class DataPrepper:
             feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
             feature_results["sku"].append(doc_id)
-            # TODO: more features here at some point?
-            feature_results["name_match"].append(features["name_match"])
+            # Append each of the features to the respective list (or create it)
+            for feat_name, v in features.items():
+                if feat_name not in feature_results:
+                    feature_results[feat_name] = []
+                feature_results[feat_name].append(v)
+
+
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
