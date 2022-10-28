@@ -57,6 +57,54 @@
             ]
           }
         }
+      },
+
+      {
+        "name": "artist_name_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "artistName.hyphens": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      },
+      
+      {
+        "name": "short_description_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "shortDescription": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      },
+      
+      {
+        "name": "long_description_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "longDescription": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
       }
     ]
   }
