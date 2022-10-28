@@ -23,6 +23,40 @@
                 "name.hyphens": { "query": "{{keywords}}", "slop": 6 }
            }
         }
+      },
+
+      {
+        "name": "avg_review_rating",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "customerReviewAverage",
+                  "missing": 3
+                }
+              }
+            ]
+          }
+        }
+      },
+
+      {
+        "name": "review_count",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "customerReviewCount",
+                  "missing": 0
+                }
+              }
+            ]
+          }
+        }
       }
     ]
   }
