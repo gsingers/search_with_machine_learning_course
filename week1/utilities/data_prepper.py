@@ -10,6 +10,7 @@ import os
 
 # from importlib import reload
 
+
 class DataPrepper:
     opensearch = None
     index_name = "bbuy_products"
@@ -17,8 +18,15 @@ class DataPrepper:
     train_random_state = RandomState(256)
     test_random_state = RandomState(17)
 
-    def __init__(self, opensearch_client, featureset_name="bbuy_product_featureset", index_name="bbuy_products",
-                 ltr_store_name="week1", train_random_seed=256, test_random_seed=17) -> None:
+    def __init__(
+        self,
+        opensearch_client,
+        featureset_name="bbuy_product_featureset",
+        index_name="bbuy_products",
+        ltr_store_name="week1",
+        train_random_seed=256,
+        test_random_seed=17,
+    ) -> None:
         self.opensearch = opensearch_client
         self.featureset_name = featureset_name
         self.index_name = index_name
@@ -38,9 +46,12 @@ class DataPrepper:
         # remove sale/promotional queries like: `LaborDay_HomeAppliances_20110902`
         print("Clicks pre filtering: %s" % len(clicks_df))
         clicks_df = clicks_df[clicks_df["query"].str.match("\w+_(\w+_)?[\w+|\d+]") == False]
-        #print("Clicks post filtering promos: %s" % len(clicks_df))
+        # print("Clicks post filtering promos: %s" % len(clicks_df))
         verify_file_path = "%s/%s" % (output_dir, verify_file)
-        print("Verify info: flag: %s, path: %s, exists: %s" % (verify_file, verify_file_path, os.path.exists(verify_file_path)))
+        print(
+            "Verify info: flag: %s, path: %s, exists: %s"
+            % (verify_file, verify_file_path, os.path.exists(verify_file_path))
+        )
         if verify_file and os.path.exists(verify_file_path):
             verify_file = pd.read_csv(verify_file_path)
             good = verify_file[verify_file["status"] == 1]
@@ -48,28 +59,35 @@ class DataPrepper:
         print("Clicks post filtering: %s" % len(clicks_df))
         return clicks_df
 
-
-    def create_splits(self, file_to_split, split_train, split_test, output_dir, train_rows, test_rows, verify_file):
-        print("Splitting: %s and writing train to: %s and test to: %s in %s" % (
-        file_to_split, split_train, split_test, output_dir))
-        input_df = pd.read_csv(file_to_split, parse_dates=['click_time', 'query_time'])
-        #input_df = input_df.astype({'click_time': 'datetime64', 'query_time':'datetime64'})
+    def create_splits(
+        self, file_to_split, split_train, split_test, output_dir, train_rows, test_rows, verify_file
+    ):
+        print(
+            "Splitting: %s and writing train to: %s and test to: %s in %s"
+            % (file_to_split, split_train, split_test, output_dir)
+        )
+        input_df = pd.read_csv(file_to_split, parse_dates=["click_time", "query_time"])
+        # input_df = input_df.astype({'click_time': 'datetime64', 'query_time':'datetime64'})
         input_df = self.filter_junk_clicks(input_df, verify_file, output_dir)
         # first we are going to split by date
-        half = input_df['click_time'].median()
-        first = input_df[input_df['click_time'] <= half]
-        second = input_df[input_df['click_time'] > half]
+        half = input_df["click_time"].median()
+        first = input_df[input_df["click_time"] <= half]
+        second = input_df[input_df["click_time"] > half]
         # for testing, we should still allow for splitting into less rows
         if train_rows > 0:
             # if we are using less than the full set, then shuffle them
-            first = first.sample(frac=1, random_state=self.train_random_state).reset_index(drop=True)  # shuffle things
-            first = first[:min(len(first), train_rows)]
+            first = first.sample(frac=1, random_state=self.train_random_state).reset_index(
+                drop=True
+            )  # shuffle things
+            first = first[: min(len(first), train_rows)]
         if test_rows > 0:
             # if we are using less than the full set, then shuffle them
-            second = second.sample(frac=1, random_state=self.test_random_state).reset_index(drop=True)  # shuffle things
-            second = second[:min(len(second), test_rows)]
-        #train, test = model_selection.train_test_split(input_df, test_size=args.split_test_size)
-        #input_df = input_df.sample(frac=1).reset_index(drop=True)  # shuffle things
+            second = second.sample(frac=1, random_state=self.test_random_state).reset_index(
+                drop=True
+            )  # shuffle things
+            second = second[: min(len(second), test_rows)]
+        # train, test = model_selection.train_test_split(input_df, test_size=args.split_test_size)
+        # input_df = input_df.sample(frac=1).reset_index(drop=True)  # shuffle things
         first.to_csv("%s/%s" % (output_dir, split_train), index=False)
         second.to_csv("%s/%s" % (output_dir, split_test), index=False)
 
@@ -79,14 +97,14 @@ class DataPrepper:
     #
     #
     def synthesize_impressions(self, clicks_df, min_impressions=20, min_clicks=5):
-        pairs = clicks_df.groupby(['query', 'sku']).size().reset_index(name='clicks')
-        pairs['rank'] = pairs.groupby('query')['clicks'].rank('dense', ascending=False)
-        pairs['num_impressions'] = pairs.groupby('query')['clicks'].transform('sum')
+        pairs = clicks_df.groupby(["query", "sku"]).size().reset_index(name="clicks")
+        pairs["rank"] = pairs.groupby("query")["clicks"].rank("dense", ascending=False)
+        pairs["num_impressions"] = pairs.groupby("query")["clicks"].transform("sum")
         # cut off the extreme end of the long tail due to low confidence in the evidence
-        pairs = pairs[(pairs['num_impressions'] >= min_impressions) & (pairs['clicks'] >= min_clicks)]
+        pairs = pairs[(pairs["num_impressions"] >= min_impressions) & (pairs["clicks"] >= min_clicks)]
 
-        pairs['doc_id'] = pairs['sku']  # not technically the doc id, but since we aren't doing a search...
-        pairs['product_name'] = "fake"
+        pairs["doc_id"] = pairs["sku"]  # not technically the doc id, but since we aren't doing a search...
+        pairs["product_name"] = "fake"
         query_ids = []
         query_ids_map = {}
         query_counter = 1
@@ -105,7 +123,9 @@ class DataPrepper:
     #########
     # For each query, send it to OpenSearch and log all the documents we retrieved and their position
     # Return the impressions data as a Pandas Data Frame
-    def generate_impressions(self, query_df, query_ids_map, retrieval_size=50, min_impressions=20, min_clicks=5):
+    def generate_impressions(
+        self, query_df, query_ids_map, retrieval_size=50, min_impressions=20, min_clicks=5
+    ):
         # Capture judgments info into a dict of arrays so we can convert it to a Data Frame
         query_counter = 1
         query_ids_list = []
@@ -121,71 +141,86 @@ class DataPrepper:
         no_results = set()
         for key in query_gb.groups.keys():
             query_id, query_counter = self.__get_query_id(key, query_ids_map, query_counter)
-            #print("Q[%s]: %s" % (query_id, key))
-            query_times_seen = 0 # careful here
+            # print("Q[%s]: %s" % (query_id, key))
+            query_times_seen = 0  # careful here
             prior_clicks_for_query = query_gb.get_group(key)
             prior_doc_ids = None
             prior_doc_id_weights = None
             if prior_clicks_for_query is not None and len(prior_clicks_for_query) > 0:
                 prior_doc_ids = prior_clicks_for_query.sku.drop_duplicates()
-                prior_doc_id_weights = prior_clicks_for_query.sku.value_counts() # histogram gives us the click counts for all the doc_ids
+                prior_doc_id_weights = (
+                    prior_clicks_for_query.sku.value_counts()
+                )  # histogram gives us the click counts for all the doc_ids
                 query_times_seen = prior_clicks_for_query.sku.count()
             click_prior_query = qu.create_prior_queries(prior_doc_ids, prior_doc_id_weights, query_times_seen)
-            query_obj = qu.create_query(key, click_prior_query, filters=None, size=retrieval_size, include_aggs=False, highlight=False,
-                                        source=["name", "sku"])  # TODO: handle categories
+            query_obj = qu.create_query(
+                key,
+                click_prior_query,
+                filters=None,
+                size=retrieval_size,
+                include_aggs=False,
+                highlight=False,
+                source=["name", "sku"],
+            )  # TODO: handle categories
             # Fetch way more than usual so we are likely to see our documents that have been clicked
             try:
                 response = self.opensearch.search(body=query_obj, index=self.index_name)
             except RequestError as re:
                 print(re, query_obj)
             else:
-                if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
+                if response and response["hits"]["hits"] and len(response["hits"]["hits"]) > 0:
                     # we have a response with some hits
-                    hits = response['hits']['hits']
+                    hits = response["hits"]["hits"]
                     # print(hits)
-                    skus_for_query = prior_clicks_for_query.sku.drop_duplicates()  # we are comparing skus later, so grab the Series now
+                    skus_for_query = (
+                        prior_clicks_for_query.sku.drop_duplicates()
+                    )  # we are comparing skus later, so grab the Series now
 
                     total_clicked_docs_per_query = 0
                     for (idx, hit) in enumerate(hits):
                         query_ids_list.append(query_id)
                         query_strs.append(key)
-                        doc_ids.append(hit['_id'])
+                        doc_ids.append(hit["_id"])
                         ranks.append(idx)
-                        sku = int(hit['_source']['sku'][0])
+                        sku = int(hit["_source"]["sku"][0])
                         skus.append(sku)
                         num_clicks = self.__num_clicks(skus_for_query, sku)
                         if num_clicks > 0:
                             total_clicked_docs_per_query += 1
                         num_impressions.append(query_times_seen)
                         clicks.append(num_clicks)
-                        if hit['_source'].get('name') is not None:
-                            product_names.append(hit['_source']['name'][0])
+                        if hit["_source"].get("name") is not None:
+                            product_names.append(hit["_source"]["name"][0])
                         else:
                             product_names.append("SKU: %s -- No Name" % sku)
                         # print("Name: {}\n\nDesc: {}\n".format(hit['_source']['name'], hit['_source']['shortDescription']))
 
-                    #print("\tQ[%s]: %s clicked" % (query_id, total_clicked_docs_per_query))
+                    # print("\tQ[%s]: %s clicked" % (query_id, total_clicked_docs_per_query))
                 else:
-                    if response and (response['hits']['hits'] == None or len(response['hits']['hits']) == 0):
+                    if response and (response["hits"]["hits"] == None or len(response["hits"]["hits"]) == 0):
                         print("No results for query: %s" % key)
                         no_results.add(key)
                     else:
                         print(response)
                         print("Invalid response for query %s" % query_obj)
         print("Zero results queries: %s" % no_results)
-        impressions_df = pd.DataFrame({
-            "query_id": query_ids_list,
-            "query": query_strs,
-            "doc_id": doc_ids,
-            "rank": ranks,
-            "clicks": clicks,
-            "sku": skus,
-            "num_impressions": num_impressions,
-            "product_name": product_names
-        })
+        impressions_df = pd.DataFrame(
+            {
+                "query_id": query_ids_list,
+                "query": query_strs,
+                "doc_id": doc_ids,
+                "rank": ranks,
+                "clicks": clicks,
+                "sku": skus,
+                "num_impressions": num_impressions,
+                "product_name": product_names,
+            }
+        )
         # remove low click/impressions,
-        #remove low click/impressions
-        impressions_df = impressions_df[(impressions_df['num_impressions'] >= min_impressions) & (impressions_df['clicks'] >= min_clicks)]
+        # remove low click/impressions
+        impressions_df = impressions_df[
+            (impressions_df["num_impressions"] >= min_impressions) & (impressions_df["clicks"] >= min_clicks)
+        ]
 
         return impressions_df, query_ids_map
 
@@ -194,7 +229,7 @@ class DataPrepper:
         query_gb = train_data_df.groupby("query")
         no_results = {}
         ctr = 0
-        #print("Number queries: %s" % query_gb.count())
+        # print("Number queries: %s" % query_gb.count())
         for key in query_gb.groups.keys():
             if ctr % 500 == 0:
                 print("Progress[%s]: %s" % (ctr, key))
@@ -206,8 +241,9 @@ class DataPrepper:
             if isinstance(doc_ids, np.ndarray):
                 doc_ids = doc_ids.tolist()
             click_prior_query = qu.create_prior_queries_from_group(group)
-            ltr_feats_df = self.__log_ltr_query_features(group[:1]["query_id"], key, doc_ids, click_prior_query, no_results,
-                                                         terms_field=terms_field)
+            ltr_feats_df = self.__log_ltr_query_features(
+                group[:1]["query_id"], key, doc_ids, click_prior_query, no_results, terms_field=terms_field
+            )
             if ltr_feats_df is not None:
                 feature_frames.append(ltr_feats_df)
 
@@ -229,29 +265,56 @@ class DataPrepper:
     #         {'name': 'sale_price_function', 'value': 949.99},
     #         {'name': 'price_function', 'value': 0.0}]}]
     # For each query, make a request to OpenSearch with SLTR logging on and extract the features
-    def __log_ltr_query_features(self, query_id, key, query_doc_ids, click_prior_query, no_results, terms_field="_id"):
+    def __log_ltr_query_features(
+        self, query_id, key, query_doc_ids, click_prior_query, no_results, terms_field="_id"
+    ):
 
-        log_query = lu.create_feature_log_query(key, query_doc_ids, click_prior_query, self.featureset_name,
-                                                self.ltr_store_name,
-                                                size=len(query_doc_ids), terms_field=terms_field)
+        log_query = lu.create_feature_log_query(
+            key,
+            query_doc_ids,
+            click_prior_query,
+            self.featureset_name,
+            self.ltr_store_name,
+            size=len(query_doc_ids),
+            terms_field=terms_field,
+        )
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
-        # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
-        # Your structure should look like the data frame below
+
         feature_results = {}
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  
-            feature_results["name_match"].append(rng.random())
+        ALL_FEATURES = [
+            "name_match",
+            "name_phrase_match",
+            "artist_match",
+            "short_description_query_match",
+            "long_description_query_match",
+            "customer_review_count_feature",
+            "customer_review_average_feature",
+            "sales_rank_short_term",
+        ]
+        for fname in ALL_FEATURES:
+            feature_results[fname] = []
+        no_results["query_id"] = []
+        # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
+        # Your structure should look like the data frame below
+        response = self.opensearch.search(body=log_query, index=self.index_name)
+
+        if response and len(response["hits"]) > 0:
+            hits = response["hits"]["hits"]
+            for hit in hits:
+                feature_results["doc_id"].append(hit["_id"])
+                feature_results["query_id"].append(query_id)
+                feature_results["sku"].append(hit["_source"]["sku"][0])
+                features = hit["fields"]["_ltrlog"][0]["log_entry"]
+                for feature in features:
+                    fname = feature["name"]
+                    feature_results[fname].append(feature.get("value", 0))
+
         frame = pd.DataFrame(feature_results)
-        return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
+        return frame.astype({"doc_id": "int64", "query_id": "int64", "sku": "int64"})
         # IMPLEMENT_END
 
     # Can try out normalizing data, but for XGb, you really don't have to since it is just finding splits
@@ -259,14 +322,15 @@ class DataPrepper:
         # we need to get some stats from OpenSearch and then use that to normalize our data
         agg_fields = []
         aggs = {}
-        for feature in feature_set['featureset']['features']:
-            func_temp = feature['template'].get("function_score")
+        for feature in feature_set["featureset"]["features"]:
+            func_temp = feature["template"].get("function_score")
             if func_temp is not None:
                 # get the field
-                funcs = func_temp.get("functions",
-                                      [func_temp.get("field_value_factor")])  # could also be a field_value_factor alone
+                funcs = func_temp.get(
+                    "functions", [func_temp.get("field_value_factor")]
+                )  # could also be a field_value_factor alone
                 for func in funcs:
-                    agg_fields.append(func['field_value_factor']['field'])
+                    agg_fields.append(func["field_value_factor"]["field"])
         stats_query = qu.create_stats_query(agg_fields)
         try:
             response = self.opensearch.search(stats_query, self.index_name)
@@ -275,8 +339,8 @@ class DataPrepper:
             raise re
         else:
             # we now have an OpenSearch response with a bunch of stats info.  We mainly care about min/max/avg/std.dev
-            if response and response['aggregations'] and len(response['aggregations']) > 0:
-                aggs = response['aggregations']
+            if response and response["aggregations"] and len(response["aggregations"]) > 0:
+                aggs = response["aggregations"]
 
                 # Initialize with the identify function for every
                 for agg in agg_fields:
@@ -288,17 +352,23 @@ class DataPrepper:
                         min = stats["min"]
                         max = stats["max"]
                         max_min = max - min
-                        ranks_features_df["%s_norm" % agg] = ranks_features_df[agg].apply(lambda x: (x - min) / max_min)
+                        ranks_features_df["%s_norm" % agg] = ranks_features_df[agg].apply(
+                            lambda x: (x - min) / max_min
+                        )
                     elif norm_type == "std-dev":
                         avg = stats["avg"]
                         std_dev = stats["std_deviation"]
-                        ranks_features_df["%s_norm" % agg] = ranks_features_df[agg].apply(lambda x: (x - avg) / std_dev)
+                        ranks_features_df["%s_norm" % agg] = ranks_features_df[agg].apply(
+                            lambda x: (x - avg) / std_dev
+                        )
                     # else:
                     # Do nothing for now
             else:
                 print("No aggregations found in %s" % response)
-        return (ranks_features_df,
-                aggs)  # return out the aggregations, bc we are going to need it to write the model normalizers
+        return (
+            ranks_features_df,
+            aggs,
+        )  # return out the aggregations, bc we are going to need it to write the model normalizers
 
     # Determine the number of clicks for this sku given a query (represented by the click group)
     def __num_clicks(self, all_skus_for_query, test_sku):

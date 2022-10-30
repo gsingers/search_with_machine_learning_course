@@ -1,0 +1,170 @@
+./ltr-end-to-end.sh -y -m 0 -c quantiles
+ltr_store_name = index_name
+ltr_store_path = "_ltr/" + ltr_store_name
+index_name = 'searchml_ltr'
+
+ltr_store = "week1_shrikar"
+base_url = "https://localhost:9200/"
+ltr_store_name = ltr_store
+ltr_store_path = "_ltr/" + ltr_store
+ltr_model_path = urljoin(base_url, ltr_store_path)
+featureset_name = "bbuy_main_featureset_shrikar"
+index_name = "bbuy_products"
+
+
+
+PUT _ltr/bbuy_products
+
+GET bbuy_products/_search?q=ipad
+POST _ltr/bbuy_products/_featureset/shrikar_featureset_v2
+{
+  "featureset": {
+    "features": [
+      {
+        "name": "name_match",
+        "params": ["keywords"],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "name": "{{keywords}}"
+          }
+        }
+      },
+      {
+            "name": "description_query_feature_name",
+            "params": ["keywords"],
+            "template_language": "mustache",
+            "template": {
+                "match": {
+                    "longDescription": "{{keywords}}"
+                }
+            }
+      },
+      {
+            "name": "price_feature",
+            "template_language": "mustache",
+            "template": {
+                "function_score": {
+                    "functions": [{
+                        "field_value_factor": {
+                            "field": "regularPrice",
+                            "missing": 0
+                        }
+                    }]
+                }
+            }
+
+      },
+      {
+        "name": "salesRankShortTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "filter": {
+                  "exists": {
+                    "field": "salesRankShortTerm"
+                  }
+                },
+                "gauss": {
+                  "salesRankShortTerm": {
+                    "origin": "1.0",
+                    "offset": "100",
+                    "scale": "10000",
+                    "decay": "0.1"
+                  }
+                }
+              },
+              {
+                "filter": {
+                  "bool": {
+                    "must_not": {
+                      "exists": {
+                        "field": "salesRankShortTerm"
+                      }
+                    }
+                  }
+                },
+                "script_score": {
+                  "script": "if (doc['salesRankShortTerm'] == null || doc['salesRankShortTerm'].size() == 0  ){return 0.0}"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+
+GET bbuy_products/_search
+{ "_source":false,
+            "query": {
+                "bool": {
+                    "filter": [
+                        {
+                            "terms": {
+                                "_id": [4032042,4032051,3725289,3725313]
+                            }
+                        },
+                        {
+                            "sltr": {
+                                "_name": "logged_featureset",
+                                "featureset": "shrikar_featureset_v1",
+                                "store": "bbuy_products",
+                                "params": {
+                                    "keywords": "bluetooth headset"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+
+            "ext": {
+                "ltr_log": {
+                    "log_specs": {
+                        "name": "log_entry",
+                        "named_query": "logged_featureset"
+                    }
+                }
+            }
+        }
+
+
+GET bbuy_products/_search
+{ "_source":false,
+            "query": {
+                "bool": {
+                    "must": [
+                            {
+                                "match": {
+                                    "name": "ipad"
+                                }
+                            }
+                        ],
+                    "filter": [
+                        {
+                            "sltr": {
+                                "_name": "logged_featureset",
+                                "featureset": "shrikar_featureset_v2",
+                                "store": "bbuy_products",
+                                "params": {
+                                    "keywords": "ipad"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+
+            "ext": {
+                "ltr_log": {
+                    "log_specs": {
+                        "name": "log_entry",
+                        "named_query": "logged_featureset"
+                    }
+                }
+            }
+        }

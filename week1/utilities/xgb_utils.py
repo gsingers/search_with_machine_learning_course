@@ -41,6 +41,4 @@ def train(xgb_train_data, num_rounds=5, xgb_conf=None):
     )  # Do the training.  NOTE: in this toy example we did not use any hold out data
     # model = bst.get_dump(fmap=feat_map_file.name, dump_format='json')
 
-    print("IMPLEMENT ME: train()")
-    print("TRain done")
     return bst, xgb_params
