@@ -26,6 +26,7 @@ class DataPrepper:
         self.ltr_store_name = ltr_store_name
         self.train_random_state = RandomState(train_random_seed)
         self.test_random_state = RandomState(test_random_seed)
+        self._noresults = defaultdict(set)
 
     def __get_query_id(self, query, query_ids_map, query_counter):
         qid = query_ids_map.get(query, None)
@@ -240,10 +241,15 @@ class DataPrepper:
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
         response = self.opensearch.search(body=log_query, index=self.index_name)
-        if response and len(response['hits']) > 0 and len(response['hits']['hits']) == len(query_doc_ids):
+        if response and len(response['hits']) > 0 and len(response['hits']['hits']) > 0:
             hits = response['hits']['hits']
+            if len(hits) != len(query_doc_ids):
+                response = {int(hit["_id"]) for hit in hits}
+                expected = {id for id in query_doc_ids}
+                self._noresults[query_id] = self._noresults[query_id].union(expected - response)
         else:
-            raise ValueError(f"Expected {len(query_doc_ids)} hits from response.")
+            hits = []
+            self._noresults[query_id] = self._noresults[query_id].union(query_doc_ids)
         feature_results = defaultdict(list)
         for hit in hits:
             doc_id = hit["_id"]
