@@ -1,4 +1,5 @@
 # This file processes our queries, runs them through OpenSearch against the BBuy Products index to fetch their "rank" and so they can be used properly in a click model
+from collections import defaultdict
 
 import ltr_utils as lu
 import numpy as np
@@ -236,20 +237,22 @@ class DataPrepper:
                                                 size=len(query_doc_ids), terms_field=terms_field)
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
-        feature_results = {}
-        feature_results["doc_id"] = []  # capture the doc id so we can join later
-        feature_results["query_id"] = []  # ^^^
-        feature_results["sku"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
+        response = self.opensearch.search(body=log_query, index=self.index_name)
+        if response and len(response['hits']) > 0 and len(response['hits']['hits']) == len(query_doc_ids):
+            hits = response['hits']['hits']
+        else:
+            raise ValueError(f"Expected {len(query_doc_ids)} hits from response.")
+        feature_results = defaultdict(list)
+        for hit in hits:
+            doc_id = hit["_id"]
+            features = hit["fields"]["_ltrlog"][0]["log_entry"] 
             feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
             feature_results["sku"].append(doc_id)  
-            feature_results["name_match"].append(rng.random())
+            for f in features:
+                feature_results[f["name"]].append(f.get("value", 0.0))
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
