@@ -246,11 +246,16 @@ class DataPrepper:
         feature_results["sku"] = []
         feature_results["name_match"] = []
         rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
+        hits = response['hits']['hits']
+        for hit in hits: 
+            feature_results["doc_id"].append(hit['_id'])  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)
-            feature_results["name_match"].append(response["doc_id"]["name_match"] or no_results)
+            feature_results["sku"].append(hit['_source']['sku'][0])
+            log_entries = hit['fields']['_ltrlog'][0]['log_entry']
+            for feature in log_entries:
+                 if feature["name"] not in feature_results:
+                     feature_results[feature["name"]] = []
+                 feature_results[feature["name"]].append(feature.get("value", 0))
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
