@@ -76,7 +76,6 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
     ##### Step 3.b:
     print("IMPLEMENT ME: create_feature_log_query")
     query_obj = {
-        'lang': 'mustache',
         'size': size,
         'query': {
             'bool': {
