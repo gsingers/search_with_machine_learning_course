@@ -236,22 +236,40 @@ class DataPrepper:
                                                 size=len(query_doc_ids), terms_field=terms_field)
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
-        # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
-        # Your structure should look like the data frame below
-        feature_results = {}
-        feature_results["doc_id"] = []  # capture the doc id so we can join later
-        feature_results["query_id"] = []  # ^^^
-        feature_results["sku"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  
-            feature_results["name_match"].append(rng.random())
-        frame = pd.DataFrame(feature_results)
-        return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
+        ##print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+        try:
+            response = self.opensearch.search(body=log_query, index=self.index_name)
+        except RequestError as re:
+            print("Error logging features", re, log_query)
+        else:
+            # Get the features that have been logged.  They aren't in the same order as our first round, so we need to line them up
+            if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
+                hits = response['hits']['hits']
+                # extract the feautres based on the features passed into the Prepper
+                feature_results = {}
+                feature_results["doc_id"] = []  # capture the doc id so we can join later
+                feature_results["query_id"] = []  # ^^^
+                feature_results["sku"] = []  # ^^^
+                for (idx, hit) in enumerate(hits):
+                    features = hit['fields']['_ltrlog'][0]['log_entry']
+                    feature_results["doc_id"].append(int(hit['_id']))
+                    feature_results["sku"].append(int(hit['_source']['sku'][0]))
+                    feature_results["query_id"].append(
+                        int(query_id))  # super redundant, but it will make it easier to join later
+                    for feat_idx, feature in enumerate(features):
+                        feat_name = feature.get('name')
+                        feat_val = feature.get('value', 0)
+                        feat_vals = feature_results.get(feat_name)
+                        if feat_vals is None:
+                            feat_vals = []
+                            feature_results[feat_name] = feat_vals
+                        feat_vals.append(feat_val)
+                frame = pd.DataFrame(feature_results)
+                # Make sure we type things appropriately
+                return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
+            else:  # Save any queries we couldn't match so that we can debug them later
+                no_results[key] = query_doc_ids
+        return None
         # IMPLEMENT_END
 
     # Can try out normalizing data, but for XGb, you really don't have to since it is just finding splits
