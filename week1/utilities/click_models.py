@@ -49,9 +49,9 @@ def apply_click_model(data_frame, click_model_type="heuristic", downsample=True,
         print("Heuristic click model")
         data_frame["grade"] = (data_frame["clicks"] / (data_frame["num_impressions"] + prior)).fillna(0).apply(lambda x: step(x))
         if downsample:
-            #print("Size pre-downsample: %s\nVal Counts: %s\n" % (len(data_frame), data_frame['grade'].value_counts()))
+            print("Size pre-downsample: %s\nVal Counts: %s\n" % (len(data_frame), data_frame['grade'].value_counts()))
             data_frame = down_sample_buckets(data_frame)
-            #print("Size post-downsample: %s\nVal Counts: %s\n" % (len(data_frame), data_frame['grade'].value_counts()))
+            print("Size post-downsample: %s\nVal Counts: %s\n" % (len(data_frame), data_frame['grade'].value_counts()))
     return data_frame
 
 # https://stackoverflow.com/questions/55119651/downsampling-for-more-than-2-classes

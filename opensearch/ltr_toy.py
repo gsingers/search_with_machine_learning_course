@@ -140,7 +140,7 @@ print("We indexed:\n{}".format(client.cat.count(index_name, params={"v": "true"}
 ltr_store_name = index_name
 ltr_store_path = "_ltr/" + ltr_store_name
 
-print("Create our LTR store")
+print("Create our LTR store index name - "+str(ltr_store_path))
 # LTR requests are not supported by the OpenSearchPy client, so we will drop down to using Python's Requests library
 ltr_model_path = urljoin(base_url, ltr_store_path)
 # Delete any old storage
@@ -224,6 +224,7 @@ class Judgment:
         self.grade = grade
         self.features = features
 
+
     # Modified from https://github.com/o19s/elasticsearch-ltr-demo/blob/master/train/judgments.py
     def toXGBFormat(self):
         featuresAsStrs = ["%s:%s" % (idx + 1, feature.get('value', 0)) for idx, feature in enumerate(self.features)]
@@ -266,6 +267,9 @@ for query in queries:
             for input in sys.stdin.readline():
                 grade = input.rstrip()
                 if grade == "0" or grade == "1":
+                    print()
+                    print(query, hit['_id'], hit['_source']['title'], int(grade))
+                    print()
                     judgment = Judgment(query, hit['_id'], hit['_source']['title'], int(grade))
                     judge_vals.append(judgment)
                     break
@@ -438,4 +442,4 @@ print("Response:\n%s" % json.dumps(response, indent=True))
 model_plot = plot_tree(bst, feat_map_file.name)
 model_plot.figure.savefig("ltr_toy_model.png")
 # If you are running in an environment other than Gitpod that can display things, you can also uncomment the next line:
-# plt.show()
+plt.show()
