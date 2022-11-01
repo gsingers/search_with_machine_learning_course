@@ -9,7 +9,6 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
     # Create the base query, use a much bigger window
     #add on the rescore
     ##### Step 4.e:
-    print(query_obj)
     query_obj["rescore"]={
         "window_size":rescore_size,
         "query":{
