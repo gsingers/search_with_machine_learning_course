@@ -33,7 +33,7 @@ def get_synonyms_from_df(
 
 input_path = '/workspace/datasets/fasttext/top_words.txt'
 model_path = '/workspace/datasets/fasttext/title_model_3.bin'
-output_path = '/workspace/datasets/fasttext/synonyms.txt'
+output_path = '/workspace/datasets/fasttext/synonyms.csv'
 min_similarity = 0.8
 
 if __name__ == '__main__':
