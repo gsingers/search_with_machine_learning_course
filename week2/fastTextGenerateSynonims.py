@@ -31,4 +31,4 @@ if __name__ == '__main__':
     data_df = read_df(input_path)
     model = load_model(model_path)
     synonyms_df = get_synonyms_from_df(data_df, model)
-    synonyms_df.to_csv(output_path, index=False)
+    synonyms_df.to_csv(output_path, index=False, header=False)
