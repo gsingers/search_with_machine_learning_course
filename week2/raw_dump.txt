@@ -1,0 +1,206 @@
+mv: cannot stat '': No such file or directory
+gitpod /workspace/search_with_machine_learning_course (main) $ cut -d' ' -f2- /workspace/datasets/fasttext/shuffled_labeled_products.txt > /workspace/datasets/fasttext/titles.txt
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/title_model
+Read 1M words
+Number of words:  10873
+Number of labels: 0
+Progress: 100.0% words/sec/thread:    1928 lr:  0.000000 avg.loss:  1.363132 ETA:   0h 0m 0s
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+iPQuery word? hone
+iPhone®, 0.951409
+iPhone® 0.930277
+iPod®/iPhone 0.850257
+iPod®/iPhone® 0.836214
+3GS 0.811673
+3G, 0.802156
+3GS, 0.801084
+4S 0.798434
+3G/3GS 0.795395
+iPod®, 0.785776
+Query word? iphone
+Microphone 0.836125
+Saxophone 0.834951
+Speakerphone 0.834494
+Telephone 0.824235
+Earphones 0.812153
+Ozone 0.809136
+Headphone 0.796176
+Phone 0.782926
+Telephones 0.778849
+GoPhone 0.769658
+Query word? iPhone
+iPhone®, 0.951409
+iPhone® 0.930277
+iPod®/iPhone 0.850257
+iPod®/iPhone® 0.836214
+3GS 0.811673
+3G, 0.802156
+3GS, 0.801084
+4S 0.798434
+3G/3GS 0.795395
+iPod®, 0.785776
+Query word? iphone
+Microphone 0.836125
+Saxophone 0.834951
+Speakerphone 0.834494
+Telephone 0.824235
+Earphones 0.812153
+Ozone 0.809136
+Headphone 0.796176
+Phone 0.782926
+Telephones 0.778849
+GoPhone 0.769658
+Query word? ^C
+gitpod /workspace/search_with_machine_learning_course (main) $ cat /workspace/datasets/fasttext/titles.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" | sed "s/[^[:alnum:]]/ /g" | tr -s ' ' > /workspace/datasets/fasttext/normalized_titles.txt
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin^C
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/title_model
+Read 1M words
+Number of words:  10873
+Number of labels: 0
+Progress:   2.5% words/sec/thread:    2472 lr:  0.048729 avg.loss:  3.491350 ETA:   0h 3m13s^C
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/nporm^Ctle_model
+gitpod /workspace/search_with_machine_learning_course (main) $ cat /workspace/datasets/fasttext/titles.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" | sed "s/[^[:alnum:]]/ /g" | tr -s ' ' > /workspace/datasets/fasttext/normalized_titles.txt^C
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/titles.txt -output /workspace/datasets/fasttext/normalized_title_model
+Read 1M words
+Number of words:  10873
+Number of labels: 0
+^C
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model
+Read 1M words
+Number of words:  8903
+Number of labels: 0
+Progress: 100.0% words/sec/thread:    1737 lr:  0.000000 avg.loss:  1.478403 ETA:   0h 0m 0s
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model -epochs 25 -minCount 20
+Unknown argument: -epochs
+
+The following arguments are mandatory:
+  -input              training file path
+  -output             output file path
+
+The following arguments are optional:
+  -verbose            verbosity level [2]
+
+The following arguments for the dictionary are optional:
+  -minCount           minimal number of word occurences [5]
+  -minCountLabel      minimal number of label occurences [0]
+  -wordNgrams         max length of word ngram [1]
+  -bucket             number of buckets [2000000]
+  -minn               min length of char ngram [3]
+  -maxn               max length of char ngram [6]
+  -t                  sampling threshold [0.0001]
+  -label              labels prefix [__label__]
+
+The following arguments for training are optional:
+  -lr                 learning rate [0.05]
+  -lrUpdateRate       change the rate of updates for the learning rate [100]
+  -dim                size of word vectors [100]
+  -ws                 size of the context window [5]
+  -epoch              number of epochs [5]
+  -neg                number of negatives sampled [5]
+  -loss               loss function {ns, hs, softmax, one-vs-all} [ns]
+  -thread             number of threads (set to 1 to ensure reproducible results) [12]
+  -pretrainedVectors  pretrained word vectors for supervised learning []
+  -saveOutput         whether output params should be saved [false]
+  -seed               random generator seed  [0]
+
+The following arguments are for autotune:
+  -autotune-validation            validation file to be used for evaluation
+  -autotune-metric                metric objective {f1, f1:labelname} [f1]
+  -autotune-predictions           number of predictions used for evaluation  [1]
+  -autotune-duration              maximum duration in seconds [300]
+  -autotune-modelsize             constraint model file size [] (empty = do not quantize)
+
+The following arguments for quantization are optional:
+  -cutoff             number of words and ngrams to retain [0]
+  -retrain            whether embeddings are finetuned if a cutoff is applied [false]
+  -qnorm              whether the norm is quantized separately [false]
+  -qout               whether the classifier is quantized [false]
+  -dsub               size of each sub-vector [2]
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -minCount 20 -epoch 25  -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model
+Read 1M words
+Number of words:  3861
+Number of labels: 0
+Progress: 100.0% words/sec/thread:    1822 lr:  0.000000 avg.loss:  1.200599 ETA:   0h 0m 0s
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -minCount 20 -epoch 25  -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model
+Read 1M words
+Number of words:  3861
+Number of labels: 0
+^C
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -minCount 20 -epoch 25  -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model
+Read 1M words
+Number of words:  3861
+Number of labels: 0
+Progress:  14.7% words/sec/thread:    1691 lr:  0.042637 avg.loss:  1.536002 ETA:   0h19m34s^C
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -minCount 20   -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/normalized_title_model
+Read 1M words
+Number of words:  3861
+Number of labels: 0
+Progress: 100.0% words/sec/thread:    1200 lr:  0.000000 avg.loss:  1.466973 ETA:   0h 0m 0s
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -minCount 20   -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model
+Read 1M words
+Number of words:  3861
+Number of labels: 0
+^C
+gitpod /workspace/search_with_machine_learning_course (main) $ ~/fastText-0.9.2/fasttext skipgram -minCount 20 -epoch 25  -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model
+Read 1M words
+Number of words:  3861
+Number of labels: 0
+Progress: 100.0% words/sec/thread:    1219 lr:  0.000000 avg.loss:  1.186265 ETA:   0h 0m 0s
+gitpod /workspace/search_with_machine_lea
+
+
+(search_with_ml) gitpod /workspace/search_with_machine_learning_course (main) $ history
+    1  ./gitpod-command.sh
+    2  ./count-tracker.sh
+    3  ./index-data.sh -r -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json
+    4  reset
+    5  pyenv activate search_with_ml
+    6  ./index-data.sh -r -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json
+    7  python week2/createSynonyms.py
+    8  pwd
+    9  ls
+   10  git diff conf/bbuy_products.json
+   11  git status
+   12  git diff week2/conf/bbuy_products.json
+   13  ./count-tracker.sh
+   14  pkill -9 -f index_products.py
+   15  ./count-tracker.sh
+   16  ./index-data.sh -r -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json
+   17  head -n 10 /workspace/datasets/fasttext/pruned_labeled_products.txt
+   18  cat /workspace/datasets/fasttext/pruned_labeled_products.txt |sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" | sed "s/[^[:alnum:]_]/ /g" | tr -s ' ' > /workspace/datasets/fasttext/normalized_pruned_labeled_products.txt
+   19  head /workspace/datasets/fasttext/normalized_pruned_labeled_products.txt
+   20  head -n 10000 /workspace/datasets/fasttext/normalized_pruned_labeled_products.txt > /workspace/datasets/fasttext/normalized_pruned_training.txt
+   21  tail -n 10000 /workspace/datasets/fasttext/normalized_pruned_labeled_products.txt > /workspace/datasets/fasttext/normalized_pruned_test.txt
+   22  shuf /workspace/datasets/fasttext/normalized_pruned_labeled_products.txt --random-source=<(seq 99999) > /workspace/datasets/fasttext/shuffled_pruned_labeled_products.txt
+   23  shuf /workspace/datasets/fasttext/normalized_pruned_labeled_products.txt --random-source=<(seq 99999) > /workspace/datasets/fasttext/normalized_shuffled_pruned_labeled_products.txt
+   24  head -n 10000 /workspace/datasets/fasttext/normalized_shuffled_pruned_labeled_products.txt > /workspace/datasets/fasttext/normalized_pruned_training.txt
+   25  tail -n 10000 /workspace/datasets/fasttext/normalized_shuffled_pruned_labeled_products.txt > /workspace/datasets/fasttext/normalized_pruned_test.txt
+   26  ~/fastText-0.9.2/fasttext supervised -epoch 10 -lr 1.0 -minCount 20  -input /workspace/datasets/fasttext/normalized_pruned_training.txt -output best_model
+   27  ~/fastText-0.9.2/fasttext test best_model.bin /workspace/datasets/fasttext/normalized_pruned_test.txt
+   28  ~/fastText-0.9.2/fasttext supervised -epoch 20 -lr 0.05 -minCount 20  -input /workspace/datasets/fasttext/normalized_pruned_training.txt -output best_model
+   29  ~/fastText-0.9.2/fasttext test best_model.bin /workspace/datasets/fasttext/normalized_pruned_test.txt
+   30  ~/fastText-0.9.2/fasttext predict title_model.bin -
+   31  ~/fastText-0.9.2/fasttext predict /workspace/datasets/fasttext/title_model.bin -
+   32  ~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin -
+   33  ~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+   34  grep /workspace/datasets/fasttext/top_words.txt
+   35  grep espresso /workspace/datasets/fasttext/top_words.txt
+   36  grep nespresso /workspace/datasets/fasttext/top_words.txt
+   37  grep nespresso /workspace/datasets/fasttext/normalized_titles.txt
+   38  ~/fastText-0.9.2/fasttext skipgram -minCount 20 -epoch 5 -lr 1.0 -wordNgrams 2  -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model
+   39  ~/fastText-0.9.2/fasttext skipgram -minCount 20 -epoch 5 -lr 1.0   -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model
+   40  ~/fastText-0.9.2/fasttext skipgram -minCount 20 -epoch 5 -wordNgrams 2   -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model
+   41  ~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+   42  ~/fastText-0.9.2/fasttext skipgram -minCount 20 -epoch 10   -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model
+   43  ~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+   44  ~/fastText-0.9.2/fasttext skipgram -minCount25 -epoch 5 -wordNgrams 5   -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model
+   45  ~/fastText-0.9.2/fasttext skipgram -minCount 5 -epoch 5 -wordNgrams 2   -input /workspace/datasets/fasttext/normalized_titles.txt -output /workspace/datasets/fasttext/title_model
+   46  ~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+   47  python week2/createSynonyms.py
+   48  python week2/createSynonyms.py > /workspace/datasets/fasttext/synonyms.csv
+   49  docker cp /workspace/datasets/fasttext/synonyms.csv opensearch-node1:/usr/share/opensearch/config/synonyms.csv
+   50  ./index-data.sh -r -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json
+   51  ./count-tracker.sh
+   52  ~/fastText-0.9.2/fasttext nn /workspace/datasets/fasttext/title_model.bin
+   53  history
+(search_with_ml) gitpod /workspace/search_with_machine_learning_course (main) $

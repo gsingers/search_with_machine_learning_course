@@ -1,0 +1,13 @@
+import fasttext
+
+
+# Train model
+model = fasttext.load_model("/workspace/datasets/fasttext/title_model.bin")
+
+words = [x.strip() for x in open("/workspace/datasets/fasttext/top_words.txt").readlines()]
+for word in words:
+    nn = [y for (x,y) in model.get_nearest_neighbors(word, k=10) if x > 0.7]
+    if(len(nn)>0):
+        print("{},{}".format(word,','.join(nn)))
+
+
