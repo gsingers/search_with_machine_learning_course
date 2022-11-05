@@ -9,7 +9,7 @@ import os
 from getpass import getpass
 from urllib.parse import urljoin
 import pandas as pd
-import fileinput
+import sys
 import logging
 
 
@@ -241,7 +241,7 @@ if __name__ == "__main__":
     index_name = args.index
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
-    for line in fileinput.input():
+    for line in sys.stdin:
         query = line.rstrip()
         if query == "Exit":
             break
