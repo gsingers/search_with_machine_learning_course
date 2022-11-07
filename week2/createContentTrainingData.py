@@ -5,6 +5,8 @@ from tqdm import tqdm
 import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
+import pandas as pd
+import numpy as np
 
 def transform_name(product_name):
     # IMPLEMENT
@@ -63,7 +65,33 @@ if __name__ == '__main__':
     print("Writing results to %s" % output_file)
     with multiprocessing.Pool() as p:
         all_labels = tqdm(p.imap(_label_filename, files), total=len(files))
+        df = []
+        min_count = 500
+
+        for label_list in all_labels:
+            df.append(pd.DataFrame(label_list, columns = ["category", "name"]))
+        data_df = pd.concat(df, axis = 0)
+        label_count = data_df.groupby("category").size().reset_index(name="num_count")
+        label_count = label_count[label_count["num_count"] > min_count]
+        label_list = list(label_count["category"])
+        #print(label_list)
+        output_df = data_df[data_df["category"].isin(label_list)]
+
         with open(output_file, 'w') as output:
             for label_list in all_labels:
                 for (cat, name) in label_list:
-                    output.write(f'__label__{cat} {name}\n')
+                   output.write(f'__label__{cat} {name}\n')
+        
+        save_path = "/workspace/datasets/fasttext/pruned_labeled_products.txt"
+        with open(save_path, 'w') as output:
+            for (index, row) in output_df.iterrows():
+                output.write(f'__label__{row["category"]} {row["name"]}\n')   
+
+        save_title_path = "/workspace/datasets/fasttext/titles.txt"
+        with open(save_title_path, 'w') as output:
+            for (index, row) in output_df.iterrows():
+                output.write(f'{row["name"]}\n')   
+
+        
+        
+
