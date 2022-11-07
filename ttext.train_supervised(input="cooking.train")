@@ -1,0 +1,68 @@
+Help on module fasttext.FastText in fasttext:
+
+NNAAMMEE
+    fasttext.FastText
+
+DDEESSCCRRIIPPTTIIOONN
+    # Copyright (c) 2017-present, Facebook, Inc.
+    # All rights reserved.
+    #
+    # This source code is licensed under the MIT license found in the
+    # LICENSE file in the root directory of this source tree.
+
+FFUUNNCCTTIIOONNSS
+    ccbbooww(*kargs, **kwargs)
+    
+    eepprriinntt(*args, **kwargs)
+    
+    llooaadd__mmooddeell(path)
+        Load a model given a filepath and return a model object.
+    
+    rreeaadd__aarrggss(arg_list, arg_dict, arg_names, default_values)
+    
+    sskkiippggrraamm(*kargs, **kwargs)
+    
+    ssuuppeerrvviisseedd(*kargs, **kwargs)
+    
+    ttookkeenniizzee(text)
+        Given a string of text, tokenize it and return a list of tokens
+    
+    ttrraaiinn__ssuuppeerrvviisseedd(*kargs, **kwargs)
+        Train a supervised model and return a model object.
+        
+        input must be a filepath. The input text does not need to be tokenized
+        as per the tokenize function, but it must be preprocessed and encoded
+        as UTF-8. You might want to consult standard preprocessing scripts such
+        as tokenizer.perl mentioned here: http://www.statmt.org/wmt07/baseline.html
+        
+        The input file must must contain at least one label per line. For an
+        example consult the example datasets which are part of the fastText
+        repository such as the dataset pulled by classification-example.sh.
+    
+    ttrraaiinn__uunnssuuppeerrvviisseedd(*kargs, **kwargs)
+        Train an unsupervised model and return a model object.
+        
+        input must be a filepath. The input text does not need to be tokenized
+        as per the tokenize function, but it must be preprocessed and encoded
+        as UTF-8. You might want to consult standard preprocessing scripts such
+        as tokenizer.perl mentioned here: http://www.statmt.org/wmt07/baseline.html
+        
+        The input field must not contain any labels or use the specified label prefix
+        unless it is ok for those words to be ignored. For an example consult the
+        dataset pulled by the example script word-vector-example.sh, which is
+        part of the fastText repository.
+
+DDAATTAA
+    BBOOWW = '<'
+    EEOOSS = '</s>'
+    EEOOWW = '>'
+    aabbssoolluuttee__iimmppoorrtt = _Feature((2, 5, 0, 'alpha', 1), (3, 0, 0, 'alpha', 0...
+    ddiissppllaayyeedd__eerrrroorrss = {}
+    ddiivviissiioonn = _Feature((2, 2, 0, 'alpha', 2), (3, 0, 0, 'alpha', 0), 1310...
+    pprriinntt__ffuunnccttiioonn = _Feature((2, 6, 0, 'alpha', 2), (3, 0, 0, 'alpha', 0)...
+    uunniiccooddee__lliitteerraallss = _Feature((2, 6, 0, 'alpha', 2), (3, 0, 0, 'alpha', ...
+    uunnssuuppeerrvviisseedd__ddeeffaauulltt = {'autotuneDuration': 300, 'autotuneMetric': 'f1...
+
+FFIILLEE
+    /home/gitpod/.pyenv/versions/3.9.7/envs/search_with_ml/lib/python3.9/site-packages/fasttext/FastText.py
+
