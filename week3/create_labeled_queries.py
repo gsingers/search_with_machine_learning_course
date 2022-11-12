@@ -6,6 +6,7 @@ import numpy as np
 import csv
 import re
 import logging
+import tqdm
 import nltk
 
 logging.basicConfig(level=logging.INFO)
@@ -51,25 +52,22 @@ queries_df = pd.read_csv(queries_file_name)[['category', 'query']]
 queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
-queries_df['query'] = queries_df['query'].apply(
-    lambda query: re.sub(r"[ ]+", " ", re.sub(r"[\W_]+", " ", str(query).lower())).strip()
-)
-queries_df['query'] = queries_df['query'].apply(lambda query: stemmer.stem(query))
+# queries_df['query'] = queries_df['query'].apply(
+#     lambda query: re.sub(r"[ ]+", " ", re.sub(r"[\W_]+", " ", str(query).lower())).strip()
+# )
+# queries_df['query'] = queries_df['query'].apply(lambda query: stemmer.stem(query))
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
-categories_replaced = 0
 while True:
-    cat_query_counts = queries_df.groupby(['category']).count()
-    categories_under_threshold = cat_query_counts[cat_query_counts < min_queries].sort_values(by='query').index
+    cat_query_counts = queries_df.groupby(['category']).size()
+    categories_under_threshold = cat_query_counts[cat_query_counts < min_queries].sort_values().index
+    logging.info(f"Categories to replace: {len(categories_under_threshold)}")
     if len(categories_under_threshold) == 0:
-        logging.info("No categories to replace")
         break
     else:
-        parent = parents_df[parents_df['category'] == categories_under_threshold[0]]['parent'].values[0]
-        queries_df.loc[queries_df['category'] == categories_under_threshold[0], 'category'] = parent
-        categories_replaced += 1
-        logging.info(f"Categories replaced: {categories_replaced}")
-        continue
+        for category in tqdm.tqdm(categories_under_threshold):
+            parent = parents_df[parents_df['category'] == category]['parent'].values[0]
+            queries_df.loc[queries_df['category'] == category, 'category'] = parent
 
 logging.info(f"Final number of categories in output: {queries_df.category.nunique()}")
 
