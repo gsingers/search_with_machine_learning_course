@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
+import fasttext
 
 
 logger = logging.getLogger(__name__)
@@ -186,11 +187,15 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
+def search(client,fasttext_model, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
     #### W3: classify the query
+    category = fasttext_model.predict(user_query)[0]
+    categories=[cat.replace('__label__','') for cat in categories]
+    filters=[]
+    filters.append({"terms": {"categoryPathIds":categories}})
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -239,13 +244,15 @@ if __name__ == "__main__":
 
     )
     index_name = args.index
+    model = fasttext.load_model(r"/workspace/datasets/fasttext/query_classifier.bin")
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
     for line in fileinput.input():
         query = line.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+
+        search(client=opensearch,fasttext_model=model, user_query=query, sort="regularPrice",index=index_name)
 
         print(query_prompt)
 

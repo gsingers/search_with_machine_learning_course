@@ -3,6 +3,7 @@ import argparse
 import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
+import re
 import csv
 
 # Useful if you want to perform stemming.
@@ -50,12 +51,34 @@ queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
 
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+def change(value):
+    print(value)
+    return (' ').join([stemmer.stem(word) for word in  value.split(' ')])
 
+queries_df['query'] = queries_df['query'].str.lower().str.replace('[\\d\\s]+', ' ').map(lambda x:change(x))
+
+# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+totaldictionary = parents_df.set_index('category').to_dict()['parent']
+
+# Roll up categories to ancestors to satisfy the minimum number of queries per category.
+while (True):
+    countdata = queries_df.groupby(['category']).size().reset_index(name='count')
+    filteredData = countdata[(countdata["count"] < 1000)]
+    filteredData['parent'] = filteredData.apply(lambda row: totaldictionary.get(row['category'], row['category']), axis=1)
+    filteredData.drop('count', axis=1)
+    if (len(filteredData) == 0):
+        break;
+    
+    parentdictionary = filteredData.set_index('category').to_dict()['parent']
+    queries_df['category'] = queries_df['category'].apply(lambda c: parentdictionary.get(c, c))
+
+print(queries_df)
+queries_df = queries_df.replace(np.nan, ' ')
 # Create labels in fastText format.
 queries_df['label'] = '__label__' + queries_df['category']
 
 # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
 queries_df = queries_df[queries_df['category'].isin(categories)]
 queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
+
 queries_df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
