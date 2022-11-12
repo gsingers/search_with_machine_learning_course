@@ -52,10 +52,10 @@ queries_df = pd.read_csv(queries_file_name)[['category', 'query']]
 queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
-# queries_df['query'] = queries_df['query'].apply(
-#     lambda query: re.sub(r"[ ]+", " ", re.sub(r"[\W_]+", " ", str(query).lower())).strip()
-# )
-# queries_df['query'] = queries_df['query'].apply(lambda query: stemmer.stem(query))
+queries_df['query'] = queries_df['query'].apply(
+    lambda query: re.sub(r"[ ]+", " ", re.sub(r"[\W_]+", " ", str(query).lower())).strip()
+)
+queries_df['query'] = queries_df['query'].apply(lambda query: stemmer.stem(query))
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
 while True:
