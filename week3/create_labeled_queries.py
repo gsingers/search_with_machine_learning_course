@@ -66,8 +66,9 @@ while True:
         break
     else:
         for category in tqdm.tqdm(categories_under_threshold):
-            parent = parents_df[parents_df['category'] == category]['parent'].values[0]
-            queries_df.loc[queries_df['category'] == category, 'category'] = parent
+            if len(parents_df[parents_df['category'] == category]) > 0:
+                parent = parents_df[parents_df['category'] == category]['parent'].values[0]
+                queries_df.loc[queries_df['category'] == category, 'category'] = parent
 
 logging.info(f"Final number of categories in output: {queries_df.category.nunique()}")
 
