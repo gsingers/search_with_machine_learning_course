@@ -198,18 +198,17 @@ def search(client, user_query, index="bbuy_products", sort="_score", sortDir="de
         score = 0
 
         for (label, cat_score) in zip(query_category_results[0], query_category_results[1]):
-            category_list.append(label)
+            categories.append(label)
             score += cat_score
 
             if (score >= 0.5):
                 break
 
-        category_list = [cat.replace("__label__", "") for cat in category_list]
-
+        categories = [cat.replace("__label__", "") for cat in categories]
         #### W3: create filters and boosts
         filters.append({
             "terms": {
-                "categoryLeaf": category_list
+                "categoryLeaf": categories
             }
         })
 
@@ -227,7 +226,7 @@ if __name__ == "__main__":
     port = 9200
     auth = ('admin', 'admin')  # For testing only. Don't store credentials in code.
     query_classifier_path = '/workspace/models/fasttext/query_classifier.bin'
-    query_classifier = fasttext.load_model(category_classifier_model_path)
+    query_classifier = fasttext.load_model(query_classifier_path)
     parser = argparse.ArgumentParser(description='Build LTR.')
     general = parser.add_argument_group("general")
     general.add_argument("-i", '--index', default="bbuy_products",
