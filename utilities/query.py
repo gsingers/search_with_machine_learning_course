@@ -10,6 +10,7 @@ from getpass import getpass
 from urllib.parse import urljoin
 import pandas as pd
 import fileinput
+import fasttext
 import logging
 
 
@@ -187,11 +188,33 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", synonyms=False):
-    #### W3: classify the query
-    #### W3: create filters and boosts
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", synonyms=False, query_classifier=None):
+    filters = []
+
+    if query_classifier:
+        #### W3: classify the query
+        query_category_results = query_classifier.predict(user_query)
+        categories = []
+        score = 0
+
+        for (label, cat_score) in zip(query_category_results[0], query_category_results[1]):
+            category_list.append(label)
+            score += cat_score
+
+            if (score >= 0.5):
+                break
+
+        category_list = [cat.replace("__label__", "") for cat in category_list]
+
+        #### W3: create filters and boosts
+        filters.append({
+            "terms": {
+                "categoryLeaf": category_list
+            }
+        })
+
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], synonyms=synonyms)
+    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], synonyms=synonyms)
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -203,6 +226,8 @@ if __name__ == "__main__":
     host = 'localhost'
     port = 9200
     auth = ('admin', 'admin')  # For testing only. Don't store credentials in code.
+    query_classifier_path = '/workspace/models/fasttext/query_classifier.bin'
+    query_classifier = fasttext.load_model(category_classifier_model_path)
     parser = argparse.ArgumentParser(description='Build LTR.')
     general = parser.add_argument_group("general")
     general.add_argument("-i", '--index', default="bbuy_products",
@@ -248,7 +273,7 @@ if __name__ == "__main__":
         query = line.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, index=index_name, query_classifier=query_classifier)
 
         print(query_prompt)
 
