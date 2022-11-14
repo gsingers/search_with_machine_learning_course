@@ -44,13 +44,56 @@ for child in root:
         parents.append(cat_path_ids[-2])
 parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 'parent'])
 
+#print (parents_df)
+
 # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
 queries_df = pd.read_csv(queries_file_name)[['category', 'query']]
 queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+queries_df['query'] = queries_df['query'].str.lower()
+queries_df['query'] = queries_df['query'].str.replace('[^a-zA-Z0-9]', ' ')
+queries_df['query'] = queries_df['query'].str.replace('\s+', ' ', regex=True)
+
+
+def stem_sentences(sentence):
+    tokens = sentence.split()
+    stemmed_tokens = [stemmer.stem(token) for token in tokens]
+    return ' '.join(stemmed_tokens)
+
+queries_df['query'] = queries_df['query'].apply(stem_sentences)
+
+#print (queries_df)
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+min_count = 1000
+
+
+category_under_threshold = queries_df.groupby(['category']).filter(lambda x: len(x) < min_count)['category'].unique()
+category_count = queries_df.groupby(['category']).size().reset_index(name='count')
+    
+    
+while len(category_under_threshold) > 0:
+    label_category = pd.merge(queries_df,category_count, how = 'left', on = ['category'])
+    category_label_count = pd.merge(label_category,parents_df, how = 'left', on = ['category'])
+    
+    category_label_count.loc[category_label_count['count'] < min_count, 'category'] = category_label_count['parent']
+    
+    #print (category_label_count)
+    queries_df = category_label_count.drop(['parent','count'], axis=1)
+    #category_under_threshold, category_count = roll_up(queries_df)
+    category_under_threshold = queries_df.groupby(['category']).filter(lambda x: len(x) < min_count)['category'].unique()
+    category_count = queries_df.groupby(['category']).size().reset_index(name='count')
+    #print (category_count)
+
+    count =  len(queries_df.groupby(['category']).filter(lambda x: len(x) >= min_count)['category'].unique())
+    print (count)
+
+                
+##test = category_count.loc[category_count['category'] == "abcat0701001"]
+#print (test)
+
+
 
 # Create labels in fastText format.
 queries_df['label'] = '__label__' + queries_df['category']
