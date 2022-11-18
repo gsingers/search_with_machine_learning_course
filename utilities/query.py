@@ -12,7 +12,8 @@ import pandas as pd
 import fileinput
 import logging
 import fasttext
-
+from sentence_transformers import SentenceTransformer
+model2 = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -186,8 +187,21 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
         query_obj["_source"] = source
     return query_obj
 
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
+    text=model2.encode([user_query])[0].tolist()
+    return {
+        "size":size,
+        "query":{
+            "knn":{
+                "embedding":{
+                    "vector":text,
+                    "k":size
+                }
+            }
+        }
+    }
 
-def search(client,fasttext_model, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
+def search(client,fasttext_model, user_query, index="bbuy_products", sort="_score", sortDir="desc",vector=False):
     #### W3: classify the query
     category = fasttext_model.predict(user_query)[0]
     categories=[cat.replace('__label__','') for cat in categories]
@@ -195,7 +209,10 @@ def search(client,fasttext_model, user_query, index="bbuy_products", sort="_scor
     filters.append({"terms": {"categoryPathIds":categories}})
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    if vector:
+        query_obj = create_vector_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    else:
+        query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -215,6 +232,8 @@ if __name__ == "__main__":
                          help='The OpenSearch host name')
     general.add_argument("-p", '--port', type=int, default=9200,
                          help='The OpenSearch port')
+    general.add_argument("-v", '--vector', type=int, default=False,
+                         help='run on vector search True or False   ')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
 
@@ -229,7 +248,7 @@ if __name__ == "__main__":
     if args.user:
         password = getpass()
         auth = (args.user, password)
-
+    vector = args.vector
     base_url = "https://{}:{}/".format(host, port)
     opensearch = OpenSearch(
         hosts=[{'host': host, 'port': port}],
@@ -252,7 +271,7 @@ if __name__ == "__main__":
         if query == "Exit":
             break
 
-        search(client=opensearch,fasttext_model=model, user_query=query, sort="regularPrice",index=index_name)
+        search(client=opensearch,fasttext_model=model, user_query=query, sort="regularPrice",index=index_name,vector)
 
         print(query_prompt)
 

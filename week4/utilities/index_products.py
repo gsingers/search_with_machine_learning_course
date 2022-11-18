@@ -151,7 +151,7 @@ def index_file(file, index_name, reduced=False):
             logger.info("Indexing")
             all_docs = []
             for o in docs:
-                all_docs.append({'_index': index_name, '_id': doc['sku'][0], '_source': doc})
+                all_docs.append({'_index': index_name, '_id': doc['sku'][0], '_source': o})
             bulk(client, all_docs, request_timeout=60)
             logger.info(f'{docs_indexed} documents indexed')
             docs = []
