@@ -6,12 +6,14 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 import argparse
 import json
 import os
+import sys
 from getpass import getpass
 from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
-
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -185,17 +187,36 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
         query_obj["_source"] = source
     return query_obj
 
+def create_vector_query(user_query, size):
+     vector = model.encode([user_query])[0].tolist()
+     query_obj = {
+         "size": size,
+         "query": {
+             "knn": {
+                 "embedding": {
+                     "vector": vector,
+                     "k": size
+                 }
+             }
+         },
+         "_source": ["name", "shortDescription"]
+     }
+     return query_obj
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
-    #### W3: classify the query
-    #### W3: create filters and boosts
-    # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", use_vector = False):
+    print("Searching")
+    if use_vector:
+        print("Using vector search")
+        query_obj = create_vector_query(user_query, size=10)
+    else:
+        query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
-        print(json.dumps(response, indent=2))
+        for hit in hits:
+            print(hit["_source"]["name"])
+        # print(json.dumps(response, indent=2))
 
 
 if __name__ == "__main__":
@@ -212,9 +233,10 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
-
+    general.add_argument('--use_vector', action='store_true', default=False, 
+                         help='Use vector search')
     args = parser.parse_args()
-
+    print(args)
     if len(vars(args)) == 0:
         parser.print_usage()
         exit()
@@ -240,12 +262,13 @@ if __name__ == "__main__":
     )
     index_name = args.index
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
-    print(query_prompt)
-    for line in fileinput.input():
+    print(query_prompt)        
+
+    for line in sys.stdin:
         query = line.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, index=index_name, use_vector = args.use_vector)
 
         print(query_prompt)
 
