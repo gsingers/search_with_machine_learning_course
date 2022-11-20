@@ -21,6 +21,7 @@ logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
 
 # IMPLEMENT ME: import the sentence transformers module!
+import sentence_transformers
 
 # NOTE: this is not a complete list of fields.  If you wish to add more, put in the appropriate XPath expression.
 #TODO: is there a way to do this using XPath/XSL Functions so that we don't have to maintain a big list?
@@ -107,7 +108,8 @@ def get_opensearch():
 def index_file(file, index_name, reduced=False):
     logger.info("Creating Model")
     # IMPLEMENT ME: instantiate the sentence transformer model!
-    
+    model = sentence_transformers.SentenceTransformer('all-MiniLM-L6-v2')
+
     logger.info("Ready to index")
 
     docs_indexed = 0
