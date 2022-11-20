@@ -5,6 +5,7 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 import argparse
 import json
+import sys
 import os
 from getpass import getpass
 from urllib.parse import urljoin
@@ -23,14 +24,14 @@ emb_model = sentence_transformers.SentenceTransformer('all-MiniLM-L6-v2')
 
 def create_vector_query(user_query, size=10):
     query_array = [user_query]
-    query_emb = model.encode(query_array)
+    query_emb = emb_model.encode(query_array)
     query_obj = {
         "size": size,
         "query": {
             "knn": {
                 "embedding": {
-                    "vector": embedded_query[0],
-                    "k": num_results
+                    "vector": query_emb[0],
+                    "k": size
                 }
             }
         }
@@ -258,9 +259,9 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
-    general.add_argument('--synonyms', action='store_true', default=False,
+    general.add_argument('--synonyms', action=argparse.BooleanOptionalAction, default=False,
                          help='Decide whether to use synonyms in the name field')
-    general.add_argument('--vector', action='store_true', default=False,
+    general.add_argument('--vector', action=argparse.BooleanOptionalAction, default=False,
                          help='Decide whether to use vector search')
 
     args = parser.parse_args()
@@ -293,7 +294,7 @@ if __name__ == "__main__":
     vector = args.vector
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
-    for line in fileinput.input():
+    for line in sys.stdin:
         query = line.rstrip()
         if query == "Exit":
             break
