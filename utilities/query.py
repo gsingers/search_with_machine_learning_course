@@ -258,9 +258,9 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
-    general.add_argument('--synonyms', action='store_true', default=False
+    general.add_argument('--synonyms', action='store_true', default=False,
                          help='Decide whether to use synonyms in the name field')
-    general.add_argument('--vector', action='store_true', default=False
+    general.add_argument('--vector', action='store_true', default=False,
                          help='Decide whether to use vector search')
 
     args = parser.parse_args()
