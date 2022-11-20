@@ -145,7 +145,7 @@ def index_file(file, index_name, reduced=False):
         if docs_indexed % 200 == 0:
             logger.info("Indexing")
             embeddings = model.encode(names)
-            for i, emb in enumerate(docs):
+            for i, doc in enumerate(docs):
                 doc['_source']['embedding'] = embeddings[i]
             bulk(client, docs, request_timeout=60)
             logger.info(f'{docs_indexed} documents indexed')
