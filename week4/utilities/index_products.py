@@ -140,9 +140,13 @@ def index_file(file, index_name, reduced=False):
             continue
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
+        names.append(doc['name'][0])
         docs_indexed += 1
         if docs_indexed % 200 == 0:
             logger.info("Indexing")
+            embeddings = model.encode(names)
+            for i, emb in enumerate(docs):
+                doc['_source']['embedding'] = embeddings[i]
             bulk(client, docs, request_timeout=60)
             logger.info(f'{docs_indexed} documents indexed')
             docs = []
