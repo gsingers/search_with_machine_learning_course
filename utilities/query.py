@@ -13,6 +13,11 @@ import fileinput
 import logging
 import sys
 
+import fasttext
+import nltk
+stemmer = nltk.stem.PorterStemmer()
+
+model = fasttext.load_model("/workspace/datasets/fasttext/model_query.bin")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -191,12 +196,59 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
         query_obj["_source"] = source
     return query_obj
 
+def normalize_query(query): 
+    lower_query = query.lower()
+    normalize_query= lower_query.replace('[^a-zA-Z0-9]', ' ').replace('\s+', ' ', regex=True)
+    tokens = normalize_query.split()
+    stemmed_tokens = [stemmer.stem(token) for token in tokens]
+    return ' '.join(stemmed_tokens)
+
+def create_vector_query(query, top_k = 10):
+    vector = sentence_transfomer.encoder([query])[0]
+    return {
+        "size" : top_k,
+        "query": {
+            "knn": {
+                "embedding": {
+                    "vector": vector,
+                    "k": top_k
+                }
+            }
+        }
+    }
 
 def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", use_synonyms = False):
-    #### W3: classify the query
-    #### W3: create filters and boosts
+
+    if user_vectors:
+        query_obj = create_vector_query(user_query)
+    
+    else:
+
+        #### W3: classify the query
+        query_normalized = normalize_query(query)
+        categories, probs = model.predict(query_normalized, k = 3)
+        print(categories, probs)
+
+        threshold = 0.5
+        category_list = []
+    
+        for i in range(len(probs)):
+            if probs[i] > threshold:
+                category_list.append(categories[i])
+
+        #### W3: create filters and boosts
+        filters = []
+        if user_filter and category_list:
+            category_filter = {
+                'terms': {
+                    'categoryPathIds.keyword': category_list
+                }
+            }
+            filter.append(category_filter)
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], use_synonyms = use_synonyms)
+   
+
+        query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], use_synonyms = use_synonyms)
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
