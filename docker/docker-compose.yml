@@ -1,7 +1,7 @@
 version: '3'
 services:
   opensearch-node1:
-    image: gsingers/opensearch-learning-to-rank:latest
+    image: gsingers/opensearch-learning-to-rank:2.1.0
     container_name: opensearch-node1
     environment:
       - discovery.type=single-node
@@ -17,7 +17,7 @@ services:
       - opensearch-net
   
   opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2.2.1
+    image: opensearchproject/opensearch-dashboards:2.5.0
     ports:
       - 5601:5601
     expose:
