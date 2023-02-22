@@ -5,6 +5,8 @@ RUN sudo apt-get install -y graphviz
 # Move where Pyenv is stored
 #RUN sudo mv /home/gitpod/.pyenv /workspace/pyenv
 #RUN sudo ln -s /workspace/pyenv /home/gitpod/.pyenv
+RUN git clone https://github.com/pyenv/pyenv-virtualenv.git /home/gitpod/.pyenv/plugins/pyenv-virtualenv
+
 
 RUN wget -O /home/gitpod/requirements.txt https://raw.githubusercontent.com/gsingers/search_with_machine_learning_course/main/requirements.txt
 
