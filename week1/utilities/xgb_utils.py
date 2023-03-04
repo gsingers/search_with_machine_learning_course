@@ -34,4 +34,15 @@ def train(xgb_train_data, num_rounds=5, xgb_conf=None ):
     print("Training XG Boost on %s for %s rounds with params: %s" % (xgb_train_data, num_rounds, xgb_params))
     ##### Step 3.a
     print("IMPLEMENT ME: train()")
+
+
+    dtrain = xgb.DMatrix(xgb_train_data)
+    xgb_params = {'max_depth': 2, 'eta': 1, 'silent': 1, 'objective': 'reg:linear'}
+    num_rounds = 2
+    print("Training XGBoost")
+    bst = xgb.train(xgb_params,
+                    dtrain,
+                    num_rounds)  # Do the training.  NOTE: in this toy example we did not use any hold out data
+    model = bst.get_dump(fmap=feat_map_file.name, dump_format='json')
+
     return bst, xgb_params
