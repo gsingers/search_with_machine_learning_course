@@ -10,7 +10,23 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
     # Create the base query, use a much bigger window
     #add on the rescore
     ##### Step 4.e:
-    print("IMPLEMENT ME: create_rescore_ltr_query")
+    query_obj["rescore"] = {
+        "window_size": rescore_size,
+        "query": {
+            "rescore_query": {
+                "sltr": {
+                    "params": {"keywords": user_query},
+                    "model": ltr_model_name,
+                    # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
+                    "store": ltr_store_name
+                }
+            },
+            "score_mode" : "total",
+            "query_weight": main_query_weight,
+            "rescore_query_weight": rescore_query_weight,  # Magic number, but let's say LTR matches are 2x baseline matches
+        },
+    }
+
     if active_features is not None and len(active_features) > 0:
         query_obj["rescore"]["query"]["rescore_query"]["sltr"]["active_features"] =  active_features
 
@@ -57,8 +73,39 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     ##### Step 3.b:
-    print("IMPLEMENT ME: create_feature_log_query")
-    return None
+    # print("IMPLEMENT ME: create_feature_log_query")
+    # print(query)
+    # print(doc_ids)
+    # print(featureset_name)
+    # print(ltr_store_name)
+    # print(terms_field)
+    # print(size)
+    query_obj = {
+        "size" : size,
+        "query": {
+            "bool": {
+                "filter": [
+                    {"terms": {terms_field: doc_ids}},
+                    {
+                        "sltr": {
+                            "_name": "logged_featureset",
+                            "params": {"keywords": query},
+                            "featureset": featureset_name,
+                            # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
+                            "store": ltr_store_name,
+                        }
+                    },
+                ]
+            }
+        },
+        "ext": {
+            "ltr_log": {
+                "log_specs": {"name": "log_entry", "named_query": "logged_featureset"}
+            }
+        },
+    }
+
+    return query_obj
 
 
 # Item is a Pandas namedtuple
