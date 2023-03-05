@@ -150,7 +150,20 @@
             }
           }
         }
-      }
-    ]
+      },
+      {
+        "name": "click_prior",
+        "params": [
+          "click_prior_query"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "query_string": {
+            "query": "{{click_prior_query}}",
+            "fields": ["_id"]
+            }
+          }
+        }
+      ]
   }
 }

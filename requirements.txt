@@ -16,3 +16,5 @@ nltk
 kaggle
 lxml
 sentence-transformers
+jupyter
+autopep8

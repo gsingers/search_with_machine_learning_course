@@ -253,6 +253,7 @@ class DataPrepper:
                     'artist_name_match_phrase',
                     'short_desc_match_phrase', 'long_desc_match_phrase',
                     'sales_rank_short_term',
+                    'click_prior'
                     ]
         
         # Initialize feature dictionary

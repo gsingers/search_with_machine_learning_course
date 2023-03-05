@@ -14,7 +14,8 @@ def create_stats_query(aggs, extended=True):
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(click_group): # total impressions isn't currently used, but it mayb worthwhile at some point
     click_prior_query = ""
-    # Create a string that looks like:  "query": "1065813^100 OR 8371111^89", where the left side is the doc id and the right side is the weight.  In our case, the number of clicks a document received in the training set
+    # Create a string that looks like:  "query": "1065813^100 OR 8371111^89", where the left side is the doc id and the right side is the weight. 
+    # In our case, the number of clicks a document received in the training set
     if click_group is not None:
         for item in click_group.itertuples():
             try:
@@ -28,7 +29,8 @@ def create_prior_queries_from_group(click_group): # total impressions isn't curr
 # expects clicks from the raw click logs, so value_counts() are being passed in
 def create_prior_queries(doc_ids, doc_id_weights, query_times_seen): # total impressions isn't currently used, but it mayb worthwhile at some point
     click_prior_query = ""
-    # Create a string that looks like:  "query": "1065813^100 OR 8371111^89", where the left side is the doc id and the right side is the weight.  In our case, the number of clicks a document received in the training set
+    # Create a string that looks like:  "query": "1065813^100 OR 8371111^89", where the left side is the doc id and the right side is the weight.  
+    # In our case, the number of clicks a document received in the training set
     if doc_ids is not None and doc_id_weights is not None:
         for idx, doc in enumerate(doc_ids):
             try:
