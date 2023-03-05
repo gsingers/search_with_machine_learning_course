@@ -1,0 +1,195 @@
+GET _cat/indices/bbuy_products
+
+GET _cat/indices/bbuy_queries
+
+POST bbuy_products/_search?explain=true
+{
+  "query": {
+      "bool":{
+        "must":[
+            {"query_string": {
+                "query": "dogs"
+            }}
+        ]
+      }
+  }
+}
+
+POST _scripts/ltr_log_template
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "size": 1,
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "terms": {
+                "sku": [
+                  "{{sku}}"
+                ]
+              }
+            },
+            {
+              "sltr": {
+                "_name": "logged_featureset",
+                "featureset": "bbuy_main_featureset",
+                "store": "week1",
+                "params": {
+                  "keywords": "{{user_query}}"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ext": {
+        "ltr_log": {
+          "log_specs": {
+            "name": "log_entry",
+            "named_query": "logged_featureset"
+          }
+        }
+      }
+    }
+  },
+  "params": {
+    "user_query": "",
+    "sku": ""
+  }
+}
+
+
+GET bbuy_products/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "terms": {
+            "sku": [2052194, 2053166, 8523243, 9311586]
+          }
+        },
+        {
+          "sltr": {
+            "_name": "logged_featureset",
+            "featureset": "bbuy_main_featureset",
+            "store": "week1",
+            "params": {
+              "keywords": "yamaha"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "ext": {
+    "ltr_log": {
+      "log_specs": {
+        "name": "log_entry",
+        "named_query": "logged_featureset"
+      }
+    }
+  }
+}
+
+
+# Test fuzzy matching
+GET bbuy_products/_search
+{
+  "query": {
+    "match": {
+      "name":{
+        "query": "iphone4",
+        "fuzziness": "1",
+        "prefix_length": 2
+      }
+    }
+  },
+  "_source": "name"
+}
+
+GET bbuy_products
+
+
+GET bbuy_products/_search
+{
+  "query": {
+    "match_phrase": {
+      "name.hyphens":{
+        "query": "iphone 4",
+        "slop": 6
+      }
+    }
+  },
+  "_source": "name"
+}
+
+GET bbuy_products/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "iphone 4",
+      "type": "phrase",
+      "slop": 6,
+      "minimum_should_match": "2<75%",
+      "fields": ["name^10", "name.hyphens^10", "shortDescription^5", "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath"]
+    }
+  },
+  "_source": "name"
+}
+
+GET bbuy_products/_search
+{
+  "query": {
+    "function_score": {
+      "functions":[{
+        "field_value_factor": {
+          "field": "customerReviewAverage",
+          "missing": 0
+        }
+      }],
+      "query": {
+        "match_all": {}
+      }
+    }
+  },
+  "_source": ["name", "customerReviewAverage"]
+}
+
+GET bbuy_products/_search
+{
+  "query": {
+    "function_score": {
+      "functions":[{
+        "field_value_factor": {
+          "field": "customerReviewCount",
+          "missing": 0
+        }
+      }],
+      "query": {
+        "match_all": {}
+      }
+    }
+  },
+  "_source": ["name", "customerReviewCount", "customerReviewAverage"]
+}
+
+GET bbuy_products/_search
+{
+  "query": {
+    "function_score": {
+      "functions":[{
+        "field_value_factor": {
+          "field": "onSale",
+          "missing": 0
+        }
+      }],
+      "query": {
+        "match_all": {}
+      }
+    }
+  },
+  "_source": ["name", "salePrice", "regularPrice", "onSale"]
+}

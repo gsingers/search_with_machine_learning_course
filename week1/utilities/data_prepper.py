@@ -252,8 +252,7 @@ class DataPrepper:
                     'customer_review_average', 'customer_review_count',
                     'artist_name_match_phrase',
                     'short_desc_match_phrase', 'long_desc_match_phrase',
-                    'sales_rank_short_term', # 'sales_rank_medium_term', 'sales_rank_long_term',
-                    # 'sale_price', 'on_sale'
+                    'sales_rank_short_term',
                     ]
         
         # Initialize feature dictionary

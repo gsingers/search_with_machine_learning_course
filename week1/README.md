@@ -282,5 +282,39 @@ features = [
 
 # ./ltr-end-to-end.sh -y -m 0 -c quantiles
 
+# Simple MRR is 0.285
+# LTR Simple MRR is 0.396
+# Hand tuned MRR is 0.423
+# LTR Hand Tuned MRR is 0.404
 
+# Simple p@10 is 0.119
+# LTR simple p@10 is 0.138
+# Hand tuned p@10 is 0.171
+# LTR hand tuned p@10 is 0.143
+# Simple better: 517      LTR_Simple Better: 591  Equal: 11
+# HT better: 640  LTR_HT Better: 630      Equal: 22
+```
+
+```python
+features = [
+            'name_match', 'name_match_phrase', 
+            'name_match_phrase_near_exact', 'multi_match',
+            'customer_review_average', 'customer_review_count',
+            'short_desc_match_phrase', 'long_desc_match_phrase',
+            'sales_rank_short_term', 'sales_rank_medium_term', 
+            ]
+
+# ./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+# Simple MRR is 0.285
+# LTR Simple MRR is 0.365
+# Hand tuned MRR is 0.423
+# LTR Hand Tuned MRR is 0.361
+
+# Simple p@10 is 0.119
+# LTR simple p@10 is 0.121
+# Hand tuned p@10 is 0.171
+# LTR hand tuned p@10 is 0.121
+# Simple better: 515      LTR_Simple Better: 593  Equal: 11
+# HT better: 690  LTR_HT Better: 592      Equal: 10
 ```

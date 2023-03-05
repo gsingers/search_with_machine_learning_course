@@ -32,6 +32,37 @@
         }
       },
       {
+        "name": "name_match_phrase_near_exact",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name.hyphens": {
+              "query": "{{keywords}}",
+              "slop": 1
+            }
+          }
+        }
+      },
+      {
+        "name": "multi_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "multi_match": {
+            "query": "iphone 4",
+            "type": "phrase",
+            "slop": 6,
+            "minimum_should_match": "2<75%",
+            "fields": ["name^10", "name.hyphens^10", "shortDescription^5", "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath"]
+          }
+        }
+      },
+      {
         "name": "customer_review_average",
         "template_language": "mustache",
         "template": {

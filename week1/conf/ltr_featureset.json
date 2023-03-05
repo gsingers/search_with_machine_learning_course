@@ -9,9 +9,9 @@
         "template_language": "mustache",
         "template": {
           "match": {
-            "name.hyphens": "{{keywords}}",
-            "fuzziness": "1",
-            "prefix_length": 2
+            "name.hyphens": {
+              "query": "{{keywords}}"
+            }
           }
         }
       },
@@ -26,21 +26,6 @@
             "name.hyphens": {
               "query": "{{keywords}}",
               "slop": 6
-            }
-          }
-        }
-      },
-      {
-        "name": "name_match_phrase_near_exact",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "match_phrase": {
-            "name.hyphens": {
-              "query": "{{keywords}}",
-              "slop": 1
             }
           }
         }
@@ -165,125 +150,8 @@
             }
           }
         }
-      },
-      {
-        "name": "sales_rank_medium_term",
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "functions": [
-              {
-                "filter": {
-                  "exists": {
-                    "field": "salesRankMediumTerm"
-                  }
-                },
-                "gauss": {
-                  "salesRankMediumTerm": {
-                    "origin": "1.0",
-                    "offset": "100",
-                    "scale": "100000",
-                    "decay": "0.1"
-                  }
-                }
-              },
-              {
-                "filter": {
-                  "bool": {
-                    "must_not": {
-                      "exists": {
-                        "field": "salesRankMediumTerm"
-                      }
-                    }
-                  }
-                },
-                "script_score": {
-                  "script": "if (doc['salesRankMediumTerm'] == null || doc['salesRankMediumTerm'].size() == 0  ){return 0.0}"
-                }
-              }
-            ],
-            "query": {
-              "match_all": {}
-            }
-          }
-        }
-      },
-      {
-        "name": "sales_rank_long_term",
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "functions": [
-              {
-                "filter": {
-                  "exists": {
-                    "field": "salesRankLongTerm"
-                  }
-                },
-                "gauss": {
-                  "salesRankLongTerm": {
-                    "origin": "1.0",
-                    "offset": "100",
-                    "scale": "100000",
-                    "decay": "0.1"
-                  }
-                }
-              },
-              {
-                "filter": {
-                  "bool": {
-                    "must_not": {
-                      "exists": {
-                        "field": "salesRankLongTerm"
-                      }
-                    }
-                  }
-                },
-                "script_score": {
-                  "script": "if (doc['salesRankLongTerm'] == null || doc['salesRankLongTerm'].size() == 0  ){return 0.0}"
-                }
-              }
-            ],
-            "query": {
-              "match_all": {}
-            }
-          }
-        }
-      },
-      {
-        "name": "sale_price",
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "functions":[{
-              "field_value_factor": {
-                "field": "salePrice",
-                "missing": 0
-              }
-            }],
-            "query": {
-              "match_all": {}
-            }
-          }
-        }
-      },
-      {
-        "name": "on_sale",
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "functions":[{
-              "field_value_factor": {
-                "field": "onSale",
-                "missing": 0
-              }
-            }],
-            "query": {
-              "match_all": {}
-            }
-          }
-        }
       }
+
     ]
   }
 }
