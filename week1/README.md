@@ -139,8 +139,148 @@ Simple better: 1193     LTR_Simple Better: 915  Equal: 23
 HT better: 1452 LTR_HT Better: 878      Equal: 21
 ```
 
-Run everything with main query weight = 0
+## Run everything with main query weight = 0
+
+With default feature of name match
 
 ```bash
-./ltr-end-to-end.sh -y -m 0
+./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+Simple MRR is 0.285
+LTR Simple MRR is 0.199
+Hand tuned MRR is 0.423
+LTR Hand Tuned MRR is 0.195
+
+Simple p@10 is 0.119
+LTR simple p@10 is 0.087
+Hand tuned p@10 is 0.171
+LTR hand tuned p@10 is 0.089
+Simple better: 647      LTR_Simple Better: 458  Equal: 14
+HT better: 680  LTR_HT Better: 597      Equal: 15
+```
+
+With name_match_phrase on name.hyphens
+```bash
+./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+Simple MRR is 0.285
+LTR Simple MRR is 0.250
+Hand tuned MRR is 0.423
+LTR Hand Tuned MRR is 0.268
+
+Simple p@10 is 0.119
+LTR simple p@10 is 0.098
+Hand tuned p@10 is 0.171
+LTR hand tuned p@10 is 0.113
+Simple better: 642      LTR_Simple Better: 463  Equal: 14
+HT better: 663  LTR_HT Better: 617      Equal: 12
+```
+
+With customer_review_average
+```bash
+# 
+./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+Simple MRR is 0.285
+LTR Simple MRR is 0.275
+Hand tuned MRR is 0.423
+LTR Hand Tuned MRR is 0.268
+
+Simple p@10 is 0.119
+LTR simple p@10 is 0.101
+Hand tuned p@10 is 0.171
+LTR hand tuned p@10 is 0.096
+Simple better: 631      LTR_Simple Better: 483  Equal: 5
+HT better: 773  LTR_HT Better: 512      Equal: 7
+```
+
+With customer_review_count
+```bash
+./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+Simple MRR is 0.285
+LTR Simple MRR is 0.350
+Hand tuned MRR is 0.423
+LTR Hand Tuned MRR is 0.299
+
+Simple p@10 is 0.119
+LTR simple p@10 is 0.125
+Hand tuned p@10 is 0.171
+LTR hand tuned p@10 is 0.137
+Simple better: 535      LTR_Simple Better: 569  Equal: 15
+HT better: 621  LTR_HT Better: 662      Equal: 9
+```
+
+With artist_name_match_phrase
+```bash
+./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+Simple MRR is 0.285
+LTR Simple MRR is 0.309
+Hand tuned MRR is 0.423
+LTR Hand Tuned MRR is 0.293
+
+Simple p@10 is 0.119
+LTR simple p@10 is 0.137
+Hand tuned p@10 is 0.171
+LTR hand tuned p@10 is 0.136
+Simple better: 500      LTR_Simple Better: 608  Equal: 11
+HT better: 596  LTR_HT Better: 684      Equal: 12
+```
+
+With long and short_desc match phrase
+```bash
+./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+Simple MRR is 0.285
+LTR Simple MRR is 0.309
+Hand tuned MRR is 0.423
+LTR Hand Tuned MRR is 0.293
+
+Simple p@10 is 0.119
+LTR simple p@10 is 0.137
+Hand tuned p@10 is 0.171
+LTR hand tuned p@10 is 0.136
+Simple better: 500      LTR_Simple Better: 608  Equal: 11
+HT better: 596  LTR_HT Better: 684      Equal: 12
+```
+
+```python
+features = [
+            'name_match', 'name_match_phrase', 
+            'customer_review_average', 'customer_review_count',
+            'artist_name_match_phrase',
+            'short_desc_match_phrase', 'long_desc_match_phrase',
+            'sales_rank_short_term', # 'sales_rank_medium_term', 'sales_rank_long_term',
+            # 'sale_price', 'on_sale'
+            ]
+
+# ./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+# Simple MRR is 0.285
+# LTR Simple MRR is 0.432
+# Hand tuned MRR is 0.423
+# LTR Hand Tuned MRR is 0.437
+
+# Simple p@10 is 0.119
+# LTR simple p@10 is 0.161
+# Hand tuned p@10 is 0.171
+# LTR hand tuned p@10 is 0.176
+# Simple better: 472      LTR_Simple Better: 638  Equal: 9
+# HT better: 629  LTR_HT Better: 656      Equal: 7
+```
+
+```python
+features = [
+            'name_match', 'name_match_phrase', 
+            'customer_review_average', 'customer_review_count',
+            'artist_name_match_phrase',
+            'short_desc_match_phrase', 'long_desc_match_phrase',
+            'sales_rank_short_term', 'sales_rank_medium_term', 'sales_rank_long_term',
+            'sale_price', 'on_sale'
+            ]
+
+# ./ltr-end-to-end.sh -y -m 0 -c quantiles
+
+
 ```

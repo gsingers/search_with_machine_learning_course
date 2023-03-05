@@ -11,7 +11,8 @@
           "match": {
             "name.hyphens": "{{keywords}}",
             "fuzziness": "1",
-            "prefix_length": 2
+            "prefix_length": 2,
+            "boost": 0.01
           }
         }
       },
@@ -26,21 +27,6 @@
             "name.hyphens": {
               "query": "{{keywords}}",
               "slop": 6
-            }
-          }
-        }
-      },
-      {
-        "name": "name_match_phrase_near_exact",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "match_phrase": {
-            "name.hyphens": {
-              "query": "{{keywords}}",
-              "slop": 1
             }
           }
         }
@@ -182,7 +168,7 @@
                   "salesRankMediumTerm": {
                     "origin": "1.0",
                     "offset": "100",
-                    "scale": "100000",
+                    "scale": "10000",
                     "decay": "0.1"
                   }
                 }
@@ -224,7 +210,7 @@
                   "salesRankLongTerm": {
                     "origin": "1.0",
                     "offset": "100",
-                    "scale": "100000",
+                    "scale": "10000",
                     "decay": "0.1"
                   }
                 }

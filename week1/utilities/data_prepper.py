@@ -245,27 +245,43 @@ class DataPrepper:
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response 
         # per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features. Your structure 
         # should look like the data frame below
+        
+        # Define features
+        features = [
+                    'name_match', 'name_match_phrase', 
+                    'customer_review_average', 'customer_review_count',
+                    'artist_name_match_phrase',
+                    'short_desc_match_phrase', 'long_desc_match_phrase',
+                    'sales_rank_short_term', # 'sales_rank_medium_term', 'sales_rank_long_term',
+                    # 'sale_price', 'on_sale'
+                    ]
+        
+        # Initialize feature dictionary
+        feature_results = {}
+        feature_results["doc_id"] = []  # capture the doc id so we can join later
+        feature_results["query_id"] = []  # ^^^
+        feature_results["sku"] = []
+        
+        for feature_name in features:
+            feature_results[feature_name] = []
+        
         if response and len(response['hits']['hits']) > 0:
+            
             # Get resulting hits from query
             hits = response['hits']['hits']
             
-            # Initialize feature dictionary
-            feature_results = {}
-            feature_results["doc_id"] = []  # capture the doc id so we can join later
-            feature_results["query_id"] = []  # ^^^
-            feature_results["sku"] = []
-            feature_results["name_match"] = []
-            
-            for i, doc_id in enumerate(query_doc_ids):
+            # for i, doc_id in enumerate(query_doc_ids):
+            for hit in hits:
+                # Add features to dict
+                feature_results["doc_id"].append(hit['_id'])  # capture the doc id so we can join later
+                feature_results["query_id"].append(query_id)
+                feature_results["sku"].append(hit['_source']['sku'][0])
                 
                 # Get log entry from hits
-                log_entry = hits[0]['fields']['_ltrlog'][0]['log_entry']
+                log_entry = hit['fields']['_ltrlog'][0]['log_entry']
                 
-                # Add features to dict
-                feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-                feature_results["query_id"].append(query_id)
-                feature_results["sku"].append(doc_id)  
-                feature_results["name_match"].append(get_feature_value(log_entry, "name_match"))
+                for feature_name in features:
+                    feature_results[feature_name].append(get_feature_value(log_entry, feature_name))
                 
             frame = pd.DataFrame(feature_results)
             return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
