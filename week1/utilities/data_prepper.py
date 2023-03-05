@@ -251,7 +251,8 @@ class DataPrepper:
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
-        feature_results["name_match"] = []
+        for feature_name in current_features:
+            feature_results[feature_name] = []
         if response and "hits" in response and "total" in response["hits"] and response["hits"]["total"]["value"] > 0:
            hits = response["hits"]["hits"]
            for hit in hits:
