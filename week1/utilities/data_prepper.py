@@ -234,6 +234,7 @@ class DataPrepper:
         log_query = lu.create_feature_log_query(key, query_doc_ids, click_prior_query, self.featureset_name,
                                                 self.ltr_store_name,
                                                 size=len(query_doc_ids), terms_field=terms_field)
+
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
         print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
@@ -244,12 +245,21 @@ class DataPrepper:
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
         feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
-        for doc_id in query_doc_ids:
-            feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
-            feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(doc_id)  
-            feature_results["name_match"].append(rng.random())
+
+        response = self.opensearch.search(body=log_query, index=self.index_name)
+
+        if response and len(response['hits']) > 0 and len(response['hits']['hits']) == 1:
+            for doc in response['hits']['hits']:
+                feature_results["doc_id"].append(doc["_id"])  # capture the doc id so we can join later
+                feature_results["query_id"].append(query_id)
+                feature_results["sku"].append(doc["_id"])  
+                name_match = 0
+                try:
+                    name_match = doc['fields']['_ltrlog']['log_entry']['value']
+                except Exception:
+                    pass
+                feature_results["name_match"].append(name_match)
+
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
