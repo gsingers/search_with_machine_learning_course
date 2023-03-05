@@ -38,7 +38,7 @@
             "functions":[{
               "field_value_factor": {
                 "field": "customerReviewAverage",
-                "missing": 0
+                "missing": 2.5
               }
             }],
             "query": {
@@ -151,7 +151,6 @@
           }
         }
       }
-
     ]
   }
 }

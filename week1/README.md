@@ -251,23 +251,22 @@ features = [
             'customer_review_average', 'customer_review_count',
             'artist_name_match_phrase',
             'short_desc_match_phrase', 'long_desc_match_phrase',
-            'sales_rank_short_term', # 'sales_rank_medium_term', 'sales_rank_long_term',
-            # 'sale_price', 'on_sale'
+            'sales_rank_short_term'
             ]
 
 # ./ltr-end-to-end.sh -y -m 0 -c quantiles
 
 # Simple MRR is 0.285
-# LTR Simple MRR is 0.432
+# LTR Simple MRR is 0.448
 # Hand tuned MRR is 0.423
-# LTR Hand Tuned MRR is 0.437
+# LTR Hand Tuned MRR is 0.464
 
 # Simple p@10 is 0.119
-# LTR simple p@10 is 0.161
+# LTR simple p@10 is 0.167
 # Hand tuned p@10 is 0.171
-# LTR hand tuned p@10 is 0.176
-# Simple better: 472      LTR_Simple Better: 638  Equal: 9
-# HT better: 629  LTR_HT Better: 656      Equal: 7
+# LTR hand tuned p@10 is 0.190
+# Simple better: 467      LTR_Simple Better: 637  Equal: 15
+# HT better: 555  LTR_HT Better: 717      Equal: 20
 ```
 
 ```python
