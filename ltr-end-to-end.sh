@@ -90,7 +90,7 @@ if [ $? -ne 0 ] ; then
   exit 2
 fi
 # Run our test queries through
-python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --train_file "$OUTPUT_DIR/train.csv" --output_dir "$OUTPUT_DIR" --xgb_test_num_queries $NUM_TEST_QUERIES  --xgb_main_query $MAIN_QUERY_WEIGHT --xgb_rescore_query_weight $RESCORE_WEIGHT
+python $WEEK/utilities/build_ltr.py --xgb_test "$OUTPUT_DIR/test.csv" --train_file "$OUTPUT_DIR/train.csv" --output_dir "$OUTPUT_DIR" --xgb_test_num_queries $NUM_TEST_QUERIES  --xgb_main_query_weight $MAIN_QUERY_WEIGHT --xgb_rescore_query_weight $RESCORE_WEIGHT
 if [ $? -ne 0 ] ; then
   exit 2
 fi

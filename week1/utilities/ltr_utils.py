@@ -16,7 +16,7 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
             "rescore_query": {
                 "sltr": {
                     "params": {
-                        "keywords": "{{user_query}}"
+                        "keywords": user_query
                     },
                     "model": ltr_model_name,
                     "store": ltr_store_name,
@@ -29,7 +29,6 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
     }
     if active_features is not None and len(active_features) > 0:
         query_obj["rescore"]["query"]["rescore_query"]["sltr"]["active_features"] = active_features
-
     return query_obj
 
 # take an existing query and add in an SLTR so we can use it for explains to see how much SLTR contributes

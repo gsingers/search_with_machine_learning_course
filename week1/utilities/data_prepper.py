@@ -8,6 +8,8 @@ import query_utils as qu
 from opensearchpy import RequestError
 import os
 
+default_features = {'name_match': 0, 'name_phrase_match': 0, 'customer_review_average': 3, 'customer_review_count': 0, 'multi_phrase_match': 0, 'salesRankShortTerm': 0}
+
 # from importlib import reload
 
 class DataPrepper:
@@ -250,14 +252,23 @@ class DataPrepper:
         if response and len(response['hits']) > 0 and len(response['hits']['hits']) > 0:
             for doc in response['hits']['hits']:
                 feature_results["doc_id"].append(doc["_id"])  # capture the doc id so we can join later
-                feature_results["query_id"].append(query_id)
-                feature_results["sku"].append(doc["_id"])  
-                name_match = 0
-                try:
-                    name_match = doc['fields']['_ltrlog']['log_entry']['value']
-                except Exception:
-                    pass
-                feature_results["name_match"].append(name_match)
+                feature_results["query_id"].append(int(query_id))
+                feature_results["sku"].append(doc["_id"])
+
+                fields_seen = set()
+                for field in doc['fields']['_ltrlog'][0]['log_entry']:
+                    if "value" not in field:
+                        continue
+                    if field["name"] not in feature_results:
+                        feature_results[field["name"]] = []
+                    feature_results[field["name"]].append(field["value"])
+                    fields_seen.add(field["name"])
+
+                for feature in default_features:
+                    if feature not in fields_seen:
+                        if feature not in feature_results:
+                            feature_results[feature] = []
+                        feature_results[feature].append(default_features[feature])
 
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
