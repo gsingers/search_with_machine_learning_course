@@ -248,7 +248,7 @@ class DataPrepper:
                 feature_results["query_id"].append(query_id)
                 feature_results["sku"].append(item['_source']['sku'][0]) 
                 get_ltr_features = item['fields']['_ltrlog'][0]['log_entry']
-                # get ltr features to append if available 
+                # get ltr features to append if available else create a new one
                 for feature in get_ltr_features:
                     feature_name = feature.get('name')
                     feature_value = feature.get('value', 0.0)
