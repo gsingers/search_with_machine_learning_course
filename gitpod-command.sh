@@ -2,7 +2,7 @@ ln -s /workspace/kaggle/ /home/gitpod/.kaggle
 
 mkdir -p /workspace/opensearch
 mkdir -p /workspace/datasets
-sudo chown -R gitpod:gitpod /workspace/opensearch
+sudo chown -R 1000:1000 /workspace/opensearch
 
 
 mkdir /workspace/ltr_output
