@@ -11,19 +11,22 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
     #add on the rescore
     ##### Step 4.e:
     query_obj["rescore"] = {
-        "window_size": 10,
+        "window_size": rescore_size,
         "query": {
             "rescore_query": {
                 "sltr": {
                     "params": {
-                        "keywords": user_query
+                        "keywords": user_query,
+                        "click_prior_query": click_prior_query
                     },
                     "model": ltr_model_name,
                     # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
                     "store": ltr_store_name,
                 }
             },
-            "rescore_query_weight": "2" # Magic number, but let's say LTR matches are 2x baseline matches
+            "score_mode": "total",
+            "query_weight": main_query_weight,
+            "rescore_query_weight": rescore_query_weight # Magic number, but let's say LTR matches are 2x baseline matches
         }
     }
 

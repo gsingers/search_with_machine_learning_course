@@ -12,6 +12,51 @@
             "name": "{{keywords}}"
           }
         }
+      },
+      {
+        "name": "name_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "name": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "customerReviewAverage",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "field_value_factor": {
+              "field": "customerReviewAverage",
+              "missing": 0
+            }
+          }
+        }
+      },
+      {
+        "name": "customerReviewCount",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "field_value_factor": {
+              "field": "customerReviewCount",
+              "missing": 0
+            }
+          }
+        }
       }
     ]
   }

@@ -302,6 +302,7 @@ if __name__ == "__main__":
                 # Log our features for the training set
                 print("Logging features")
                 features_df = data_prepper.log_features(impressions_df, terms_field=args.ltr_terms_field)
+
                 # Calculate some stats so we can normalize values.
                 # Since LTR only supports min/max, mean/std. dev and sigmoid, we can only do that
                 if args.normalize_json:
