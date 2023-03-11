@@ -29,6 +29,51 @@
         }
       },
       {
+        "name": "artistName_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "artistName": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "shortDescription_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "shortDescription": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      },
+      {
+        "name": "longDescription_match_phrase",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {
+            "longDescription": {
+              "query": "{{keywords}}",
+              "slop": 6
+            }
+          }
+        }
+      },
+      {
         "name": "customerReviewAverage",
         "params": [
           "keywords"
@@ -36,10 +81,17 @@
         "template_language": "mustache",
         "template": {
           "function_score": {
-            "field_value_factor": {
-              "field": "customerReviewAverage",
-              "missing": 0
-            }
+            "query": {
+              "match_all": {}
+            },
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "customerReviewAverage",
+                  "missing": 0
+                }
+              }
+            ]
           }
         }
       },
@@ -51,9 +103,211 @@
         "template_language": "mustache",
         "template": {
           "function_score": {
-            "field_value_factor": {
-              "field": "customerReviewCount",
-              "missing": 0
+            "query": {
+              "match_all": {}
+            },
+            "functions": [
+              {
+                "field_value_factor": {
+                  "field": "customerReviewCount",
+                  "missing": 0
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "salesRankShortTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "filter": {
+                  "exists": {
+                    "field": "salesRankShortTerm"
+                  }
+                },
+                "gauss": {
+                  "salesRankShortTerm": {
+                    "origin": "1.0",
+                    "offset": "100",
+                    "scale": "10000",
+                    "decay": "0.1"
+                  }
+                }
+              },
+              {
+                "filter": {
+                  "bool": {
+                    "must_not": {
+                      "exists": {
+                        "field": "salesRankShortTerm"
+                      }
+                    }
+                  }
+                },
+                "script_score": {
+                  "script": "if (doc['salesRankShortTerm'] == null || doc['salesRankShortTerm'].size() == 0  ){return 0.0}"
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "name_min_raw_tf",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "min_raw_tf",
+            "query": {
+              "match": {
+                  "name": "{{keywords}}"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "name_max_raw_tf",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "min_raw_tf",
+            "query": {
+              "match": {
+                  "name": "{{keywords}}"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "name_sum_raw_tf",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "sum_raw_tf",
+            "query": {
+              "match": {
+                  "name": "{{keywords}}"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "name_min_raw_df",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "min_raw_df",
+            "query": {
+              "match": {
+                  "name": "{{keywords}}"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "name_max_raw_df",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "max_raw_df",
+            "query": {
+              "match": {
+                  "name": "{{keywords}}"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "name_sum_raw_df",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "sum_raw_df",
+            "query": {
+              "match": {
+                  "name": "{{keywords}}"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "name_min_raw_tp",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "min_raw_tp",
+            "query": {
+              "match": {
+                  "name": "{{keywords}}"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "name_max_raw_tp",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "max_raw_tp",
+            "query": {
+              "match": {
+                  "name": "{{keywords}}"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "name_avg_raw_tp",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "avg_raw_tp",
+            "query": {
+              "match": {
+                  "name": "{{keywords}}"
+              }
             }
           }
         }

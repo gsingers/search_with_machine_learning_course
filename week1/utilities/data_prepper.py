@@ -245,9 +245,9 @@ class DataPrepper:
         for hit in hits:
             doc_id = hit["_id"]
             doc_id_lookup[doc_id] = {}
-            for kvpair in hit["fields"]["_ltrlog"][0]["log_entry"]:
-                if 'name' in kvpair and 'value' in kvpair:
-                    doc_id_lookup[doc_id][kvpair['name']] = kvpair['value']
+            for nvpair in hit["fields"]["_ltrlog"][0]["log_entry"]:
+                if 'name' in nvpair and 'value' in nvpair:
+                    doc_id_lookup[doc_id][nvpair['name']] = nvpair['value']
 
         feature_results = {}
         feature_results["doc_id"] = []  # capture the doc id so we can join later
@@ -257,8 +257,20 @@ class DataPrepper:
         feature_defaults = {
             "name_match": 0,
             "name_match_phrase": 0,
+            "artistName_match_phrase": 0,
+            "shortDescription_match_phrase": 0,
+            "longDescription_match_phrase": 0,
             "customerReviewAverage": 0,
-            "customerReviewCount": 0
+            "customerReviewCount": 0,
+            "salesRankShortTerm": 0,
+            "name_min_raw_tf": 0,
+            "name_max_raw_tf": 0,
+            "name_sum_raw_tf": 0,
+            "name_min_raw_df": 0,
+            "name_min_raw_df": 0,
+            "name_min_raw_tp": 0,
+            "name_max_raw_tp": 0,
+            "name_avg_raw_tp": 0
         }
 
         for feature in feature_defaults:
