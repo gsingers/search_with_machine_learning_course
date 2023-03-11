@@ -267,7 +267,8 @@ class DataPrepper:
             "name_max_raw_tf": 0,
             "name_sum_raw_tf": 0,
             "name_min_raw_df": 0,
-            "name_min_raw_df": 0
+            "name_min_raw_df": 0,
+            "click_prior": ''
 
             # for some reason, these ones caused MRR to go down:
             # "name_min_raw_tp": 0,
