@@ -1,0 +1,441 @@
+-----------------
+-----------------
+Query - earbuds
+-----------------
+-----------------
+{
+  "took": 8,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1205,
+      "relation": "eq"
+    },
+    "max_score": 843.09705,
+    "hits": [
+      {
+        "_index": "bbuy_products",
+        "_id": "9084206",
+        "_score": 843.09705,
+        "_source": {
+          "name": [
+            "Apple\u00ae - Earbuds for Select Apple\u00ae iPod\u00ae Models"
+          ],
+          "shortDescription": [
+            "Compatible with 4th-generation iPod nano, 120GB iPod classic and 2nd-generation iPod touch; remote for controlling music and video playback; microphone for recording voice memos"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "2197043",
+        "_score": 121.19351,
+        "_source": {
+          "name": [
+            "Sony - Earbud Headphones - Black"
+          ],
+          "shortDescription": [
+            "13.5mm drivers; neodymium magnet; 3 sets of silicone ear cushions"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3100277",
+        "_score": 109.44192,
+        "_source": {
+          "name": [
+            "Rocketfish\u2122 - Stereo Earbud Headphones"
+          ],
+          "shortDescription": [
+            "10mm drivers; neodymium magnets; lightweight design"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "2197089",
+        "_score": 109.428734,
+        "_source": {
+          "name": [
+            "Sony - Earbud Headphones - White"
+          ],
+          "shortDescription": [
+            "13.5mm drivers; neodymium magnet; 3 sets of silicone ear cushions"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "8605459",
+        "_score": 99.21863,
+        "_source": {
+          "name": [
+            "JVC - Gumy Stereo Earbud Headphones - Olive Black"
+          ],
+          "shortDescription": [
+            "Compatible with most portable audio devices; 3-1/3' cord; gold-plated stereo mini jack"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3316072",
+        "_score": 98.27057,
+        "_source": {
+          "name": [
+            "JVC - JVC Sport Clip Earbud Headphones - Black"
+          ],
+          "shortDescription": [
+            "JVC Sport Clip Earbud Headphones: Rubber ear hooks; water-resistant design; sound isolating; 11mm drivers; neodymium magnets"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "8605253",
+        "_score": 95.65777,
+        "_source": {
+          "name": [
+            "JVC - Gumy Stereo Earbud Headphones - Coconut White"
+          ],
+          "shortDescription": [
+            "From our expanded online assortment; compatible with most portable audio devices; 3-1/3' cord; gold-plated stereo mini jack"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "1232474",
+        "_score": 92.01677,
+        "_source": {
+          "name": [
+            "Beats By Dr. Dre - Beats iBeats Earbud Headphones"
+          ],
+          "shortDescription": [
+            "3-button microphone; noise-canceling design; Duraflex protective jacket"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "2197052",
+        "_score": 86.037025,
+        "_source": {
+          "name": [
+            "Sony - Earbud Headphones - Dark Blue"
+          ],
+          "shortDescription": [
+            "13.5mm drivers; neodymium magnet; 3 sets of silicone ear cushions"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "2264036",
+        "_score": 85.73258,
+        "_source": {
+          "name": [
+            "JayBird - Freedom Bluetooth Earbud Headphones"
+          ],
+          "shortDescription": [
+            "GeckoGrip active ear tips; 6 earbud sizes; Bluetooth-ready; sound isolating; tangle-free flat cord; magnet-sealed hard shell carrying case"
+          ]
+        }
+      }
+    ]
+  }
+}
+
+
+-----------------
+-----------------
+Query - nespresso
+-----------------
+-----------------
+{
+  "took": 120,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 8,
+      "relation": "eq"
+    },
+    "max_score": 0.07420327,
+    "hits": [
+      {
+        "_index": "bbuy_products",
+        "_id": "1720059",
+        "_score": 0.07420327,
+        "_source": {
+          "name": [
+            "Nespresso - Essenza Espresso Maker - Black"
+          ],
+          "shortDescription": [
+            "Automatic and programmable; compact brewing unit technology; included Aeroccino milk frother; backlit on/off and coffee volume buttons"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3990516",
+        "_score": 0.07420327,
+        "_source": {
+          "name": [
+            "Nespresso - Essenza Espresso Maker - Black"
+          ],
+          "shortDescription": [
+            "Makes espresso and lungo; 19-bar high-pressure pump; Thermobloc heating element; Compact Brewing Unit technology; 30-oz. removable water tank; manual volume control; backlit coffee buttons; 1260 watts of power"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3990831",
+        "_score": 0.07074005,
+        "_source": {
+          "name": [
+            "Nespresso - CitiZ Espresso Maker - Red"
+          ],
+          "shortDescription": [
+            "Makes espresso and lungo; 19-bar high-pressure pump; automatic volume control; thermo block heating element; auto power-off after 9 minutes; folding drip tray; removable 34-oz. water tank; adaptable grid"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3990589",
+        "_score": 0.07074005,
+        "_source": {
+          "name": [
+            "Nespresso - CitiZ Espresso Maker - Black"
+          ],
+          "shortDescription": [
+            "Makes espresso and lungo; 19-bar high-pressure pump; automatic volume control; thermo block heating element; auto power-off after 9 minutes; folding drip tray; removable 34-oz. water tank; adaptable grid"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "2588376",
+        "_score": 0.07073941,
+        "_source": {
+          "name": [
+            "Nespresso - Essenza Espresso Maker - Titan Gray"
+          ],
+          "shortDescription": [
+            "Automatic and programmable; compact unit brewing technology; included Aeroccino milk frother; backlit on/off and coffee volume buttons"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3990534",
+        "_score": 0.07073941,
+        "_source": {
+          "name": [
+            "Nespresso - Pixie Espresso Maker - Electric Aluminum"
+          ],
+          "shortDescription": [
+            "Thermoblock heating element; 19-bar high-pressure pump; automatic volume control; folding drip tray; cable storage"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3990561",
+        "_score": 0.07073941,
+        "_source": {
+          "name": [
+            "Nespresso - Pixie Espresso Maker - Electric Titan"
+          ],
+          "shortDescription": [
+            "Thermoblock heating element; 19-bar high-pressure pump; folding drip tray; cable storage; capsule container"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3991039",
+        "_score": 0.06758508,
+        "_source": {
+          "name": [
+            "Nespresso - CitiZ & Milk Coffeemaker - Silver Chrome"
+          ],
+          "shortDescription": [
+            "Thermoblock heating element; froths hot or cold milk; 19-bar high-pressure pump; folding drip tray; cable storage"
+          ]
+        }
+      }
+    ]
+  }
+}
+
+-----------------
+-----------------
+Query - dslr
+-----------------
+-----------------
+
+{
+  "took": 18,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 2837,
+      "relation": "eq"
+    },
+    "max_score": 408.17416,
+    "hits": [
+      {
+        "_index": "bbuy_products",
+        "_id": "1980124",
+        "_score": 408.17416,
+        "_source": {
+          "name": [
+            "Canon - EOS Rebel T3i 18.0-Megapixel DSLR Camera with 18-55mm Lens - Black"
+          ],
+          "shortDescription": [
+            "Vari-angle 3.0-inch Clear View LCD screen1080 full HD video3.7 FPS (frames per second)ISO 100-6400 (expandable to 12800)"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "1989073",
+        "_score": 347.9671,
+        "_source": {
+          "name": [
+            "Nikon - D5100 16.2-Megapixel DSLR Camera with 18-55mm VR Lens - Black"
+          ],
+          "shortDescription": [
+            "High Resolution 16.2 MP DX-format CMOS sensor3\" Super-Density Vari-Angle LCD Monitor1080 full HD videoISO sensitivity 100-6400 (expandable to ISO 25,600 equivalent)"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "6813362",
+        "_score": 193.71939,
+        "_source": {
+          "name": [
+            "Canon - DSLR Gadget Bag - Black"
+          ],
+          "shortDescription": [
+            "Convenient storage for Canon EOS DSLR cameras"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "2705145",
+        "_score": 27.712948,
+        "_source": {
+          "name": [
+            "DigiPower - Travel Charger"
+          ],
+          "shortDescription": [
+            "Compatible with select Canon DSLR batteries; provides uninterrupted power for your digital camera; lightweight design"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "9778635",
+        "_score": 27.528584,
+        "_source": {
+          "name": [
+            "Canon - EOS Rebel T2i 18.0-Megapixel DSLR Camera with EF-S 18-55mm Lens - Black"
+          ],
+          "shortDescription": [
+            "3\" LCD screenFull HD videoISO 100-6400 (expandable to 12800)"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "1223834",
+        "_score": 11.542395,
+        "_source": {
+          "name": [
+            "PNY - 16GB Secure Digital High Capacity (SDHC) Class 10 Memory Card"
+          ],
+          "shortDescription": [
+            "Compatible with most digital cameras and camcorders with a Secure Digital High Capacity slot; 16GB capacity; shock protection and RTV silicone coating"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "1227075",
+        "_score": 10.8557005,
+        "_source": {
+          "name": [
+            "PNY - 8GB Secure Digital High Capacity (SDHC) Class 10 Memory Card"
+          ],
+          "shortDescription": [
+            "Compatible with most digital cameras and camcorders with a Secure Digital High Capacity slot; 8GB capacity; shock protection and RTV silicone coating"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3099128",
+        "_score": 10.553733,
+        "_source": {
+          "name": [
+            "Nikon - D3100 14.2-Megapixel DSLR Camera with 18-55mm VR Lens - Red"
+          ],
+          "shortDescription": [
+            "3\" TFT-LCD display1080p full HD videoUp to 3 fpsISO 100-3200 (expandable to 12,800)"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "2300602",
+        "_score": 6.7035723,
+        "_source": {
+          "name": [
+            "PNY - 32GB Secure Digital High Capacity (SDHC) Class 10 Memory Card"
+          ],
+          "shortDescription": [
+            "Compatible with most digital cameras with a Secure Digital High Capacity slot; 32GB capacity; 20MB/sec. transfer rate"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "8758114",
+        "_score": 6.677643,
+        "_source": {
+          "name": [
+            "Canon - 55-250mm f/4-5.6 Telephoto Zoom Lens for Select Canon Cameras"
+          ],
+          "shortDescription": [
+            "Compatible with Canon cameras with an EF-S mount; optical image stabilizer maintains clarity at slow shutter speeds; 12 elements in 10 groups"
+          ]
+        }
+      }
+    ]
+  }
+}
+

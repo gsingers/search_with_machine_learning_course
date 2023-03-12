@@ -1,0 +1,180 @@
+inkjet
+-------
+officejet 0.859827
+laserjet 0.829652
+lexmark 0.808284
+hewlett 0.808253
+packard 0.798062
+printer 0.77309
+pixma 0.771934
+printers 0.771518
+copier 0.747586
+photosmart 0.731177
+
+netbook
+-------
+netbooks 0.913442
+atom 0.765125
+eee 0.743241
+slip 0.666067
+laptop 0.639132
+laptops 0.587462
+pentium 0.577611
+mouse 0.56924
+intel 0.568688
+briefcase 0.552359
+
+headphones
+-----------
+earbud 0.885173
+ear 0.873191
+bud 0.773636
+sennheiser 0.705507
+skullcandy 0.693679
+noise 0.690202
+earbuds 0.663797
+akg 0.663163
+headset 0.656449
+headsets 0.649393
+
+laptop
+-------
+laptops 0.877572
+notebook 0.71084
+netbook 0.639132
+notebooks 0.629873
+lap 0.59367
+netbooks 0.593367
+desktop 0.590914
+640gb 0.574021
+macbook 0.570789
+
+freezer
+--------
+freezers 0.934877
+refrigerators 0.830141
+frost 0.814023
+refrigerator 0.802598
+bottom 0.779667
+side 0.763548
+french 0.698804
+free 0.693938
+counter 0.691596
+ft 0.679379
+
+nintendo
+--------
+ds 0.8908
+wii 0.831185
+3ds 0.819883
+dsi 0.744915
+gamecube 0.735725
+boy 0.704029
+challenge 0.699968
+psp 0.699152
+pokémon 0.697919
+ninja 0.697788
+
+whirlpool
+---------
+maytag 0.864204
+biscuit 0.806803
+frigidaire 0.785557
+hotpoint 0.751985
+electrolux 0.733736
+ge 0.726039
+bosch 0.712841
+bisque 0.712604
+profile 0.698898
+ft 0.676973
+
+kodak
+------
+easyshare 0.863579
+share 0.708895
+canon 0.657527
+photosmart 0.648105
+fuji 0.639942
+picture 0.610426
+pixma 0.610172
+powershot 0.606416
+epson 0.603123
+fujifilm 0.601849
+
+ps2
+-------
+playstation 0.780599
+ps3 0.733143
+vs 0.728435
+gamecube 0.725411
+xbox 0.720834
+challenge 0.713282
+greatest 0.708104
+legends 0.700401
+nba 0.696798
+ninja 0.695286
+
+razr
+------
+razor 0.803289
+razer 0.769264
+skateboards 0.632429
+rams 0.624598
+scooter 0.622111
+scooters 0.607912
+raiders 0.605943
+bikes 0.601066
+bike 0.583375
+exercise 0.575756
+
+stratocaster
+------------
+roaster 0.746912
+potter 0.700679
+toaster 0.679834
+slow 0.673832
+toasters 0.648769
+schecter 0.641712
+tycoon 0.63702
+string 0.636363
+strategy 0.636088
+canister 0.625061
+
+holiday
+--------
+birthday 0.808683
+feliz 0.807219
+buy 0.80551
+gift 0.804573
+gc 0.797883
+happy 0.76729
+best 0.735349
+itunes 0.708761
+day 0.700302
+christmas 0.685616
+
+plasma
+--------
+600hz 0.831026
+viera 0.752519
+240hz 0.731653
+televisions 0.712627
+65 0.695224
+hdtv 0.690913
+1080p 0.690113
+120hz 0.670047
+46 0.665342
+tvs 0.665138
+
+leather
+---------
+recliner 0.697018
+seating 0.65162
+curved 0.647823
+executive 0.644681
+theaterseatstore 0.634076
+berkline 0.631294
+portfolio 0.599448
+weather 0.596057
+chairs 0.59112
+baseline 0.586025
