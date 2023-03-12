@@ -4,8 +4,16 @@ from pathlib import Path
 
 def transform_training_data(title, comment):
     # IMPLEMENT
+    title = title.lower()
+    comment = comment.lower()
     return title + ' ' + comment
 
+def rating_sentiment(rating):
+    if rating > 4.0:
+        return "positive"
+    elif rating < 1.5:
+        return "negative"
+    return "neutral"
 
 # Directory for review data
 directory = r'/workspace/datasets/product_data/reviews/'
@@ -38,4 +46,4 @@ with open(output_file, 'w') as output:
                     elif '<comment>' in line:
                         comment = line[13:len(line) - 11]
                     elif '</review>'in line:
-                      output.write("__label__%s %s\n" % (rating, transform_training_data(title, comment)))
+                      output.write("__label__%s %s\n" % (rating_sentiment(float(rating)), transform_training_data(title, comment)))

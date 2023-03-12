@@ -5,9 +5,26 @@ from tqdm import tqdm
 import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from collections import defaultdict
+import re
+import nltk
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+
+nltk.download('stopwords')
+ps = PorterStemmer()
 
 def transform_name(product_name):
     # IMPLEMENT
+    # convert name to lower
+    product_name = product_name.lower()
+    # remove all non-alphanumeric characters except underscore
+    product_name=re.sub(r'[\W_]+', '', product_name)
+    # trim extra space and only keep token seperated by one space 
+    product_name = " ".join(product_name.split())
+    # remove stopwords + perform stemming (https://www.geeksforgeeks.org/python-stemming-words-with-nltk/)
+    product_name = " ".join(x for x in product_name.split() if x not in stopwords.words('english'))
+    product_name = " ".join(ps.stem(x) for x in product_name.split())
     return product_name
 
 # Directory for product data
@@ -64,6 +81,11 @@ if __name__ == '__main__':
     with multiprocessing.Pool() as p:
         all_labels = tqdm(p.imap(_label_filename, files), total=len(files))
         with open(output_file, 'w') as output:
+            label_items_list = defaultdict(list)
             for label_list in all_labels:
                 for (cat, name) in label_list:
-                    output.write(f'__label__{cat} {name}\n')
+                    label_items_list[cat].append(name)
+            for label in label_items_list.keys():
+                if len(label_items_list[label]) > min_products:
+                    for item in label_items_list[label]:
+                        output.write(f'__label__{label} {item}\n')

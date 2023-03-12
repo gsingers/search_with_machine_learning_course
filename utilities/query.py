@@ -50,6 +50,7 @@ def create_prior_queries(doc_ids, doc_id_weights,
 
 # Hardcoded query here.  Better to use search templates or other query config.
 def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
+    name_field = 'name.synonyms' if args.synonyms else 'name'
     query_obj = {
         'size': size,
         "sort": [
@@ -65,7 +66,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                         "should": [  #
                             {
                                 "match": {
-                                    "name": {
+                                    name_field: {
                                         "query": user_query,
                                         "fuzziness": "1",
                                         "prefix_length": 2,
@@ -212,6 +213,8 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    general.add_argument("--synonyms",
++                         help='Set True to match queries with synonyms of product names', default=False)
 
     args = parser.parse_args()
 
@@ -240,10 +243,9 @@ if __name__ == "__main__":
     )
     index_name = args.index
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
-    print(query_prompt)
-    for line in fileinput.input():
-        query = line.rstrip()
-        if query == "Exit":
+    while True:
+        query = input(query_prompt).rstrip()
+        if query.lower() == "exit":
             break
         search(client=opensearch, user_query=query, index=index_name)
 
