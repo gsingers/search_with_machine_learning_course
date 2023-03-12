@@ -5,7 +5,7 @@ import csv
 
 ROOT_DIR = os.path.dirname(os.path.abspath("__file__"))
 MODEL_PATH = os.path.join(ROOT_DIR, 'models/product_synonyms/product_synonyms_mc100_e25.bin')
-TOP_WORDS_PATH = os.path.join(ROOT_DIR, 'datasets/fasttext/top_words.txt')
+TOP_WORDS_PATH = os.path.join(ROOT_DIR, 'models/product_synonyms/top_words.txt')
 OUTPUT_CSV = os.path.join(ROOT_DIR, 'models/product_synonyms/synonyms.csv')
 
 parser = argparse.ArgumentParser(description='Process some integers.')
@@ -23,7 +23,7 @@ with open(TOP_WORDS_PATH) as top_words:
         fnn = [nn[1] for nn in knn if nn[0] > args.threshold]
         if(len(fnn)):
             synonyms.append(tuple([w]+fnn))
-            
+
     with open(OUTPUT_CSV,"wt") as syn_file:
         writer = csv.writer(syn_file,delimiter=',')
         writer.writerows(synonyms)
