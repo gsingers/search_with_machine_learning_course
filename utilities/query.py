@@ -74,6 +74,16 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                 }
                             },
                             {
+                                "match": {
+                                    "name.synonym": {
+                                        "query": user_query,
+                                        "fuzziness": "1",
+                                        "prefix_length": 2,
+                                        "boost": 0.01
+                                    }
+                                }
+                            },
+                            {
                                 "match_phrase": {  # near exact phrase match
                                     "name.hyphens": {
                                         "query": user_query,
@@ -88,7 +98,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                     "type": "phrase",
                                     "slop": "6",
                                     "minimum_should_match": "2<75%",
-                                    "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
+                                    "fields": ["name^10", "name.hyphens^10", "name.synonym^10", "shortDescription^5",
                                                "longDescription^5", "department^0.5", "sku", "manufacturer", "features",
                                                "categoryPath"]
                                 }

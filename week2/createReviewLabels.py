@@ -3,7 +3,15 @@ import argparse
 from pathlib import Path
 
 def transform_training_data(title, comment):
-    # IMPLEMENT
+    
+    # Preprocess Comment
+    stemmer = SnowballStemmer("english")
+    tokens = word_tokenize(title)
+    tokens = [token.lower() for token in tokens]
+    tokens = [token for token in tokens if not token in stopwords.words("english")]
+    tokens = [stemmer.stem(token) for token in tokens]
+    comment = ' '.join(tokens)
+    
     return title + ' ' + comment
 
 

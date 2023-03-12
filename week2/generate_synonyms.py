@@ -1,6 +1,6 @@
 import fasttext
 
-model = fasttext.load_model('title_model.bin')
+model = fasttext.load_model('/workspace/datasets/fasttext/title_model.bin')
 input_file = '/workspace/datasets/fasttext/top_words.txt'
 output_file = '/workspace/datasets/fasttext/synonyms.csv'
 threshold = 0.75
