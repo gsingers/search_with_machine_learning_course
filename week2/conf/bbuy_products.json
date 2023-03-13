@@ -11,7 +11,7 @@
         },
         "synonym": {
           "tokenizer": "whitespace",
-          "filter": [ "lowercase", "synonym"]
+          "filter": [ "lowercase", "stemmer", "synonym"]
         }
       },
       "tokenizer": {
@@ -31,8 +31,7 @@
         },
         "synonym": {
           "type": "synonym",
-          "synonyms_path": "synonyms.csv",
-          "updateable": true
+          "synonyms_path": "synonyms.csv"
         }
       }
     }
