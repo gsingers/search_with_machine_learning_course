@@ -5,9 +5,25 @@ from tqdm import tqdm
 import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
+import pandas as pd
 
 def transform_name(product_name):
     # IMPLEMENT
+    print("Writing results to %s" % output_file)
+    with multiprocessing.Pool() as p:
+         all_labels = tqdm(p.imap(_label_filename, files), total=len(files))
+         label_items = [item for label_list in all_labels for item in label_list]
+         if min_products > 0:
+             df = pd.DataFrame(label_items, columns = ['cat', 'name'])
+             df['product_count'] = df.groupby('cat')['name'].transform('count')
+             df_trimmed = df.query("product_count > @min_products")
+             label_items = df_trimmed.drop('product_count', axis=1).values
+         with open(output_file, 'w') as output:
+             for label_list in all_labels:
+                 for (cat, name) in label_list:
+                     output.write(f'__label__{cat} {name}\n')
+             for (cat, name) in label_items:
+                 output.write(f'__label__{cat} {name}\n')
     return product_name
 
 # Directory for product data

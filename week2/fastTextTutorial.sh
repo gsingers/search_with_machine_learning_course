@@ -9,6 +9,9 @@ tail -3000 cooking.stackexchange.txt > cooking.test
 # Train model
 ~/fastText-0.9.2/fasttext supervised -input cooking.train -output model_cooking
 
+~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/training_data.txt -output product_classifier -lr 1.0 -epoch 25 -wordNgrams 2
+~/fastText-0.9.2/fasttext test product_classifier.bin /workspace/datasets/fasttext/test_data.txt
+
 # Test model for P@1 and R@1
 ~/fastText-0.9.2/fasttext test model_cooking.bin cooking.test
 
