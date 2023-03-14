@@ -239,17 +239,54 @@ class DataPrepper:
         print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
+        response = self.opensearch.search(body=log_query, index=self.index_name)
+        hits = response['hits']['hits']
+        doc_id_lookup = {} 
+        for hit in hits:
+            doc_id = hit["_id"]
+            doc_id_lookup[doc_id] = {}
+            for nvpair in hit["fields"]["_ltrlog"][0]["log_entry"]:
+                if 'name' in nvpair and 'value' in nvpair:
+                    doc_id_lookup[doc_id][nvpair['name']] = nvpair['value']
         feature_results = {}
         feature_results["doc_id"] = []  # capture the doc id so we can join later
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
-        feature_results["name_match"] = []
-        rng = np.random.default_rng(12345)
+        #feature_results["name_match"] = []
+        #rng = np.random.default_rng(12345)
+        feature_defaults = {
+            "name_match": 0,
+            "name_match_phrase": 0,
+            "artistName_match_phrase": 0,
+            "shortDescription_match_phrase": 0,
+            "longDescription_match_phrase": 0,
+            "customerReviewAverage": 0,
+            "customerReviewCount": 0,
+            "salesRankShortTerm": 0,
+            "name_min_raw_tf": 0,
+            "name_max_raw_tf": 0,
+            "name_sum_raw_tf": 0,
+            "name_min_raw_df": 0,
+            "name_min_raw_df": 0,
+            "name_min_raw_tp": 0,
+            "name_max_raw_tp": 0,
+            "name_avg_raw_tp": 0,
+            "click_prior": ''
+        }
+
+        for feature in feature_defaults:
+            feature_results[feature] = []
+        
         for doc_id in query_doc_ids:
             feature_results["doc_id"].append(doc_id)  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
             feature_results["sku"].append(doc_id)  
             feature_results["name_match"].append(rng.random())
+            feature_results["sku"].append(doc_id)
+            doc_response = doc_id_lookup.get(str(doc_id),{})
+            for feature, default_value in feature_defaults.items():
+                feature_results[feature].append(doc_response.get(feature,default_value))
+
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
