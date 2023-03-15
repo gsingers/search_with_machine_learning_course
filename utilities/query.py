@@ -11,11 +11,17 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
+import fasttext
+import re
+import nltk
+stemmer = nltk.stem.PorterStemmer()
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
+query_model_file = "/workspace/datasets/fasttext/query_model.bin"
+query_model = fasttext.load_model(query_model_file)
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -185,18 +191,56 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
         query_obj["_source"] = source
     return query_obj
 
+def create_filter(query):
+    labels = query_model.predict(query, k=5)
+
+    categories = [text.removeprefix("__label__") for text in labels[0]]
+    confidence_scores = labels[1]
+    print(categories)
+    print(confidence_scores)
+
+    agg_confidence = 0
+    threshold = 0.4
+    filter_categories = []
+    index = 0
+
+    while agg_confidence < threshold and index < len(confidence_scores):
+        agg_confidence = agg_confidence + confidence_scores[index]
+        filter_categories.append(categories[index])
+        index = index + 1
+
+    filter = None
+    if agg_confidence >= threshold:
+        filter = [{
+            "terms" : {"categoryPathIds" : filter_categories}
+        }]
+    print("FILTER", filter) # should look something like [{'terms': {'categoryPathIds': ['abcat0912000', 'cat02015']}}]
+    return filter    
+
+def normalize(x):
+    words = re.sub(r'[\W_ ]+', ' ', x).lower().split()
+    stemmed_words = [stemmer.stem(word) for word in words]
+    return " ".join(stemmed_words)
 
 def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+
+    filter = None
+    if use_filter:
+        normalized_query = normalize(query)
+        print("Normalized Query:", normalized_query)
+        filter = create_filter(normalized_query)
+
+    query_obj = create_query(user_query, click_prior_query=None, filters=filter, sort=sort, sortDir=sortDir, source=["name", "shortDescription","categoryPath", "categoryPathIds"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
         print(json.dumps(response, indent=2))
 
+use_filter = True
 
 if __name__ == "__main__":
     host = 'localhost'
@@ -212,6 +256,8 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    #general.add_argument('--use_filter',
+    #                     help='Apply category filter')
 
     args = parser.parse_args()
 
@@ -240,11 +286,16 @@ if __name__ == "__main__":
     )
     index_name = args.index
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
+    
+   # use_filter =  args.use_filter and args.use_filter.lower == "true"  
+
     print(query_prompt)
     for line in fileinput.input():
         query = line.rstrip()
         if query == "Exit":
             break
+        
+        
         search(client=opensearch, user_query=query, index=index_name)
 
         print(query_prompt)

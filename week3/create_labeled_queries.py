@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 import csv
+import re
 
 # Useful if you want to perform stemming.
 import nltk
@@ -50,8 +51,39 @@ queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
 
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+def normalize(x):
+    words = re.sub(r'[\W_ ]+', ' ', x).lower().split()
+    stemmed_words = [stemmer.stem(word) for word in words]
+    return " ".join(stemmed_words)
 
+def get_parent(category):
+    # print("CATEGORY", category)
+    parent = parents_df[parents_df["category"]==category]["parent"]
+    return parent.iloc[0]
+
+def rollup(df, min_queries):
+    aggr_df = df.groupby(['category']).size().reset_index(name="count")
+    low_count_df = aggr_df[(aggr_df["count"] < min_queries) & (aggr_df["category"] != "cat00000")] 
+    print("Number of Categories with query count less than " + str(min_queries) + ":" + str(len(low_count_df.index)))
+    if len(low_count_df.index) == 0:
+        return  # exit recursion
+    categoryCount = 1
+    for category in list(low_count_df["category"]):
+        # print(categoryCount, "CATEGORY", category)
+        # categoryCount = categoryCount +1
+        parent = get_parent(category)
+        # print("PARENT", parent)
+        df.loc[df["category"] == category, "category"]= parent 
+    rollup(df, min_queries) # recursive call to keep rolling up categories
+
+
+print("Normalizing data")
+queries_df['query'] = queries_df['query'].apply(normalize)
+
+
+# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+print("Rolling up Categories")
+rollup(queries_df, min_queries=10000)
 # Create labels in fastText format.
 queries_df['label'] = '__label__' + queries_df['category']
 
