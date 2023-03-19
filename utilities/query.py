@@ -10,11 +10,16 @@ from getpass import getpass
 from urllib.parse import urljoin
 import pandas as pd
 import logging
-
+import fasttext
+import re
+import nltk
+stemmer = nltk.stem.PorterStemmer()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
+
+query_classifier_model = fasttext.load_model("/workspace/datasets/fasttext/query_classifier.bin")
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -185,12 +190,33 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
         query_obj["_source"] = source
     return query_obj
 
+def normalize_query(query):
+    words = re.sub(r'[\W_ ]+', ' ', query).lower().split()
+    stemmed_words = [stemmer.stem(word) for word in words]
+    return " ".join(stemmed_words)
 
 def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
-    #### W3: classify the query
-    #### W3: create filters and boosts
-    # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    labels = query_classifier_model.predict(normalize_query(user_query), k=5) # applying same kind of normalization used for training-data
+    query_categories = [category.replace("__label__", "") for category in labels[0]]
+    scores = labels[1]
+
+    aggregated_score = 0.0
+    threshold = 0.5
+    filtered_categories = list()
+
+    for category_index,category in enumerate(query_categories):
+        filtered_categories.append(category)
+        aggregated_score = aggregated_score + scores[category_index]
+        if aggregated_score >= threshold:
+            break
+
+    filter = None
+    if aggregated_score >= threshold:
+        filter = [{
+            "terms" : {"categoryPathIds" : filtered_categories}
+        }]
+
+    query_obj = create_query(user_query, click_prior_query=None, filters=filter, sort=sort, sortDir=sortDir, source=["name", "shortDescription", "categoryPath", "categoryPathIds"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
