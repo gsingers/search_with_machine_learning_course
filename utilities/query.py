@@ -186,11 +186,36 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
+def search(client, user_query, query_classification=False, index="bbuy_products", sort="_score", sortDir="desc"):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    filters = None
+
+    if query_classification:
+        model = fasttext.load_model("/workspace/datasets/fasttext/labeled_queries.bin")
+        result_count = 3
+        threshold = 0.5
+        #(('__label__abcat0101001', '__label__cat02015', '__label__abcat0201011', '__label__pcmcat128700050041', '__label__cat09000'), 
+        #array([0.69107682, 0.06324813, 0.05189264, 0.02867361, 0.01826925]))
+        result = model.predict(user_query, k=result_count)
+        prediction = list(zip(result[0], result[1]))
+        running_threshold = 0
+        running_ids= []
+        for item in prediction:
+            running_threshold += item[1]
+            running_ids.append(item[0].replace('__label__', ''))
+            if running_threshold  > threshold:
+                break
+
+        if running_threshold > threshold:
+            filters = [{
+                'terms' : {'categoryPathIds' : running_ids}
+            }]
+
+
+
+    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription","categoryPathIds"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -212,6 +237,8 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    general.add_argument('-q', '--query_classification', default=False, action=argparse.BooleanOptionalAction,
++                        help='Enable query classfication, True/False')
 
     args = parser.parse_args()
 
@@ -224,6 +251,7 @@ if __name__ == "__main__":
     if args.user:
         password = getpass()
         auth = (args.user, password)
+    query_classification = args.query_classification
 
     base_url = "https://{}:{}/".format(host, port)
     opensearch = OpenSearch(
@@ -240,12 +268,11 @@ if __name__ == "__main__":
     )
     index_name = args.index
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
-    print(query_prompt)
-    for line in fileinput.input():
-        query = line.rstrip()
-        if query == "Exit":
+    while True:
+        query = input(query_prompt).rstrip()
+        if query.lower() == "exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, query_classification=query_classification, index=index_name)
 
         print(query_prompt)
 

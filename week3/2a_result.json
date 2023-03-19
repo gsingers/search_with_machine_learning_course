@@ -1,0 +1,422 @@
+=======
+macbook
+=======
+{
+  "took": 148,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 27,
+      "relation": "eq"
+    },
+    "max_score": 793.17267,
+    "hits": [
+      {
+        "_index": "bbuy_products",
+        "_id": "5430505",
+        "_score": 793.17267,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook\u00ae Pro - 13.3\" Display - 4GB Memory - 500GB Hard Drive"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionTechnical details: Intel\u00ae Core\u2122 i5 processor; 13.3\" display; 4GB memory; 500GB hard driveSpecial features: Bluetooth"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3827134",
+        "_score": 559.4063,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook\u00ae Pro - 13.3\" Display - 8GB Memory - 750GB Hard Drive"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionTechnical details: Intel\u00ae Core\u2122 i7 processor; 13.3\" display; 8GB memory;750GB hard driveSpecial features: Bluetooth"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "4775291",
+        "_score": 503.93143,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook Air\u00ae - 13.3\" Display - 4GB Memory - 128GB Flash Storage"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionSpecial features: BluetoothNote: DVD/CD drive not included"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3827152",
+        "_score": 328.02713,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook\u00ae Pro - 15.4\" Display - 4GB Memory - 500GB Hard Drive"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionTechnical details: Intel\u00ae Core\u2122 i7 processor; 15.4\" display; 4GB memory;500GB hard driveSpecial features: Bluetooth"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "5430514",
+        "_score": 61.42716,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook\u00ae Pro with Retina display - 15.4\" Display - 8GB Memory - 256GB Flash Storage"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionIntel\u00ae Core\u2122 i7 processor; 15.4\" display; 8GB memory; 256GB Flash StrorageSpecial features: BluetoothDVD/CD drive not included"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3827161",
+        "_score": 38.3421,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook\u00ae Pro - 15.4\" Display - 8GB Memory - 750GB Hard Drive"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionTechnical details: Intel\u00ae Core\u2122 i7 processor; 15.4\" display; 8GB memory; 750GB hard driveSpecial features: Bluetooth"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "4760675",
+        "_score": 15.058939,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook\u00ae Air - 11.6\" Display - 4GB Memory - 64GB Flash Storage"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionSpecial features: BluetoothNote: DVD/CD drive not included"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "4775307",
+        "_score": 3.9045706,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook Air\u00ae - 13.3\" Display - 4GB Memory - 256GB Flash Storage"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionSpecial features: BluetoothNote: DVD/CD drive not included"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "4775273",
+        "_score": 2.8946142,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook\u00ae Air - 11.6\" Display - 4GB Memory - 128GB Flash Storage"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionSpecial features: BluetoothNote: DVD/CD drive not included"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "5430532",
+        "_score": 2.570489,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0500000",
+            "abcat0502000",
+            "pcmcat247400050001"
+          ],
+          "name": [
+            "Apple\u00ae - MacBook\u00ae Pro with Retina display - 15.4\" Display - 8GB Memory -512GB Flash Storage"
+          ],
+          "shortDescription": [
+            "ENERGY STAR QualifiedMac OS X LionIntel\u00ae Core\u2122 i7 processor; 15.4\" display; 8GB memory; 512GB Flash StrorageSpecial features: BluetoothDVD/CD drive not included"
+          ]
+        }
+      }
+    ]
+  }
+}
+
+=======
+ps3
+=======
+
+{
+  "took": 267,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 52,
+      "relation": "eq"
+    },
+    "max_score": 10.288266,
+    "hits": [
+      {
+        "_index": "bbuy_products",
+        "_id": "3061302",
+        "_score": 10.288266,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony - PlayStation 3 (160GB)"
+          ],
+          "shortDescription": [
+            "Delve into endless possibilities and high-definition entertainment"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "5403717",
+        "_score": 8.580911,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony Computer Entertainment America LLC - PlayStation 3 (320GB) Call of Duty: Modern Warfare 3 Bundle"
+          ],
+          "shortDescription": [
+            "Answer the call and dive into your entertainment with this PlayStation 3 bundle"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "3061366",
+        "_score": 0.78077525,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony - PlayStation 3 (320GB) with PlayStation Move Bundle"
+          ],
+          "shortDescription": [
+            "Get into the action with PlayStation 3 and PlayStation Move"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "9999168200050097",
+        "_score": 0.004264249,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony PlayStation 3 (320GB) Uncharted 3 Bundle"
+          ],
+          "shortDescription": []
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "9999168200050096",
+        "_score": 0.004108703,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony PlayStation 3 (160GB) Starter Package"
+          ],
+          "shortDescription": []
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "8008513",
+        "_score": 0.0031278238,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony - PlayStation 3 20GB System"
+          ],
+          "shortDescription": [
+            "Experience the excitement and realism of next-generation gaming"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "1113692",
+        "_score": 0.00052038184,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony, EA Sports - PlayStation 3 (250GB) with Madden NFL 11"
+          ],
+          "shortDescription": [
+            "Find new levels of fun with PlayStation 3 and Madden NFL 11"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "1122275",
+        "_score": 0.00052038184,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony - PlayStation 3 (320GB) with PlayStation Move Bundle"
+          ],
+          "shortDescription": [
+            "Get into the action with PlayStation 3 and PlayStation Move"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "1007046",
+        "_score": 0.00052038184,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony - PlayStation 3 (250GB) with Uncharted 2: Among Thieves"
+          ],
+          "shortDescription": [
+            "Find new levels of fun with PlayStation 3 and Uncharted 2: Among Thieves"
+          ]
+        }
+      },
+      {
+        "_index": "bbuy_products",
+        "_id": "1237212",
+        "_score": 0.00052038184,
+        "_source": {
+          "categoryPathIds": [
+            "cat00000",
+            "abcat0700000",
+            "abcat0703000",
+            "abcat0703001"
+          ],
+          "name": [
+            "Sony - PlayStation 3 (160GB)"
+          ],
+          "shortDescription": [
+            "Delve into endless possibilities and high-definition entertainment"
+          ]
+        }
+      }
+    ]
+  }
+}

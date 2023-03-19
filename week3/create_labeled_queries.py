@@ -4,10 +4,14 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 import csv
+import re
 
 # Useful if you want to perform stemming.
 import nltk
-stemmer = nltk.stem.PorterStemmer()
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+
+ps = PorterStemmer()
 
 categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 
@@ -49,8 +53,38 @@ queries_df = pd.read_csv(queries_file_name)[['category', 'query']]
 queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+def normalization(query):
+       query = query.lower()
+       # remove all non-alphanumeric characters except underscore
+       query = re.sub(r'[\W_]+', ' ', query)
+       # trim extra space and only keep token seperated by one space
+       query = " ".join(query.split())
+       # perform stemming
+       return " ".join(ps.stem(x) for x in query.split())
+
+queries_df['query'] = queries_df['query'].map(normalization)
+check_parent = dict(zip(parents_df['category'], parents_df['parent']))
+#queries_df = queries_df.groupby(['category']).size().reset_index(name="count")
+#print(queries_df[queries_df['category'] == 'abcat0701001'])
+#         category  count
+#272  abcat0701001  13830
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+# set parent with same category, e.g. cat00000
+check_parent[root_category_id] = root_category_id
+
+def set_parent(category):
+    if category in remaining_categories:
+        return check_parent[category]
+    else:
+        return category
+
+while True:
+    df_category_count = queries_df.groupby(['category']).size().reset_index(name='count')
+    remaining_categories = set(df_category_count[df_category_count['count'] < min_queries]['category'].values)
+    if len(remaining_categories) < 1:
+        break
+    queries_df['category'] = queries_df['category'].apply(set_parent)
 
 # Create labels in fastText format.
 queries_df['label'] = '__label__' + queries_df['category']

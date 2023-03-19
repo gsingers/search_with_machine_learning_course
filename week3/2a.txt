@@ -1,0 +1,34 @@
+2a.
+Positive results came back for "macbook" and "ps3".
+
+"macbook"
+----------
+For "macbook", without query classification, top results were related to macbook power adapter / laptop / dislay port.
+With query classification, Macbook laptop were the top results.
+
+fasttext returned [('__label__pcmcat247400050001', 0.9390029311180115), ('__label__pcmcat183800050007', 0.03336909040808678), ('__label__abcat0511004', 0.004591682925820351)]
+Filter added after passing threshold(0.5) 'pcmcat247400050001'
+
+Results are relevant --
+1) Apple\u00ae - MacBook\u00ae Pro - 13.3\" Display - 4GB Memory - 500GB Hard Drive 
+2) Apple\u00ae - MacBook\u00ae Pro - 13.3\" Display - 8GB Memory - 750GB Hard Drive
+3) Apple\u00ae - MacBook Air\u00ae - 13.3\" Display - 4GB Memory - 128GB Flash Storage
+4) Apple\u00ae - MacBook\u00ae Pro - 15.4\" Display - 4GB Memory - 500GB Hard Drive
+5) Apple\u00ae - MacBook\u00ae Pro with Retina display - 15.4\" Display - 8GB Memory - 256GB Flash Storage
+
+
+ps3
+------
+For "ps3", without query classification, top results were related to ps3 games / home network / ps3 controller.
+With query classification, all top results are about ps3 consoles.
+
+fasttext returned [('__label__abcat0703001', 0.599634051322937), ('__label__abcat0703002', 0.17374223470687866), ('__label__pcmcat248500050014', 0.03276897221803665)]
+Filter added after passing threshold(0.5) 'abcat0703001'
+
+
+Results are relevant --
+1) Sony - PlayStation 3 (160GB)
+2) Sony Computer Entertainment America LLC - PlayStation 3 (320GB) Call of Duty: Modern Warfare 3 Bundle
+3) Sony - PlayStation 3 (320GB) with PlayStation Move Bundle
+4) Sony PlayStation 3 (320GB) Uncharted 3 Bundle
+5) Sony PlayStation 3 (160GB) Starter Package
