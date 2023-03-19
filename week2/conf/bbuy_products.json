@@ -10,9 +10,9 @@
           ]
         },
         "synonyms": {
-          "tokenizer": "smarter_hyphens_tokenizer",
+          "tokenizer": "standard",
           "filter": [
-            "smarter_hyphens_filter",
+            "asciifolding",
             "lowercase",
             "stemmer",
             "synonyms"
