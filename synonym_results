@@ -1,0 +1,158 @@
+#first iteration
+Query word? inkjet
+deskjet 0.88566
+officejet 0.872725
+mvm 0.834454
+pixma 0.828955
+564xl 0.828034
+c5280 0.812327
+laserjet 0.80464
+lexmark 0.800192
+564 0.798819
+twinpack 0.798367
+Query word? netbook
+netbooks 0.942119
+jetbook 0.897209
+ipadnetbook 0.853173
+nextbook 0.840125
+atom 0.770783
+eee 0.75376
+n270 0.708803
+zenbook 0.696015
+n455 0.694169
+tf101 0.69408
+
+#minCount 30
+ epoch 25
+Query word? headphones
+headphone 0.905927
+ear 0.854045
+earbud 0.85149
+overtheear 0.785252
+bud 0.677883
+inear 0.67441
+akg 0.612552
+sennheiser 0.599442
+microphones 0.553176
+stereo 0.547868
+Query word? laptop
+notebook 0.798945
+laptops 0.63778
+notebooks 0.636427
+netbook 0.606882
+briefcase 0.557735
+atg 0.545325
+netbooks 0.53901
+macbook 0.537915
+pavilion 0.527471
+inspiron 0.520745
+Query word? freezer
+freezers 0.835864
+topfreezer 0.799071
+refrigerators 0.761186
+refrigerator 0.758552
+frostfree 0.722399
+topmount 0.700008
+bottommount 0.697719
+counterdepth 0.69251
+217 0.670152
+sidebyside 0.654011
+Query word? nintendo
+d 0.900392
+wii 0.893184
+ds 0.884978
+3ds 0.806304
+playstation 0.681371
+advance 0.679538
+psp 0.678803
+gamecube 0.673
+mario 0.664648
+xbox 0.64831
+Query word? whirpool
+whirlpool 0.875722
+maytag 0.695472
+frigidaire 0.690837
+biscuitonbiscuit 0.648857
+ge 0.619889
+whiteonwhite 0.607959
+pool 0.598196
+profile 0.590758
+hotpoint 0.58253
+blackonblack 0.578031
+Query word? kodak
+easyshare 0.786604
+canon 0.618417
+photosmart 0.542297
+coolpix 0.537807
+hewlettpackard 0.533188
+exilim 0.524741
+fujifilm 0.524475
+fuji 0.519824
+powershot 0.516791
+everio 0.50188
+Query word? ps2
+playstation 0.779064
+xbox 0.689756
+ps3 0.681542
+360 0.646661
+psp 0.643901
+wii 0.642446
+gamecube 0.630652
+boy 0.615249
+guides 0.605423
+code 0.6038
+Query word? razr
+motorola 0.76847
+droid 0.726195
+phone 0.708193
+mobile 0.651144
+nokia 0.647892
+kyocera 0.629451
+htc 0.618454
+blackberry 0.609265
+smartphones 0.597953
+cell 0.591681
+Query word? stratocaster
+strat 0.815184
+fender 0.736582
+squier 0.662924
+jazz 0.592707
+bass 0.583477
+guitar 0.579974
+guitars 0.569662
+sunburst 0.561604
+cutaway 0.537055
+dreadnought 0.526567
+Query word? holiday
+happy 0.61633
+gift 0.580217
+buy 0.566132
+feliz 0.558732
+gc 0.542563
+best 0.519453
+connection 0.515834
+cinemanow 0.504608
+day 0.503177
+greeting 0.499001
+Query word? plasma
+600hz 0.754924
+televisions 0.667309
+panel 0.651249
+flat 0.649394
+3dready 0.644898
+viera 0.642802
+hdtv 0.628763
+tvs 0.621835
+dlp 0.574439
+240hz 0.555953
+Query word? leather
+recliner 0.678377
+seating 0.595815
+theaterseatstore 0.594004
+berkline 0.579717
+curved 0.556412
+folio 0.551945
+executive 0.529828
+clips 0.522787
+case 0.506123
+cases 0.496476

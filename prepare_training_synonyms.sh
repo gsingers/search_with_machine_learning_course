@@ -1,0 +1,3 @@
+python week2/createContentTrainingData.py --output /workspace/datasets/fasttext/products.txt --label name
+cat /workspace/datasets/fasttext/products.txt |  cut -c 10- | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" | sed "s/[^[:alnum:]]/ /g" | tr -s ' ' > /workspace/datasets/fasttext/normalized_products.txt
+~/fastText-0.9.2/fasttext skipgram -input /workspace/datasets/fasttext/normalized_products.txt -output /workspace/datasets/fasttext/synonim_model -epoch 25 -minCount 100

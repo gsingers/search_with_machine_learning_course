@@ -8,6 +8,10 @@
             "smarter_hyphens_filter",
             "lowercase"
           ]
+        },
+        "synonym": {
+          "tokenizer": "whitespace",
+          "filter": ["stemmer", "synonym"]
         }
       },
       "tokenizer": {
@@ -17,6 +21,10 @@
             "whitespace",
             "\n"
           ]
+        },
+        "synonym": {
+          "type": "synonym",
+          "synonyms_path": "synonyms.csv"
         }
       },
       "filter": {
@@ -248,8 +256,11 @@
           },
           "suggest": {
             "type": "completion"
+          },
+          "synonyms": {
+            "type": "text",
+            "analyzer": "synonym"
           }
-
         }
       },
       "onSale": {

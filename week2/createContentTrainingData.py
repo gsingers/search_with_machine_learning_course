@@ -1,13 +1,21 @@
 import argparse
 import multiprocessing
-import glob
+import glob,pandas as pd
 from tqdm import tqdm
 import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
-
+import nltk, re
+from nltk.stem import WordNetLemmatizer 
+nltk.download('wordnet')
+nltk.download('punkt')
+lemmatizer = WordNetLemmatizer()
 def transform_name(product_name):
     # IMPLEMENT
+    product_name = product_name.lower()
+    product_name = re.sub(r'[^\w\s_]','', product_name)
+    word_list = nltk.word_tokenize(product_name)
+    product_name = ' '.join([lemmatizer.lemmatize(w) for w in word_list])
     return product_name
 
 # Directory for product data
@@ -50,7 +58,9 @@ def _label_filename(filename):
             child.find('categoryPath')[1][0].text != 'abcat0600000'):
               # Choose last element in categoryPath as the leaf categoryId or name
               if names_as_labels:
-                  cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][1].text.replace(' ', '_')
+                  cat_name = child.find('categoryPath')[len(child.find('categoryPath')) - 1][1].text
+                  cat_name = transform_name(cat_name)
+                  cat = cat_name.replace(' ', '_')
               else:
                   cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
               # Replace newline chars with spaces so fastText doesn't complain
@@ -63,7 +73,13 @@ if __name__ == '__main__':
     print("Writing results to %s" % output_file)
     with multiprocessing.Pool() as p:
         all_labels = tqdm(p.imap(_label_filename, files), total=len(files))
+
+        df = pd.DataFrame(columns = ['cat', 'name'])
+        for labels in all_labels:
+            df = pd.concat([df,pd.DataFrame(labels, columns = ['cat', 'name'])])
+        df['cat_count'] = df.groupby('cat')['cat'].transform('count')
+        df_pruned = df[df.cat_count >= min_products]
+        labels = df_pruned.values
         with open(output_file, 'w') as output:
-            for label_list in all_labels:
-                for (cat, name) in label_list:
-                    output.write(f'__label__{cat} {name}\n')
+            for (index, row) in df_pruned.iterrows():
+                output.write(f'__label__{row["cat"]} {row["name"]}\n')
