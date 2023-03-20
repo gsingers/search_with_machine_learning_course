@@ -22,6 +22,9 @@ logging.basicConfig(format='%(levelname)s:%(message)s')
 
 # IMPLEMENT ME: import the sentence transformers module!
 
+logger.info("Creating Model")
+# IMPLEMENT ME: instantiate the sentence transformer model!
+
 # NOTE: this is not a complete list of fields.  If you wish to add more, put in the appropriate XPath expression.
 #TODO: is there a way to do this using XPath/XSL Functions so that we don't have to maintain a big list?
 mappings =  [
@@ -105,9 +108,6 @@ def get_opensearch():
 
 
 def index_file(file, index_name, reduced=False):
-    logger.info("Creating Model")
-    # IMPLEMENT ME: instantiate the sentence transformer model!
-    
     logger.info("Ready to index")
 
     docs_indexed = 0
@@ -151,7 +151,7 @@ def index_file(file, index_name, reduced=False):
     return docs_indexed
 
 @click.command()
-@click.option('--source_dir', '-s', default='/workspace/datasets/product_data/products'. help='XML files source directory')
+@click.option('--source_dir', '-s', default='/workspace/datasets/product_data/products', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
 def main(source_dir: str, index_name: str, reduced: bool):
