@@ -11,11 +11,18 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
+import re
+import nltk
+import fasttext
 
+stemmer = nltk.stem.PorterStemmer()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
+
+model = fasttext.load_model("/workspace/datasets/fasttext/query_classifier.bin")
+category_threshold = 0.5
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -49,7 +56,8 @@ def create_prior_queries(doc_ids, doc_id_weights,
 
 
 # Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None,
+                  should_use_categories=False):
     if args.synonyms:
          name_field = "name.synonyms" 
     else:
@@ -190,12 +198,50 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
         query_obj["_source"] = source
     return query_obj
 
+def get_categories(query: str):
+     candidate_count = 5
+     words = re.sub(r'[\W_ ]+', ' ', query).lower().split()
+     stemmed_words = [stemmer.stem(word) for word in words]
+     normalized_query = " ".join(stemmed_words)
+     categories, probs = model.predict(normalized_query, k=candidate_count)
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
+     print(categories)
+     print(probs)
+
+     cat_len = len(categories)
+     category_list = []
+
+     for i in range(0, cat_len):
+         if probs[i] > category_threshold:
+             curr_cat = categories[i].replace("__label__", "")
+             category_list.append(curr_cat)
+         else:
+             break
+     return category_list
+
+
+def get_filters(categories):
+     return [
+         {
+             "terms": {
+                 "categoryPathIds.keyword": categories
+             }
+         }
+     ]
+
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", use_categories=False):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    filters = []
+    if use_categories:
+         categories = get_categories(user_query)
+         print("categories " + str(categories))
+         if categories:
+             filters = get_filters(categories)
+
+    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir,
+                              source=["name", "shortDescription"], should_use_categories=args.use_categories)
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -211,14 +257,14 @@ if __name__ == "__main__":
     general = parser.add_argument_group("general")
     general.add_argument("-i", '--index', default="bbuy_products",
                          help='The name of the main index to search')
-    general.add_argument("-s", '--host', default="localhost",
+    general.add_argument('--host', default="localhost",
                          help='The OpenSearch host name')
     general.add_argument("-p", '--port', type=int, default=9200,
                          help='The OpenSearch port')
     general.add_argument('--synonyms', action='store_true', default=False, help='Search with synonym')                     
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
-
+    general.add_argument("--use_categories", action=argparse.BooleanOptionalAction, help="Whether to use categories")
     args = parser.parse_args()
 
     if len(vars(args)) == 0:
@@ -245,11 +291,11 @@ if __name__ == "__main__":
 
     )
     index_name = args.index
-    query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     while True:
-        query = input(query_prompt).rstrip()
+        query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
+        query = input(query_prompt)
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, index=index_name, use_categories=args.use_categories)
 
     
