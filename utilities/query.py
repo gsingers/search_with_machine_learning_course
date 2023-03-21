@@ -11,6 +11,9 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 
 logger = logging.getLogger(__name__)
@@ -47,6 +50,21 @@ def create_prior_queries(doc_ids, doc_id_weights,
                 pass  # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query
 
+def create_vector_query(size, query):
+    encoded_query = model.encode([query])[0]
+    query_obj = {
+                    "size": size,
+                    "query": {
+                        "knn": {
+                            "encoded_name": {
+                                "vector": encoded_query,
+                                "k": size
+                            }
+                        }
+                    }
+                }
+    query_obj["_source"] = ["name"]
+    return query_obj
 
 # Hardcoded query here.  Better to use search templates or other query config.
 def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
@@ -190,7 +208,10 @@ def search(client, user_query, index="bbuy_products", sort="_score", sortDir="de
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    if use_vector_search:
+        query_obj = create_vector_query(10, query)
+    else:
+        query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -212,6 +233,8 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    general.add_argument('-v', '--vector', type=bool, default=False,
+                         help='Execute vector search')                     
 
     args = parser.parse_args()
 
@@ -224,6 +247,8 @@ if __name__ == "__main__":
     if args.user:
         password = getpass()
         auth = (args.user, password)
+
+    use_vector_search = True
 
     base_url = "https://{}:{}/".format(host, port)
     opensearch = OpenSearch(

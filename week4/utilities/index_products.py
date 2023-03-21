@@ -20,7 +20,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
 
-# IMPLEMENT ME: import the sentence transformers module!
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+print(model)
+
 
 # NOTE: this is not a complete list of fields.  If you wish to add more, put in the appropriate XPath expression.
 #TODO: is there a way to do this using XPath/XSL Functions so that we don't have to maintain a big list?
@@ -129,29 +132,38 @@ def index_file(file, index_name, reduced=False):
             xpath_expr = mappings[idx]
             key = mappings[idx + 1]
             doc[key] = child.xpath(xpath_expr)
-        #print(doc)
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
         if 'name' not in doc or len(doc['name']) == 0:
             continue
         if reduced and ('categoryPath' not in doc or 'Best Buy' not in doc['categoryPath'] or 'Movies & Music' in doc['categoryPath']):
             continue
+
+        names.append(doc['name'][0])
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
         docs_indexed += 1
         if docs_indexed % 200 == 0:
             logger.info("Indexing")
+            encode(docs, names)
             bulk(client, docs, request_timeout=60)
             logger.info(f'{docs_indexed} documents indexed')
             docs = []
             names = []
     if len(docs) > 0:
+        encode(docs, names)
         bulk(client, docs, request_timeout=60)
         logger.info(f'{docs_indexed} documents indexed')
     return docs_indexed
 
+def encode(docs, names):
+    encoded_names  = model.encode(names)
+    for doc, encoded_name in zip(docs, encoded_names):
+        doc["_source"]['encoded_name'] = encoded_name
+
+
 @click.command()
-@click.option('--source_dir', '-s', default='/workspace/datasets/product_data/products'. help='XML files source directory')
+@click.option('--source_dir', '-s', default='/workspace/datasets/product_data/products', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--reduced', is_flag=True, show_default=True, default=False, help="Removes music, movies, and merchandised products.")
 def main(source_dir: str, index_name: str, reduced: bool):
