@@ -2,6 +2,8 @@ FROM gitpod/workspace-full:latest
 #docker pull gitpod/workspace-full:2022-06-09-20-58-43
 RUN sudo apt-get install -y graphviz
 
+USER gitpod
+
 # Move where Pyenv is stored
 #RUN sudo mv /home/gitpod/.pyenv /workspace/pyenv
 #RUN sudo ln -s /workspace/pyenv /home/gitpod/.pyenv
