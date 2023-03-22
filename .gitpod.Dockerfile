@@ -21,7 +21,7 @@ RUN pyenv global 3.9.7
 RUN pip install kaggle
 
 RUN pyenv virtualenv 3.9.7 search_with_ml
-RUN bash  -i -c "pyenv activate search_with_ml && pip install -r /home/gitpod/requirements.txt"
+RUN bash  -c "pyenv activate search_with_ml && pip install -r /home/gitpod/requirements.txt"
 
 
 
