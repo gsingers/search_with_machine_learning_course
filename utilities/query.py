@@ -11,12 +11,12 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
-
+import fasttext
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
-
+query_class = fasttext.load_model('/workspace/search_with_machine_learning_course/query_classifier.bin')
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
         click_group):  # total impressions isn't currently used, but it mayb worthwhile at some point
@@ -47,6 +47,17 @@ def create_prior_queries(doc_ids, doc_id_weights,
                 pass  # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query
 
+def get_filter_categories():
+    cats = query_class.predict(query, k=5)
+    # print(cats)
+    cats_to_apply = []
+    score = 0
+    for idx, cat in enumerate(cats[0]):
+        cats_to_apply.append(cat.replace("__label__", ""))
+        score = score + cats[1][idx]
+        if score > 0.5:
+            break
+    return cats_to_apply
 
 # Hardcoded query here.  Better to use search templates or other query config.
 def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
@@ -186,11 +197,22 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", use_cat_filters=None):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    if use_cat_filters:
+        cat_filters = get_filter_categories()
+        filters = {
+            "terms": {
+                "categoryPathIds": cat_filters
+            }
+        }
+        print(cat_filters)
+    else:
+        filters=None
+    
+    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription", "categoryPathIds"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -212,7 +234,12 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
-
+    general.add_argument('-f','--use_cat_filters',
+                         help='Use category filters from model', action=argparse.BooleanOptionalAction)
+    general.add_argument('-x','--sort',
+                         help='Sort products by',default="_score")
+    general.add_argument('-z','--sort_dir',
+                         help='Sort direction',default="desc")
     args = parser.parse_args()
 
     if len(vars(args)) == 0:
@@ -221,6 +248,9 @@ if __name__ == "__main__":
 
     host = args.host
     port = args.port
+    use_cat_filters = args.use_cat_filters
+    sort = args.sort
+    sort_dir = args.sort_dir
     if args.user:
         password = getpass()
         auth = (args.user, password)
@@ -241,11 +271,11 @@ if __name__ == "__main__":
     index_name = args.index
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
-    for line in fileinput.input():
+    for line in fileinput.input(('-', )):
         query = line.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, index=index_name, use_cat_filters=use_cat_filters,sort=sort,sortDir=sort_dir)
 
         print(query_prompt)
 
