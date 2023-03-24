@@ -11,12 +11,30 @@ from urllib.parse import urljoin
 import pandas as pd
 import logging
 import fasttext
+from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
 
 category_model = fasttext.load_model('/workspace/search_with_machine_learning_course/week3/model_queries.bin')
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
+def create_vector_query(query, size):
+    embedding = model.encode([query])[0]
+
+    es_query = {
+        "size": size,
+        "query": {
+            "knn": {
+                "embedding": {
+                    "vector": embedding,
+                    "k": size
+                }
+            }
+        }
+    }
+    return es_query
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -61,11 +79,11 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     category_prediction = category_model.predict(user_query, k=3)
     if category_prediction:
         if category_prediction[1][0] >= 0.5:
-            category_filtrs.append({ "term": { "categoryLeaf": category_prediction[0][0].replace("__label__", "") }})
+            category_filtrs.append({ "term": { "categoryPathIds": category_prediction[0][0].replace("__label__", "") }})
         else:
             if sum(category_prediction[1]) >= 0.5:
                 for category in category_prediction[0]:
-                    category_filtrs.append({ "term": { "categoryLeaf": category_prediction[0][0].replace("__label__", "") }})
+                    category_filtrs.append({ "term": { "categoryPathIds": category_prediction[0][0].replace("__label__", "") }})
     if category_filtrs:
         filters.append(
             {
@@ -209,16 +227,16 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", synonyms=False):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", synonyms=False, vector_query=False):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], synonyms=synonyms)
+    query_obj = create_vector_query(user_query, 5) if vector_query else create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], synonyms=synonyms)
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
-        print(json.dumps(response, indent=2))
+        print(json.dumps(hits, indent=2))
 
 
 if __name__ == "__main__":
@@ -236,6 +254,7 @@ if __name__ == "__main__":
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
     general.add_argument('--synonyms', action='store_true')
+    general.add_argument('--vector', action='store_true')
 
     args = parser.parse_args()
 
@@ -268,6 +287,6 @@ if __name__ == "__main__":
         query = input(query_prompt).rstrip()
         if query.lower() == "exit":
             break
-        search(client=opensearch, user_query=query, index=index_name, synonyms=args.synonyms)
+        search(client=opensearch, user_query=query, index=index_name, synonyms=args.synonyms, vector_query=args.vector)
 
     
