@@ -5,6 +5,7 @@ from tqdm import tqdm
 import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from collections import defaultdict
 
 def transform_name(product_name):
     # IMPLEMENT
@@ -16,8 +17,9 @@ directory = r'/workspace/datasets/product_data/products/'
 parser = argparse.ArgumentParser(description='Process some integers.')
 general = parser.add_argument_group("general")
 general.add_argument("--input", default=directory,  help="The directory containing product data")
-general.add_argument("--output", default="/workspace/datasets/fasttext/output.fasttext", help="the file to output to")
+general.add_argument("--output", default="/workspace/datastracets/fasttext/output.fasttext", help="the file to output to")
 general.add_argument("--label", default="id", help="id is default and needed for downsteam use, but name is helpful for debugging")
+general.add_argument("--pruned_n", type=int, default=0,  help="Min num of products per label")
 
 # IMPLEMENT: Setting min_products removes infrequent categories and makes the classifier's task easier.
 general.add_argument("--min_products", default=0, type=int, help="The minimum number of products per category (default is 0).")
@@ -63,7 +65,22 @@ if __name__ == '__main__':
     print("Writing results to %s" % output_file)
     with multiprocessing.Pool() as p:
         all_labels = tqdm(p.imap(_label_filename, files), total=len(files))
-        with open(output_file, 'w') as output:
+        counter = defaultdict(int)
+        if args.pruned_n > 0:
+            merged_labels = []
+            filtered_labels = []
             for label_list in all_labels:
-                for (cat, name) in label_list:
-                    output.write(f'__label__{cat} {name}\n')
+                for cat, name in label_list:
+                    counter[cat] += 1
+                    merged_labels.append((cat, name))
+            for cat, name in merged_labels:
+                    if counter[cat] >= args.pruned_n:
+                        filtered_labels.append((cat, name))
+            with open(output_file, 'w') as output:
+                    for (cat, name) in filtered_labels:
+                        output.write(f'__label__{cat} {name}\n')
+        else:
+            with open(output_file, 'w') as output:
+                for label_list in all_labels:
+                    for (cat, name) in label_list:
+                        output.write(f'__label__{cat} {name}\n')
