@@ -12,10 +12,13 @@ import pandas as pd
 import fileinput
 import logging
 
+from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
+
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -186,16 +189,36 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
+def create_vector(q,limit):
+    vec = model.encode([q])
+    return {
+        "_source": "name",
+        "size": int(limit),
+        "query": {
+            "knn":{
+                "embedding": {
+                    "vector": vec[0],
+                    "k":limit
+                }
+            }
+        }
+    }
+
+def search(client, user_query,vec, index="bbuy_products", sort="_score", sortDir="desc"):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    if vec:
+        query_obj = create_vector(user_query, 10)
+    else:
+        query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
         print(json.dumps(response, indent=2))
+
+
 
 
 if __name__ == "__main__":
@@ -212,7 +235,8 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
-
+    general.add_argument("-v",'--vector', action="store_true", help='Vector search')
+    
     args = parser.parse_args()
 
     if len(vars(args)) == 0:
@@ -245,7 +269,7 @@ if __name__ == "__main__":
         query = line.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, index=index_name,vec=True)
 
         print(query_prompt)
 

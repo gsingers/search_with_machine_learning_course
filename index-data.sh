@@ -11,7 +11,7 @@ ANNOTATIONS_JSON_FILE="/workspace/search_with_machine_learning_course/conf/bbuy_
 PRODUCTS_JSON_FILE="/workspace/search_with_machine_learning_course/conf/bbuy_products.json"
 QUERIES_JSON_FILE="/workspace/search_with_machine_learning_course/conf/bbuy_queries.json"
 DATASETS_DIR="/workspace/datasets"
-PYTHON_LOC="/workspace/search_with_machine_learning_course/utilities"
+PYTHON_LOC="week4/utilities"
 
 LOGS_DIR="/workspace/logs"
 ANNOTATE=""
@@ -52,8 +52,9 @@ if [ "$ANNOTATE" != "--annotate" ]; then
     fi
 
     if [ -f index_products.py ]; then
+      echo "POTATOOOOAAAA"
       echo "Indexing product data in $DATASETS_DIR/product_data/products and writing logs to $LOGS_DIR/index_products.log"
-      nohup python index_products.py $REDUCE -s "$DATASETS_DIR/product_data/products" > "$LOGS_DIR/index_products.log" &
+      nohup python index_products.py $REDUCE -s "$DATASETS_DIR/product_data/products" > "$LOGS_DIR/index_products.log" & >> /dev/stdout
       if [ $? -ne 0 ] ; then
         echo "Failed to index products"
         exit 2
