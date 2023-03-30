@@ -49,8 +49,29 @@ queries_df = pd.read_csv(queries_file_name)[['category', 'query']]
 queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+def normalize_query(query):
+    lowered = query.lower()
+    lowered_sub = re.sub('[^0-9a-zA-Z]+', ' ', lowered)
+    stemmed_tokens = [stemmer.stem(token) for token in lowered_sub.strip().split()]
+    return ' '.join(stemmed_tokens)
+
+queries_df['query'] = queries_df['query'].map(normalize_query)
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+cat_counts_df = queries_df.groupby('category').size().to_frame('size')
+queries_df_counts = pd.merge(queries_df, cat_counts_df, on='category')
+
+while len(queries_df_counts[queries_df_counts['size'] < min_queries]) > 0:
+    queries_df_counts_parents = pd.merge(queries_df_counts, parents_df, on='category')
+    queries_df_counts_parents.loc[queries_df_counts_parents['size'] < min_queries, 'category'] = queries_df_counts_parents['parent']
+    queries_df = queries_df_counts_parents[['category', 'query']]
+    cat_counts_df = queries_df.groupby('category').size().to_frame('size')
+    queries_df_counts = pd.merge(queries_df, cat_counts_df, on='category')
+# Now there should be no queries with categories less than min_queries count
+queries_df = queries_df_counts_parents[['category', 'query']].copy()
+print(queries_df)
+
+print(f"Unique categories: {queries_df['category'].nunique()}")
 
 # Create labels in fastText format.
 queries_df['label'] = '__label__' + queries_df['category']

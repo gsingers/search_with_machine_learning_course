@@ -183,14 +183,27 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
             print("Couldn't replace query for *")
     if source is not None:  # otherwise use the default and retrieve all source
         query_obj["_source"] = source
+    if query_label is not None:
+        query_obj["query"]["function_score"]["query"]["bool"]["must"].append({
+            "term" : {
+                "categoryPathIds.keyword": query_label 
+            }
+        })
     return query_obj
 
 
 def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
     #### W3: classify the query
+    query_label = None
+    if model is not None:
+        prediction = model.predict(user_query)
+        print(f'prediction: {prediction}')
+        labels = prediction[0][0].split(",")
+        query_label = labels[0].replace("__label__", "")
+
+    print(f"query_label: {query_label}")
     #### W3: create filters and boosts
-    # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription", "categoryPath", "categoryPathIds"], synonyms=synonyms, query_label=query_label) 
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -239,13 +252,14 @@ if __name__ == "__main__":
 
     )
     index_name = args.index
+    model = fasttext.load_model("/workspace/search_with_machine_learning_course/query_classifier.bin")
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
     for line in fileinput.input():
         query = line.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, index=index_name, synonyms=use_synonyms, model=model)
 
         print(query_prompt)
 
