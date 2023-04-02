@@ -4,9 +4,8 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 import csv
-
-# Useful if you want to perform stemming.
 import nltk
+
 stemmer = nltk.stem.PorterStemmer()
 
 categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
@@ -31,6 +30,11 @@ root_category_id = 'cat00000'
 tree = ET.parse(categories_file_name)
 root = tree.getroot()
 
+def normalize(query): 
+    query = "".join([c if c.isalnum() else " " for c in query.lower()])
+    query = " ".join([stemmer.stem(w) for w in query.split()])
+    return query
+
 # Parse the category XML file to map each category id to its parent category id in a dataframe.
 categories = []
 parents = []
@@ -50,11 +54,19 @@ queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
 
+queries_df['query'] = queries_df['query'].apply(normalize)
+
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+queries_df["count"] = queries_df.groupby('category')['category'].transform('count')
+while len(queries_df.loc[queries_df["count"] < min_queries]["count"]) > 0:
+    queries_df = pd.merge(queries_df, parents_df, on="category", how="left")
+    queries_df["category"] = pd.DataFrame(queries_df.apply(lambda x: x["parent"] if x["count"] < min_queries else  x["category"], axis=1).to_list(),index=queries_df.index)
+    queries_df["count"] = queries_df.groupby('category')['category'].transform('count')
+    queries_df = queries_df.drop(["parent"], axis=1)
 
 # Create labels in fastText format.
 queries_df['label'] = '__label__' + queries_df['category']
-
+print(queries_df.head(5))
 # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
 queries_df = queries_df[queries_df['category'].isin(categories)]
 queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']

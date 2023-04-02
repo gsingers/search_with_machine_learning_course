@@ -11,11 +11,20 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
+import fasttext
+import nltk 
 
+stemmer = nltk.stem.PorterStemmer()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
+ ## duplicating the code because of import issues. TODO - fix the relative import issue
+def normalize(query): 
+    query = "".join([c if c.isalnum() else " " for c in query.lower()])
+    query = " ".join([stemmer.stem(w) for w in query.split()])
+    return query
+
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -47,9 +56,30 @@ def create_prior_queries(doc_ids, doc_id_weights,
                 pass  # nothing to do in this case, it just means we can't find priors for this doc
     return click_prior_query
 
+def predict_categories(query: str):
+    model = "/workspace/search_with_machine_learning_course/week3/model2.bin"
+    set_threshold = 0.2 # min score
+    k = 5 # number top categories
+    model = fasttext.load_model(model)
+    query = normalize(query)
+    categories, probs = model.predict(query, k=k)
+    cat_len = len(categories)
+    category_list = []
+
+    for i in range(0, cat_len):
+        if probs[i] >= set_threshold:
+            curr_cat = categories[i].replace("__label__", "")
+            category_list.append(curr_cat)
+        else:
+            break
+    return category_list
 
 # Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None, category_filtering=None, category_boost=None, categories=[]):
+    
+    # update filterings if category_filtering is enabled
+    if category_filtering:
+        filters.append({"terms": {"categoryPathIds.keyword": categories}})
     query_obj = {
         'size': size,
         "sort": [
@@ -181,6 +211,14 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
             query_obj["query"] = {"match_all": {}}
         except:
             print("Couldn't replace query for *")
+
+    if category_boost:
+        query_obj["query"]["function_score"]["query"]["bool"]["should"].append({
+            "terms": {
+                "categoryPathIds.keyword": categories,
+                "boost": 50
+            }
+        })
     if source is not None:  # otherwise use the default and retrieve all source
         query_obj["_source"] = source
     return query_obj
@@ -188,9 +226,11 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
 
 def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
     #### W3: classify the query
+    categories = predict_categories(user_query)
+    print("Predicted categories: ", categories)
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    query_obj = create_query(user_query, click_prior_query=None, filters=[], sort=sort, sortDir=sortDir, source=["name", "shortDescription", "categoryPath", "categoryPathIds"], category_filtering=True, category_boost=False, categories=categories)
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
