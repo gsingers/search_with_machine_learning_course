@@ -13,11 +13,10 @@ SPLIT_TRAIN_ROWS=1000000
 SPLIT_TEST_ROWS=1000000
 NUM_TEST_QUERIES=100 # the number of test queries to run
 CLICK_MODEL="heuristic"
-SYNTHESIZE=""
 DOWNSAMPLE=""
 MAIN_QUERY_WEIGHT=1
 RESCORE_WEIGHT=2
-while getopts ':s:c:e:g:m:w:o:a:r:t:ydh' c
+while getopts ':s:c:e:g:m:w:o:a:r:tdh' c
 do
   case $c in
     a) ALL_CLICKS_FILE=$OPTARG ;;
@@ -31,7 +30,6 @@ do
     s) SOURCE_DIR=$OPTARG ;;
     t) SPLIT_TEST_ROWS=$OPTARG ;;
     w) WEEK=$OPTARG ;;
-    y) SYNTHESIZE="--synthesize" ;;
     h) usage ;;
     [?]) usage ;;
   esac
@@ -46,7 +44,7 @@ shift $((OPTIND -1))
 # $ALL_CLICKS_FILE -- The set of all clicks
 cd $SOURCE_DIR
 mkdir -p $OUTPUT_DIR
-echo "ltr-end-to-end.sh $SOURCE_DIR $WEEK $OUTPUT_DIR $ALL_CLICKS_FILE $SYNTHESIZE $CLICK_MODEL run at "  `date` > $OUTPUT_DIR/meta.txt
+echo "ltr-end-to-end.sh $SOURCE_DIR $WEEK $OUTPUT_DIR $ALL_CLICKS_FILE $CLICK_MODEL run at "  `date` > $OUTPUT_DIR/meta.txt
 set -x
 python $WEEK/utilities/build_ltr.py --create_ltr_store
 if [ $? -ne 0 ] ; then
@@ -65,7 +63,7 @@ fi
 
 # Create our impressions (positive/negative) data set, e.g. all sessions (with LTR features added in already)
 echo "Creating impressions data set" # outputs to $OUTPUT_DIR/impressions.csv by default
-python $WEEK/utilities/build_ltr.py --generate_impressions  --output_dir "$OUTPUT_DIR" --train_file "$OUTPUT_DIR/train.csv" $SYNTHESIZE
+python $WEEK/utilities/build_ltr.py --synthesize_impressions  --output_dir "$OUTPUT_DIR" --train_file "$OUTPUT_DIR/train.csv"
 if [ $? -ne 0 ] ; then
   exit 2
 fi

@@ -40,7 +40,7 @@ if __name__ == "__main__":
     general.add_argument("-l", '--ltr_store', default="week1",
                          help='The name of the LTR store.  Will be prepended with _ltr on creation')
     general.add_argument("-a", '--all_clicks',
-                         help='The path to the CSV file containing all click/session data.  This is required if doing --generate_impressions or --xgb_test')
+                         help='The path to the CSV file containing all click/session data.  This is required if doing --xgb_test')
     general.add_argument("--output_dir", default="output", help="the directory to output all files to")
 
     dp_group = parser.add_argument_group("LTR Data Prep")
@@ -49,12 +49,8 @@ if __name__ == "__main__":
     dp_group.add_argument('--normalize_json',
                           help='A path to a JSON map of LTR feature-normalizer type pairs. If unset, data normalization will not happen.  See week1/conf/normalize_types.json for an example')
 
-    dp_group.add_argument('--synthesize', action="store_true",
-                          help='if set, along with --generate_impressions, creates impressions based on an implied ranking in the click logs.  Writes to --impressions_file.')
-    dp_group.add_argument('--generate_impressions', action="store_true",
-                          help='Generate impressions by running a search and comparing results using the --train_file file.  Writes to --impressions_file. See also --synthesize.')
-    dp_group.add_argument('--generate_num_rows', default=5000, type=int,
-                          help='The number of impressions to generate using retrieval.  Randomly samples from all_clicks.  Use with --generate_impressions.  Ignored if --synthesize')
+    dp_group.add_argument('--synthesize_impressions', action="store_true",
+                          help='Synthesizes impressions. Writes to --impressions_file.')
     dp_group.add_argument('--min_impressions', default=20, type=int,
                           help='The minimum number of times a query must be seen to be included in the impressions set')
     dp_group.add_argument('--min_clicks', default=10, type=int,
@@ -232,15 +228,13 @@ if __name__ == "__main__":
     # and click counts.  Impressions are what we use to then generate training data.  In the real world, you wouldn't
     # need to do this because you would be logging both clicked and unclicked events.
     # TLDR: we are trying to build a dataset that approximates what Best Buy search looked like back when this data was captured.
-    # We have two approaches to impressions:
-    # 1) We synthesize/infer them from the existing clicks, essentially assuming there is a built in position bias in the logs that *roughly* approximates the actual ranking of Best Buy search
-    #    back when this data was captured.  Run using --generate_impressions and --synthesize
-    # 2) Taking --generate_num_rows, run a random sample of queries through our current search engine.  If we find docs that have clicks, mark them as relevant.  All else are non-relevant.
-    # Both approaches add rank, clicks and num_impressions onto the resulting data frame
+    # We synthesize/infer them from the existing clicks, essentially assuming there is a built in position bias in the logs that *roughly* approximates the actual ranking of Best Buy search
+    # back when this data was captured. 
+    # This approach add rank, clicks and num_impressions onto the resulting data frame
     # We also dump out a map of queries to query ids.  Query ids are used in our XGB model.
     # Outputs to --output_dir using the --impressions_file argument, which defaults to impressions.csv
     ######
-    if args.generate_impressions:
+    if args.synthesize_impressions:
         impressions_df = None
         train_df = None
         if args.train_file:  # these should be pre-filtered, assuming we used our splitter, so let's not waste time filtering here
@@ -249,22 +243,10 @@ if __name__ == "__main__":
             print("You must provide the --train_file option")
             exit(2)
 
-        if args.synthesize:
-            (impressions_df, query_ids_map) = data_prepper.synthesize_impressions(train_df,
-                                                                                  min_impressions=args.min_impressions,
-                                                                                  min_clicks=args.min_clicks)
-        else:
-            # use the synthesize to feed into our generate
-            (impressions_df, query_ids_map) = data_prepper.synthesize_impressions(train_df,
-                                                                                  min_impressions=args.min_impressions,
-                                                                                  min_clicks=args.min_clicks)
-            impressions_df.drop(["product_name", "sku"], axis=1)
-            impressions_df = impressions_df.sample(n=args.generate_num_rows).reset_index(drop=True)  # shuffle things
-            # impressions_df = impressions_df[:args.generate_num_rows]
-            (impressions_df, query_ids_map) = data_prepper.generate_impressions(impressions_df,
-                                                                                query_ids_map,
-                                                                                min_impressions=args.min_impressions,
-                                                                                min_clicks=args.min_clicks)  # impressions as a Pandas DataFrame
+        (impressions_df, query_ids_map) = data_prepper.synthesize_impressions(train_df,
+                                                                            min_impressions=args.min_impressions,
+                                                                            min_clicks=args.min_clicks)
+        
         print("Writing impressions to file: %s/%s" % (output_dir, args.impressions_file))
         impressions_df.to_csv("%s/%s" % (output_dir, args.impressions_file), index=False)
         query_ids = query_ids_map
