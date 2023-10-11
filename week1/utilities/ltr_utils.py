@@ -1,6 +1,7 @@
 import json
 
 import requests
+import student_ltr
 
 
 def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str, ltr_model_name: str,
@@ -9,8 +10,8 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                              rescore_size=500, main_query_weight=1, rescore_query_weight=2):
     # Create the base query, use a much bigger window
     #add on the rescore
-    ##### Step 4.e:
-    print("IMPLEMENT ME: create_rescore_ltr_query")
+    student_ltr.create_rescore_ltr_query(user_query, query_obj, click_prior_query, ltr_model_name, ltr_store_name,
+                                         rescore_size, main_query_weight, rescore_query_weight)
     if active_features is not None and len(active_features) > 0:
         query_obj["rescore"]["query"]["rescore_query"]["sltr"]["active_features"] =  active_features
 
@@ -57,8 +58,7 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     ##### Step 3.b:
-    print("IMPLEMENT ME: create_feature_log_query")
-    return None
+    return student_ltr.create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size, terms_field)
 
 
 # Item is a Pandas namedtuple

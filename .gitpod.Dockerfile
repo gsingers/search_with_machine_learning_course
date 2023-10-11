@@ -1,6 +1,7 @@
 FROM gitpod/workspace-full:latest
 #docker pull gitpod/workspace-full:2022-06-09-20-58-43
-RUN sudo apt-get install -y graphviz
+RUN sudo apt-get update
+RUN sudo apt install -y graphviz
 
 USER gitpod
 
