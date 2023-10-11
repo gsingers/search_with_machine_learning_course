@@ -34,10 +34,10 @@ def get_opensearch():
 def main(source_file):
     index_name = 'bbuy_queries'
     client = get_opensearch()
-    ds = pd.read_csv(source_file)
+    ds = pd.read_csv(source_file, keep_default_na=False, na_values={'category': {}})
     #print(ds.columns)
-    ds['click_time'] = pd.to_datetime(ds['click_time'])
-    ds['query_time'] = pd.to_datetime(ds['query_time'])
+    ds['click_time'] = pd.to_datetime(ds['click_time'], format="ISO8601")
+    ds['query_time'] = pd.to_datetime(ds['query_time'], format="ISO8601")
     #print(ds.dtypes)
     docs = []
     for idx, row in ds.iterrows():
