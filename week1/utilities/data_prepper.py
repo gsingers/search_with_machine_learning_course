@@ -151,7 +151,7 @@ class DataPrepper:
             # Get the features that have been logged.  They aren't in the same order as our first round, so we need to line them up
             if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
                 hits = response['hits']['hits']
-                student_ltr.extract_logged_features(hits, query_id)
+                return student_ltr.extract_logged_features(hits, query_id)
 
     # Can try out normalizing data, but for XGb, you really don't have to since it is just finding splits
     def normalize_data(self, ranks_features_df, feature_set, normalize_type_map):
