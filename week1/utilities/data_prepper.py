@@ -53,7 +53,7 @@ class DataPrepper:
     def create_splits(self, file_to_split, split_train, split_test, output_dir, train_rows, test_rows, verify_file):
         print("Splitting: %s and writing train to: %s and test to: %s in %s" % (
         file_to_split, split_train, split_test, output_dir))
-        input_df = pd.read_csv(file_to_split, parse_dates=['click_time', 'query_time'])
+        input_df = pd.read_csv(file_to_split, parse_dates=['click_time', 'query_time'], date_format="ISO8601")
         #input_df = input_df.astype({'click_time': 'datetime64', 'query_time':'datetime64'})
         input_df = self.filter_junk_clicks(input_df, verify_file, output_dir)
         # first we are going to split by date
