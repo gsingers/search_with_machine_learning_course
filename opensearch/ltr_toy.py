@@ -361,7 +361,7 @@ feat_map_file.write(bytes('1\t{}\tq\n'.format(title_query_feature_name), 'utf-8'
 feat_map_file.write(bytes('2\t{}\tq\n'.format(body_query_feature_name), 'utf-8'))
 feat_map_file.write(bytes('3\t{}\tq\n'.format(price_func_feature_name), 'utf-8'))
 feat_map_file.close()
-dtrain = xgb.DMatrix(train_file.name)
+dtrain = xgb.DMatrix(f'{train_file.name}?format=libsvm')
 param = {'max_depth': 5,  'silent': 1, 'objective': 'reg:linear'}
 num_round = 5
 print("Training XG Boost")
