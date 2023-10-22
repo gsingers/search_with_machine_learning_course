@@ -88,8 +88,24 @@ Called from ltr_utils.py
 def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str, ltr_model_name: str,
                              ltr_store_name: str,
                              rescore_size=500, main_query_weight=1, rescore_query_weight=2):
-    print("IMPLEMENT ME: create_rescore_ltr_query")
-    # query_obj["rescore"] = { ... }
+    query_obj["rescore"] = {
+        "window_size": rescore_size,
+        "query": {
+            "rescore_query": {
+                "sltr": {
+                    "params": {
+                        "keywords": user_query,
+                        "skus": user_query.split(),
+                        "click_prior_query": click_prior_query
+                    },
+                    "model": ltr_model_name,
+                    "store": ltr_store_name
+                }
+            },
+            "query_weight": main_query_weight,
+            "rescore_query_weight": rescore_query_weight
+        }
+    }
 
 
 ##### Step Extract LTR Logged Features:
