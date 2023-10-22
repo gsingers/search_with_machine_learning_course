@@ -119,17 +119,19 @@ and extract the features into a data frame.
 def extract_logged_features(hits, query_id):
     import numpy as np
     import pandas as pd
-    print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+    # print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
     feature_results = {}
     feature_results["doc_id"] = []  # capture the doc id so we can join later
     feature_results["query_id"] = []  # ^^^
     feature_results["sku"] = []
     feature_results["name_match"] = []
-    rng = np.random.default_rng(12345)
     for (idx, hit) in enumerate(hits):
         feature_results["doc_id"].append(int(hit['_id']))  # capture the doc id so we can join later
         feature_results["query_id"].append(query_id)  # super redundant, but it will make it easier to join later
-        feature_results["sku"].append(int(hit['_id']))
-        feature_results["name_match"].append(rng.random())
+        feature_results["sku"].append(int(hit['_source']["sku"][0]))
+
+        for entry in hit["fields"]["_ltrlog"][0]["log_entry"]:
+            feature_results[entry["name"]] = entry.get("value") if entry.get("value") is not None else 0.0
+
     frame = pd.DataFrame(feature_results)
     return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
