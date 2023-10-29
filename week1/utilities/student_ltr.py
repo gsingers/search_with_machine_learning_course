@@ -131,7 +131,9 @@ def extract_logged_features(hits, query_id):
         feature_results["sku"].append(int(hit['_source']["sku"][0]))
 
         for entry in hit["fields"]["_ltrlog"][0]["log_entry"]:
-            feature_results[entry["name"]] = entry.get("value") if entry.get("value") is not None else 0.0
+            if feature_results.get(entry.get("name")) is None:
+                feature_results[entry["name"]] = []
+            feature_results[entry["name"]].append(entry.get("value", 0.0))
 
     frame = pd.DataFrame(feature_results)
     return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
